@@ -64,6 +64,12 @@ export default function PlayPage() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [pixelSize, setPixelSize] = useState(30);
   const [logoPoints, setLogoPoints] = useState(100);
+
+    useEffect(() => {
+      if (logos.length > 0 && currentIndex === 0) {
+        setLogoPoints(logos[0].points || 100);
+      }
+    }, [logos]);
   const [totalScore, setTotalScore] = useState(0);
   const [timeLeft, setTimeLeft] = useState(TIMER_SECONDS);
   const [guess, setGuess] = useState('');
@@ -79,7 +85,7 @@ export default function PlayPage() {
   const mascotRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const shuffled = [...LOGOS].sort(() => Math.random() - 0.5);
+    const shuffled = [...LOGOS].sort(() => Math.random() - 0.5).slice(0, 10);
     setLogos(shuffled);
   }, []);
 
@@ -290,7 +296,7 @@ export default function PlayPage() {
     setCurrentIndex(prev => {
       if (prev < logos.length - 1) {
         setPixelSize(30);
-        setLogoPoints(100);
+        setLogoPoints(logos[prev + 1]?.points || 100);
         setTimeLeft(TIMER_SECONDS);
         setGuess('');
         setCloseGuessWarning(false);
