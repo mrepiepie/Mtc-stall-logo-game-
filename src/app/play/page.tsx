@@ -7,6 +7,7 @@ import gsap from 'gsap';
 import { Eye, CheckCircle2, Timer, XCircle, LogOut, ArrowRight, CornerDownLeft, User } from 'lucide-react';
 import { MessageLoading } from '@/components/ui/message-loading';
 import { DeBugger } from '@/components/ui/de-bugger';
+import { AnimatedCounter } from '@/components/ui/animated-counter';
 
 const TIMER_SECONDS = 10;
 const READY_TITLES = [
@@ -323,10 +324,7 @@ export default function PlayPage() {
       
       <div className="absolute inset-0 bg-[radial-gradient(#333_2px,transparent_2px)] bg-[size:24px_24px] pointer-events-none z-0"></div>
 
-      
-          <img src={`${NOTO_BASE}/1f47d/512.webp`} className="w-20 h-20 drop-shadow-md transform hover:scale-110 transition-transform" alt="Mascot" />
-        </div>
-      </div>
+
 
       {/* INTRO SCREEN (Sequential Centered Layout) */}
       {step === 'intro' && (
