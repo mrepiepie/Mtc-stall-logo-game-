@@ -1,13 +1,16 @@
 "use client";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import { motion } from "framer-motion";
-import { MoveRight, Trophy } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { MoveRight, Users, User, Gamepad2 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import gsap from "gsap";
 
 function AnimatedHero() {
   const router = useRouter();
   const [titleNumber, setTitleNumber] = useState(0);
+  const buttonRef1 = useRef(null);
+  const buttonRef2 = useRef(null);
+  
   const titles = useMemo(
     () => ["brands", "startups", "MNCs", "mascots", "tech giants"],
     []
@@ -24,13 +27,22 @@ function AnimatedHero() {
     return () => clearTimeout(timeoutId);
   }, [titleNumber, titles]);
 
+  // GSAP Entrance Animation for buttons
+  useEffect(() => {
+    gsap.fromTo(
+      [buttonRef1.current, buttonRef2.current],
+      { opacity: 0, y: 30, scale: 0.9 },
+      { opacity: 1, y: 0, scale: 1, duration: 0.6, stagger: 0.15, ease: "back.out(1.5)", delay: 0.2 }
+    );
+  }, []);
+
   return (
     <div className="w-full relative h-full flex flex-col justify-center pl-8 lg:pl-16 xl:pl-24 py-6">
       <div className="relative z-10 flex flex-col items-start justify-center">
         {/* MTC Top Badge */}
         <div className="flex items-center gap-2 mb-4">
           <div className="text-[#4fc3f7] font-mono text-xs sm:text-sm font-bold uppercase tracking-[0.2em]">
-            Microsoft Tech Club <span className="mx-2 text-zinc-500">•</span> BITS Pilani Dubai
+            Microsoft Tech Club <span className="mx-2 text-zinc-500">?</span> BITS Pilani Dubai
           </div>
         </div>
 
@@ -61,22 +73,40 @@ function AnimatedHero() {
           </p>
         </div>
 
-        {/* Brutalist Style Action Buttons */}
-        <div className="flex flex-row gap-6 mt-6">
+        {/* Brutalist Action Buttons */}
+        <div className="flex flex-col sm:flex-row gap-4 mt-8 w-full max-w-xl">
           <button 
+            ref={buttonRef1}
             onClick={() => router.push('/play')}
-            className="bg-red-600 text-white font-bold text-base px-10 py-4 border-4 border-black shadow-[4px_4px_0px_0px_rgba(255,255,255,1)] hover:translate-y-1 hover:translate-x-1 hover:shadow-[2px_2px_0px_0px_rgba(255,255,255,1)] transition-all flex items-center gap-3 uppercase tracking-wider"
+            className="group relative flex-1 bg-[#f4f0e6] text-black font-black text-xl px-8 py-5 border-4 border-black shadow-[6px_6px_0px_0px_rgba(255,255,255,1)] hover:translate-y-1 hover:translate-x-1 hover:shadow-[2px_2px_0px_0px_rgba(255,255,255,1)] transition-all flex items-center justify-center gap-3 uppercase tracking-wider overflow-hidden"
           >
-            Start Run <MoveRight className="w-5 h-5" />
+            <User className="w-6 h-6 text-red-600 group-hover:scale-110 transition-transform" />
+            Single Player
+            {/* Mario visual flair */}
+            <span className="absolute -bottom-2 -right-2 text-3xl opacity-50 group-hover:opacity-100 group-hover:-translate-y-2 transition-all duration-300">🍄</span>
+          </button>
+
+          <button 
+            ref={buttonRef2}
+            onClick={() => router.push('/join')}
+            className="group relative flex-1 bg-red-600 text-white font-black text-xl px-8 py-5 border-4 border-black shadow-[6px_6px_0px_0px_rgba(255,255,255,1)] hover:translate-y-1 hover:translate-x-1 hover:shadow-[2px_2px_0px_0px_rgba(255,255,255,1)] transition-all flex items-center justify-center gap-3 uppercase tracking-wider overflow-hidden"
+          >
+            <Users className="w-6 h-6 text-[#f4f0e6] group-hover:scale-110 transition-transform" />
+            Multiplayer
+            {/* Mario visual flair */}
+            <span className="absolute -bottom-2 -right-2 text-3xl opacity-50 group-hover:opacity-100 group-hover:-translate-y-2 transition-all duration-300">⭐</span>
           </button>
         </div>
         
         {/* MTC Promotion Box - Brutalist Dark */}
-        <div className="mt-8 w-full max-w-lg bg-[#111] text-white p-5 lg:p-6 border-4 border-[#333] text-left relative overflow-hidden group hover:border-[#555] transition-colors">
+        <div className="mt-10 w-full max-w-lg bg-[#111] text-white p-5 lg:p-6 border-4 border-[#333] text-left relative overflow-hidden group hover:border-[#555] transition-colors">
           <div className="absolute top-0 right-0 w-32 h-32 bg-red-600 rounded-full blur-[80px] opacity-10 group-hover:opacity-30 transition-opacity"></div>
           <div className="relative z-10">
-            <h3 className="text-xl font-bold mb-2 tracking-tight uppercase">Inspired by the tech?</h3>
-            <p className="text-sm text-zinc-400 font-medium mb-4">Wanna learn how to build all these things? Join MTC and learn.</p>
+            <h3 className="text-xl font-bold mb-2 tracking-tight uppercase flex items-center gap-2">
+              <Gamepad2 className="w-5 h-5 text-red-500" />
+              Inspired by the tech?
+            </h3>
+            <p className="text-sm text-zinc-400 font-medium mb-4">Wanna learn how to build all these things? Join MTC and level up.</p>
             <a 
               href="https://www.instagram.com/mtc_bpdc" 
               target="_blank" 
