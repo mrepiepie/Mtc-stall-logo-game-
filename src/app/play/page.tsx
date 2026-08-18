@@ -78,6 +78,7 @@ export default function PlayPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [finalRank, setFinalRank] = useState<number | null>(null);
   const [finalPercentile, setFinalPercentile] = useState<number | null>(null);
+  const [fetchError, setFetchError] = useState<string | null>(null);
 
   const [closeGuessWarning, setCloseGuessWarning] = useState(false);
 
@@ -575,6 +576,7 @@ export default function PlayPage() {
                     
                     <div className="w-full bg-yellow-300 border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] p-4 mb-6 text-center transform -rotate-1">
                       <div className="font-black text-black uppercase text-sm tracking-widest">Global Ranking</div>
+{fetchError && finalRank === null && <div className="text-red-500 text-xs font-mono">{fetchError}</div>}
                       <div className="font-bold text-black mt-2 text-lg">You're better than <span className="font-black text-red-600 text-xl">{finalPercentile !== null ? finalPercentile : Math.min(99, Math.max(1, Math.floor(totalScore / 15) + 12))}%</span> of the participants today!</div>
                       <div className="font-black text-black text-2xl mt-2 bg-white inline-block px-4 py-1 border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
                         Rank: #{finalRank !== null ? finalRank : Math.max(1, 300 - Math.floor(totalScore / 5))}
