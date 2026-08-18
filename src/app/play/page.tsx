@@ -175,10 +175,7 @@ export default function PlayPage() {
       if (e.key === 'Enter') {
         gsap.to('.ready-popup', { 
           scale: 0.95, opacity: 0, duration: 0.3, 
-          onComplete: () => {
-            setStep('game');
-            gsap.fromTo('.game-container', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.4 });
-          }
+          onComplete: () => { setStep('countdown'); }
         });
       }
     };
@@ -186,8 +183,27 @@ export default function PlayPage() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [step]);
 
-  useEffect(() => {
-    if (step !== 'game' || gameStatus !== 'playing') return;
+      // Countdown logic
+    useEffect(() => {
+      if (step === 'countdown') {
+        setCountdownValue(3);
+        const timer = setInterval(() => {
+          setCountdownValue(prev => {
+            if (prev <= 1) {
+              clearInterval(timer);
+              setStep('game');
+              gsap.fromTo('.game-container', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.4 });
+              return 0;
+            }
+            return prev - 1;
+          });
+        }, 1000);
+        return () => clearInterval(timer);
+      }
+    }, [step]);
+
+    useEffect(() => {
+      if (step !== 'game' || gameStatus !== 'playing') return;
     if (timeLeft <= 0) {
       handleTimeOut();
       return;
@@ -452,11 +468,29 @@ export default function PlayPage() {
             <p className="text-xl text-black font-bold mb-10">
               You have exactly 10 seconds per target.
             </p>
-            <div className="inline-flex items-center gap-3 bg-white px-8 py-5 border-4 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] rounded-none">
-              <span className="text-lg font-black text-black uppercase">
-                Press <kbd className="bg-black text-white px-4 py-2 mx-2">ENTER</kbd> to begin
-              </span>
-            </div>
+            <div 
+                className="inline-flex items-center gap-3 bg-white px-8 py-5 border-4 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] rounded-none cursor-pointer hover:bg-zinc-100 hover:translate-y-1 hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all"
+                onClick={() => {
+                  gsap.to('.ready-popup', { 
+                    scale: 0.95, opacity: 0, duration: 0.3, 
+                    onComplete: () => setStep('countdown')
+                  });
+                }}
+              >
+                <span className="text-lg font-black text-black uppercase pointer-events-none">
+                  Press <kbd className="bg-black text-white px-4 py-2 mx-2">ENTER</kbd> or Click to begin
+                </span>
+              </div>
+          </div>
+        </div>
+      )}
+
+            {/* COUNTDOWN SCREEN */}
+      {step === 'countdown' && (
+        <div className="relative z-20 flex flex-col items-center justify-center min-h-screen p-6">
+          <div className="flex flex-col items-center animate-in fade-in zoom-in duration-500">
+            <h2 className="text-3xl font-black text-white uppercase tracking-widest mb-8 drop-shadow-sm">Initializing</h2>
+            <AnimatedCounter value={countdownValue} fontSize={100} />
           </div>
         </div>
       )}
