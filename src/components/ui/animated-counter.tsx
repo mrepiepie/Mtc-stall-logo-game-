@@ -27,7 +27,7 @@ function Digit({ place, value, height }: { place: number; value: number, height:
   }, [animatedValue, valueRoundedToPlace]);
 
   return (
-    <div style={{ height }} className="relative w-[1ch] tabular-nums">
+    <div style={{ height }} className="relative w-[1ch] tabular-nums overflow-hidden">
       {[...Array(10).keys()].map((i) => (
         <Number key={i} mv={animatedValue} number={i} height={height} />
       ))}
