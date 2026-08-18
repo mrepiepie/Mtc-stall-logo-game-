@@ -215,9 +215,9 @@ export default function PlayPage() {
   useEffect(() => {
     if (step !== 'game') return;
     if (timeLeft <= 4 && timeLeft > 0 && gameStatus === 'playing') {
-      gsap.to(mascotRef.current, { scale: 1, opacity: 1, duration: 0.5, ease: 'elastic.out(1, 0.5)', visibility: 'visible', overwrite: true });
+      gsap.fromTo(mascotRef.current, { y: -20, opacity: 0, scale: 0.8 }, { y: 0, opacity: 1, scale: 1, duration: 0.6, ease: 'elastic.out(1, 0.5)', visibility: 'visible', overwrite: true });
     } else {
-      gsap.to(mascotRef.current, { scale: 0, opacity: 0, duration: 0.3, ease: 'back.in(1.5)', overwrite: true, onComplete: () => {
+      gsap.to(mascotRef.current, { y: -20, opacity: 0, scale: 0.8, duration: 0.3, ease: 'back.in(1.5)', overwrite: true, onComplete: () => {
         if (mascotRef.current) mascotRef.current.style.visibility = 'hidden';
       }});
     }
@@ -508,7 +508,7 @@ export default function PlayPage() {
                     {/* Mascot GSAP Speech Bubble attached to timer */}
                     <div 
                       ref={mascotRef}
-                      className="absolute top-[140%] left-1/2 -translate-x-1/2 z-50 transform scale-0 opacity-0 invisible origin-top"
+                      className="absolute top-[140%] left-1/2 -translate-x-1/2 z-50 opacity-0 invisible"
                     >
                       {/* Brutalist Speech Bubble Triangle Pointing Up */}
                       <div className="absolute -top-4 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[16px] border-l-transparent border-r-[16px] border-r-transparent border-b-[16px] border-b-black"></div>
