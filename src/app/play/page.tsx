@@ -507,11 +507,11 @@ export default function PlayPage() {
                   </div>
                 ) : (
                   <>
-                    <div className="bg-green-50 p-4 rounded-full mb-6">
-                      <CheckCircle2 className="w-10 h-10 text-green-500" />
+                    <div className="bg-[#f4f0e6] border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] p-4 rounded-none mb-6">
+                      <CheckCircle2 className="w-10 h-10 text-black" />
                     </div>
                     <h2 className="text-4xl font-black uppercase tracking-tight mb-2 text-black">Game Over!</h2>
-                    <p className="text-zinc-500 font-medium mb-8">Your final score has been saved.</p>
+                    <p className="text-black font-bold uppercase tracking-widest mb-8">Run sequence terminated.</p>
                     
                     <div className="w-full mb-8 p-6 bg-white rounded-none border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
                       <div className="text-xs text-zinc-400 font-bold uppercase tracking-widest mb-1">Final Score</div>
