@@ -216,9 +216,9 @@ export default function PlayPage() {
   useEffect(() => {
     if (step !== 'game') return;
     if (timeLeft <= 4 && timeLeft > 0 && gameStatus === 'playing') {
-      gsap.fromTo(mascotRef.current, { y: -20, opacity: 0, scale: 0.8 }, { y: 0, opacity: 1, scale: 1, duration: 0.6, ease: 'elastic.out(1, 0.5)', visibility: 'visible', overwrite: true });
+      gsap.fromTo(mascotRef.current, { x: -20, opacity: 0, scale: 0.8 }, { x: 0, opacity: 1, scale: 1, duration: 0.6, ease: 'elastic.out(1, 0.5)', visibility: 'visible', overwrite: true });
     } else {
-      gsap.to(mascotRef.current, { y: -20, opacity: 0, scale: 0.8, duration: 0.3, ease: 'back.in(1.5)', overwrite: true, onComplete: () => {
+      gsap.to(mascotRef.current, { x: -20, opacity: 0, scale: 0.8, duration: 0.3, ease: 'back.in(1.5)', overwrite: true, onComplete: () => {
         if (mascotRef.current) mascotRef.current.style.visibility = 'hidden';
       }});
     }
@@ -479,7 +479,7 @@ export default function PlayPage() {
         <div className="relative z-20 flex flex-col items-center justify-center min-h-screen p-6">
           <div className="flex flex-col items-center animate-in fade-in zoom-in duration-500">
             <h2 className="text-3xl font-black text-white uppercase tracking-widest mb-8 drop-shadow-sm">Initializing</h2>
-            <AnimatedCounter value={countdownValue} fontSize={100} />
+            <AnimatedCounter value={countdownValue} fontSize={100} className="bg-[#f4f0e6] border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] px-6 py-2" />
           </div>
         </div>
       )}
