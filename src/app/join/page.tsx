@@ -1,13 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { User, KeyRound, ArrowRight, Loader2, Send } from 'lucide-react';
+import { User, KeyRound, ArrowRight, Loader2, Send, AlertTriangle } from 'lucide-react';
 import gsap from 'gsap';
 
 export default function JoinPage() {
   const [gameCode, setGameCode] = useState('');
   const [playerName, setPlayerName] = useState('');
   const [isJoining, setIsJoining] = useState(false);
+  const [error, setError] = useState('');
   const [step, setStep] = useState<'form' | 'waiting' | 'playing' | 'round_over'>('form');
   
   // Player Game State
@@ -19,10 +20,19 @@ export default function JoinPage() {
     e.preventDefault();
     if (!gameCode || !playerName) return;
 
+    setError('');
     setIsJoining(true);
     
-    // Simulate network request to join game
+    // Simulate network validation
     setTimeout(() => {
+      // PROTOTYPE VALIDATION: Only accept 'MTC123' or 'MARIO1'
+      if (gameCode !== 'MTC123' && gameCode !== 'MARIO1') {
+        setIsJoining(false);
+        setError('INVALID CODE. TEST CODES: MTC123 OR MARIO1');
+        gsap.fromTo('.code-input-wrapper', { x: -6 }, { x: 0, duration: 0.1, yoyo: true, repeat: 4 });
+        return;
+      }
+
       setIsJoining(false);
       setStep('waiting');
       gsap.fromTo('.waiting-container', { opacity: 0, scale: 0.9 }, { opacity: 1, scale: 1, duration: 0.4, ease: 'back.out(1.2)' });
@@ -50,7 +60,7 @@ export default function JoinPage() {
     e.preventDefault();
     if (!guess.trim()) return;
     setHasGuessed(true);
-    // In the real app, this would emit the guess to the server via Supabase Realtime
+    // In the real app, this would emit the guess to the server
   };
 
   return (
@@ -70,19 +80,30 @@ export default function JoinPage() {
           </div>
 
           <div className="bg-[#f4f0e6] border-4 border-black shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] rounded-none w-full p-8 flex flex-col relative overflow-hidden">
+            
+            {error && (
+              <div className="bg-red-600 text-white p-3 border-4 border-black mb-6 font-black uppercase tracking-widest text-sm flex items-center gap-2 animate-in fade-in zoom-in duration-300">
+                <AlertTriangle className="w-5 h-5" />
+                {error}
+              </div>
+            )}
+
             <form onSubmit={handleJoin} className="flex flex-col gap-6">
               
               <div className="flex flex-col gap-2">
                 <label className="text-black font-black uppercase tracking-widest text-sm">Game Code</label>
-                <div className="relative">
+                <div className="relative code-input-wrapper">
                   <KeyRound className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 w-6 h-6" />
                   <input 
                     type="text" 
                     value={gameCode}
-                    onChange={(e) => setGameCode(e.target.value.toUpperCase())}
+                    onChange={(e) => {
+                      setGameCode(e.target.value.toUpperCase());
+                      setError('');
+                    }}
                     maxLength={6}
                     placeholder="6-DIGIT CODE" 
-                    className="w-full bg-white border-4 border-black p-4 pl-14 text-2xl font-black text-black placeholder:text-zinc-300 focus:outline-none focus:ring-4 focus:ring-red-500/20 rounded-none uppercase tracking-widest transition-all"
+                    className={`w-full bg-white border-4 ${error ? 'border-red-600 text-red-600' : 'border-black text-black'} p-4 pl-14 text-2xl font-black placeholder:text-zinc-300 focus:outline-none focus:ring-4 focus:ring-red-500/20 rounded-none uppercase tracking-widest transition-all`}
                     required
                   />
                 </div>
