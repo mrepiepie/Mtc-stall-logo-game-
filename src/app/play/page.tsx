@@ -198,10 +198,10 @@ export default function PlayPage() {
 
   useEffect(() => {
     if (step !== 'game') return;
-    if (timeLeft <= 4 && gameStatus === 'playing') {
-      gsap.to(mascotRef.current, { y: 0, opacity: 1, duration: 0.6, ease: 'back.out(1.5)', visibility: 'visible' });
+    if (timeLeft <= 4 && timeLeft > 0 && gameStatus === 'playing') {
+      gsap.to(mascotRef.current, { y: 0, opacity: 1, duration: 0.6, ease: 'back.out(1.5)', visibility: 'visible', overwrite: true });
     } else {
-      gsap.to(mascotRef.current, { y: 150, opacity: 0, duration: 0.4, ease: 'power2.in', onComplete: () => {
+      gsap.to(mascotRef.current, { y: 150, opacity: 0, duration: 0.4, ease: 'power2.in', overwrite: true, onComplete: () => {
         if (mascotRef.current) mascotRef.current.style.visibility = 'hidden';
       }});
     }
