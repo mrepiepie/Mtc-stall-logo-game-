@@ -1,0 +1,617 @@
+'use client';
+import { useState, useEffect, useRef, FormEvent } from 'react';
+import { useRouter } from 'next/navigation';
+import { LOGOS } from '@/data/logos';
+import { PixelatedImage } from '@/components/PixelatedImage';
+import gsap from 'gsap';
+import { Eye, CheckCircle2, Timer, XCircle, LogOut, ArrowRight, CornerDownLeft, User } from 'lucide-react';
+import { MessageLoading } from '@/components/ui/message-loading';
+import { DeBugger } from '@/components/ui/de-bugger';
+
+const TIMER_SECONDS = 10;
+const READY_TITLES = [
+  "Are you down for the challenge?",
+  "Ready to get roasted?",
+  "Hope you know your logos...",
+  "Don't embarrass yourself.",
+  "Time to prove your worth.",
+  "Prepare for pixelated pain.",
+  "Try not to cry.",
+  "Let's see what you got.",
+  "Good luck, you'll need it.",
+  "No pressure. Just kidding, lots of pressure."
+];
+const NOTO_BASE = "https://fonts.gstatic.com/s/e/notoemoji/latest";
+
+const JOKES_FAST = [
+  { text: "Woah that was quick.. calm down twin", emoji: `${NOTO_BASE}/1f480/512.webp` },
+  { text: "Bro is literally a human scanner", emoji: `${NOTO_BASE}/1f92f/512.webp` },
+  { text: "Are you cheating?!", emoji: `${NOTO_BASE}/1f928/512.webp` },
+  { text: "Speedforce activated", emoji: `${NOTO_BASE}/26a1/512.webp` },
+  { text: "Bro has 20/20 vision", emoji: `${NOTO_BASE}/1f440/512.webp` },
+];
+const JOKES_MID = [
+  { text: "Solid pace, but I've seen faster", emoji: `${NOTO_BASE}/1f971/512.webp` },
+  { text: "Not bad, but don't get cocky", emoji: `${NOTO_BASE}/1f921/512.webp` },
+  { text: "Acceptable... barely.", emoji: `${NOTO_BASE}/1f644/512.webp` },
+  { text: "Average behavior.", emoji: `${NOTO_BASE}/1f610/512.webp` },
+  { text: "You're doing okay sweetie", emoji: `${NOTO_BASE}/1f485_1f3fc/512.webp` },
+];
+const JOKES_SLOW = [
+  { text: "Fighting for your life out here", emoji: `${NOTO_BASE}/1f975/512.webp` },
+  { text: "Bro was sweating bullets", emoji: `${NOTO_BASE}/1f630/512.webp` },
+  { text: "My grandma types faster...", emoji: `${NOTO_BASE}/1f475_1f3fc/512.webp` },
+  { text: "Did you fall asleep?", emoji: `${NOTO_BASE}/1f634/512.webp` },
+  { text: "Barely made it out alive", emoji: `${NOTO_BASE}/1f915/512.webp` },
+];
+
+export default function PlayPage() {
+  const router = useRouter();
+
+  // App State
+  const [step, setStep] = useState<'intro' | 'popup' | 'countdown' | 'game'>('intro');
+  const [countdownValue, setCountdownValue] = useState(3);
+  const [readyTitle, setReadyTitle] = useState(READY_TITLES[0]);
+  const [introStep, setIntroStep] = useState<1 | 2>(1); // 1 = Rules, 2 = Form
+  
+  // Form State
+  const [playerName, setPlayerName] = useState('');
+  const [playerEmail, setPlayerEmail] = useState('');
+  
+  // Game State
+  const [logos, setLogos] = useState<typeof LOGOS>([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [pixelSize, setPixelSize] = useState(30);
+  const [logoPoints, setLogoPoints] = useState(100);
+  const [totalScore, setTotalScore] = useState(0);
+  const [timeLeft, setTimeLeft] = useState(TIMER_SECONDS);
+  const [guess, setGuess] = useState('');
+  const [gameStatus, setGameStatus] = useState<'playing' | 'correct' | 'wrong' | 'gameover'>('playing');
+  const [jokeContent, setJokeContent] = useState<{text: string, emoji: string} | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const [closeGuessWarning, setCloseGuessWarning] = useState(false);
+
+  const containerRef = useRef<HTMLDivElement>(null);
+  const guessInputRef = useRef<HTMLInputElement>(null);
+  const nameInputRef = useRef<HTMLInputElement>(null);
+  const mascotRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const shuffled = [...LOGOS].sort(() => Math.random() - 0.5);
+    setLogos(shuffled);
+  }, []);
+
+  // Helper for Skribbl-style "Close" guessing
+  const levenshtein = (a: string, b: string) => {
+    if (a.length === 0) return b.length;
+    if (b.length === 0) return a.length;
+    const matrix = [];
+    for (let i = 0; i <= b.length; i++) matrix[i] = [i];
+    for (let j = 0; j <= a.length; j++) matrix[0][j] = j;
+    for (let i = 1; i <= b.length; i++) {
+      for (let j = 1; j <= a.length; j++) {
+        if (b.charAt(i - 1) == a.charAt(j - 1)) {
+          matrix[i][j] = matrix[i - 1][j - 1];
+        } else {
+          matrix[i][j] = Math.min(
+            matrix[i - 1][j - 1] + 1, 
+            Math.min(matrix[i][j - 1] + 1, matrix[i - 1][j] + 1)
+          );
+        }
+      }
+    }
+    return matrix[b.length][a.length];
+  };
+
+  // Parallax Effect & Initial Intro Anim
+  useEffect(() => {
+    if (step === 'intro') {
+      gsap.fromTo('.rules-panel-item', 
+        { y: 30, opacity: 0 }, 
+        { y: 0, opacity: 1, duration: 0.8, stagger: 0.1, ease: 'power3.out' }
+      );
+
+      const handleMouseMove = (e: MouseEvent) => {
+        const { clientX, clientY } = e;
+        const xPos = (clientX / window.innerWidth - 0.5) * 40;
+        const yPos = (clientY / window.innerHeight - 0.5) * 40;
+        gsap.to('.parallax-layer-1', { x: xPos, y: yPos, duration: 1, ease: 'power2.out' });
+        gsap.to('.parallax-layer-2', { x: xPos * -1.5, y: yPos * -1.5, duration: 1, ease: 'power2.out' });
+      };
+      window.addEventListener('mousemove', handleMouseMove);
+      return () => window.removeEventListener('mousemove', handleMouseMove);
+    }
+  }, [step]);
+
+  const handleRulesNext = () => {
+    gsap.to('.rules-panel', { 
+      opacity: 0, 
+      scale: 0.95, 
+      duration: 0.5, 
+      ease: 'power3.inOut',
+      onComplete: () => {
+        setIntroStep(2);
+        setTimeout(() => {
+          gsap.to('.parallax-layer-1, .parallax-layer-2', { opacity: 1, scale: 1, duration: 1.5, ease: 'elastic.out(1, 0.5)' });
+          gsap.fromTo('.form-panel', 
+            { opacity: 0, y: 30, scale: 1.05 }, 
+            { opacity: 1, y: 0, scale: 1, duration: 0.6, ease: 'power3.out' }
+          );
+          nameInputRef.current?.focus();
+        }, 50);
+      }
+    });
+  };
+
+  useEffect(() => {
+    if (step === 'intro' && introStep === 1) {
+      const handleKeyDown = (e: KeyboardEvent) => {
+        if (e.key === 'Enter') handleRulesNext();
+      };
+      window.addEventListener('keydown', handleKeyDown);
+      return () => window.removeEventListener('keydown', handleKeyDown);
+    }
+  }, [step, introStep]);
+
+  const handleRegSubmit = (e: FormEvent) => {
+    e.preventDefault();
+    if (!playerName.trim() || !playerEmail.trim()) return;
+    
+    gsap.to('.intro-container', { 
+      opacity: 0, y: -30, duration: 0.5, ease: 'power3.in',
+      onComplete: () => {
+        setStep('popup');
+        setTimeout(() => {
+          gsap.fromTo('.ready-popup', { scale: 0.9, opacity: 0, y: 30 }, { scale: 1, opacity: 1, y: 0, duration: 0.6, ease: 'back.out(1.5)' });
+        }, 50);
+      }
+    });
+  };
+
+  useEffect(() => {
+    if (step !== 'popup') return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Enter') {
+        gsap.to('.ready-popup', { 
+          scale: 0.95, opacity: 0, duration: 0.3, 
+          onComplete: () => {
+            setStep('game');
+            gsap.fromTo('.game-container', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.4 });
+          }
+        });
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [step]);
+
+  useEffect(() => {
+    if (step !== 'game' || gameStatus !== 'playing') return;
+    if (timeLeft <= 0) {
+      handleTimeOut();
+      return;
+    }
+    const timerId = setInterval(() => setTimeLeft(prev => prev - 1), 1000);
+    return () => clearInterval(timerId);
+  }, [timeLeft, gameStatus, step]);
+
+  useEffect(() => {
+    if (step !== 'game') return;
+    if (timeLeft <= 4 && gameStatus === 'playing') {
+      gsap.to(mascotRef.current, { y: 0, opacity: 1, duration: 0.6, ease: 'back.out(1.5)', visibility: 'visible' });
+    } else {
+      gsap.to(mascotRef.current, { y: 150, opacity: 0, duration: 0.4, ease: 'power2.in', onComplete: () => {
+        if (mascotRef.current) mascotRef.current.style.visibility = 'hidden';
+      }});
+    }
+  }, [timeLeft, gameStatus, step]);
+
+  useEffect(() => {
+    if (step === 'game' && gameStatus === 'playing' && guessInputRef.current) {
+      guessInputRef.current.focus();
+    }
+  }, [step, gameStatus]);
+
+  const handleTimeOut = () => {
+    setGameStatus('wrong');
+    gsap.to('.logo-container canvas', { filter: 'grayscale(100%) opacity(50%)', duration: 0.5 });
+    setTimeout(handleNext, 800);
+  };
+
+  const handleHint = () => {
+    if (pixelSize > 5 && gameStatus === 'playing') {
+      setPixelSize(prev => Math.max(1, prev - 8));
+      setLogoPoints(prev => Math.max(10, prev - 20));
+      gsap.fromTo('.logo-container canvas', { opacity: 0.8 }, { opacity: 1, duration: 0.3 });
+      setTimeout(() => guessInputRef.current?.focus(), 10);
+    }
+  };
+
+  const handleGuess = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (gameStatus !== 'playing' || !guess.trim()) return;
+
+    setCloseGuessWarning(false);
+    const normalize = (str: string) => str.toLowerCase().replace(/[^a-z0-9]/g, '');
+    const normGuess = normalize(guess);
+    const normTarget = normalize(currentLogo.name);
+    const isCorrect = normGuess === normTarget;
+
+    if (isCorrect) {
+      setGameStatus('correct');
+      const timeBonus = timeLeft * 10;
+      setTotalScore(prev => prev + logoPoints + timeBonus);
+      
+      let pool = JOKES_SLOW;
+      if (timeLeft >= 7) pool = JOKES_FAST;
+      else if (timeLeft >= 4) pool = JOKES_MID;
+      const randomJoke = pool[Math.floor(Math.random() * pool.length)];
+      setJokeContent(randomJoke);
+
+      gsap.to('.logo-container canvas', { scale: 1.02, duration: 0.4, ease: 'power2.out' });
+      setTimeout(handleNext, 1200); 
+    } else {
+      const dist = levenshtein(normGuess, normTarget);
+      if (dist <= 2 && normGuess.length > 2) {
+        setCloseGuessWarning(true);
+        gsap.fromTo('.guess-input', { x: -3 }, { x: 0, duration: 0.1, yoyo: true, repeat: 3 });
+      } else {
+        gsap.fromTo('.guess-input', { x: -5 }, { x: 0, duration: 0.2, ease: 'bounce.out' });
+        setGuess('');
+      }
+    }
+  };
+
+  const handleNext = () => {
+    setCurrentIndex(prev => {
+      if (prev < logos.length - 1) {
+        setPixelSize(30);
+        setLogoPoints(100);
+        setTimeLeft(TIMER_SECONDS);
+        setGuess('');
+        setCloseGuessWarning(false);
+        setGameStatus('playing');
+        setJokeContent(null);
+        gsap.fromTo('.game-content', { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.3 });
+        return prev + 1;
+      } else {
+        setGameStatus('gameover');
+        return prev;
+      }
+    });
+  };
+
+  useEffect(() => {
+    if (gameStatus === 'gameover') {
+      setIsSubmitting(true);
+      fetch('/api/scores', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: playerName, email: playerEmail, score: totalScore })
+      })
+      .catch(console.error)
+      .finally(() => {
+        // Simulate a tiny bit of extra loading so the user actually sees the beautiful animation
+        setTimeout(() => setIsSubmitting(false), 1500);
+      });
+    }
+  }, [gameStatus, playerName, playerEmail, totalScore]);
+
+  const currentLogo = logos[currentIndex];
+
+  if (!currentLogo) return <div className="flex h-screen items-center justify-center bg-[#fafafa]">Loading...</div>;
+
+  return (
+    <div className="min-h-screen bg-[#111111] text-white flex flex-col font-sans relative selection:bg-red-500 overflow-hidden">
+      
+      <div className="absolute inset-0 bg-[radial-gradient(#333_2px,transparent_2px)] bg-[size:24px_24px] pointer-events-none z-0"></div>
+
+      {/* Mascot GSAP Box */}
+      <div 
+        ref={mascotRef}
+        className="fixed bottom-8 right-8 z-50 transform translate-y-[150px] opacity-0 invisible"
+      >
+        <div className="bg-[#f4f0e6] shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] border-4 border-black p-6 flex items-center gap-6 min-w-[300px] rounded-none">
+          <div className="flex-1">
+            <div className="font-black text-red-500 text-xl uppercase tracking-widest mb-1">Hurry Up Twin!</div>
+            <div className="text-black font-bold uppercase tracking-wider flex items-center gap-2">Time is ticking... <img src={`${NOTO_BASE}/1f47d/512.webp`} className="w-8 h-8 inline-block drop-shadow-sm" alt="alien" /></div>
+          </div>
+          <img src={`${NOTO_BASE}/1f61d/512.webp`} className="w-20 h-20 drop-shadow-md transform hover:scale-110 transition-transform" alt="Mascot" />
+        </div>
+      </div>
+
+      {/* INTRO SCREEN (Sequential Centered Layout) */}
+      {step === 'intro' && (
+        <div className="intro-container relative z-10 flex flex-col items-center justify-center h-screen p-4 md:p-8 overflow-hidden">
+          
+          <div className="parallax-layer-1 absolute inset-0 z-0 opacity-100 scale-100 pointer-events-none flex items-center justify-center">
+            {/* Retro arcade DeBugger animation in the background */}
+            <div className="scale-[2] sm:scale-[3] opacity-30 mix-blend-screen w-full h-full relative">
+              <DeBugger />
+            </div>
+          </div>
+
+          <div className="w-full h-full flex items-center justify-center relative z-20">
+            
+            {/* RULES PANEL */}
+            {introStep === 1 && (
+              <div className="rules-panel absolute z-10 max-w-2xl w-full flex flex-col items-center px-4">
+                <h1 className="text-4xl md:text-6xl font-black text-white tracking-tighter mb-2 uppercase drop-shadow-sm text-center">
+                  Welcome to <span className="text-red-600 block sm:inline">Logo Run.</span>
+                </h1>
+                <p className="text-zinc-400 text-base md:text-lg font-medium mb-6 text-center max-w-lg">
+                  Identify highly pixelated logos. Precision and speed yield the highest scores.
+                </p>
+                
+                <div className="bg-[#f4f0e6] border-4 border-black shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] rounded-none w-full flex flex-col relative overflow-hidden">
+                  <div className="bg-black text-white p-4 border-b-4 border-black font-black uppercase tracking-widest text-center">
+                    Rules of Engagement
+                  </div>
+
+                  <div className="flex flex-col p-4 sm:p-5 gap-4 text-left">
+                    <div className="flex items-start gap-4">
+                      <div className="bg-black text-[#f4f0e6] p-3 border-2 border-black">
+                        <CheckCircle2 className="w-6 h-6" />
+                      </div>
+                      <div>
+                        <h3 className="font-black text-black text-lg uppercase tracking-wider">+100 Base Points</h3>
+                        <p className="text-black/70 font-bold">Awarded for correctly identifying a logo.</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start gap-4">
+                      <div className="bg-red-600 text-white p-3 border-2 border-black">
+                        <Timer className="w-6 h-6" />
+                      </div>
+                      <div>
+                        <h3 className="font-black text-black text-lg uppercase tracking-wider">10s Speed Bonus</h3>
+                        <p className="text-black/70 font-bold">Earn +10 points for every second left on the clock.</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start gap-4">
+                      <div className="bg-black text-[#f4f0e6] p-3 border-2 border-black">
+                        <Eye className="w-6 h-6" />
+                      </div>
+                      <div>
+                        <h3 className="font-black text-black text-lg uppercase tracking-wider">-20 Pts to Clarify</h3>
+                        <p className="text-black/70 font-bold">Reduce pixelation if stuck, but it costs base points.</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="rules-panel-item mt-6 text-zinc-400 font-bold uppercase tracking-widest text-sm sm:text-base flex items-center gap-4 bg-black px-6 py-3 border-4 border-[#333]">
+                  Press 
+                  <span className="bg-white text-black px-4 py-1.5 font-black border-4 border-black shadow-[4px_4px_0px_0px_rgba(255,255,255,1)] hover:translate-y-0.5 hover:shadow-[2px_2px_0px_0px_rgba(255,255,255,1)] transition-all cursor-pointer" onClick={handleRulesNext}>
+                    ENTER
+                  </span> 
+                  to acknowledge
+                </div>
+              </div>
+            )}
+            
+            {/* REGISTRATION FORM */}
+            {introStep === 2 && (
+              <div className="form-panel parallax-layer-2 absolute z-20 max-w-md w-full opacity-0 scale-75 pointer-events-auto px-4 flex flex-col justify-center items-center h-full">
+                <div className="bg-[#f4f0e6] border-4 border-black shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] rounded-none w-full p-8 sm:p-10 flex flex-col items-center">
+                  <h2 className="text-3xl font-black text-black uppercase mb-8 tracking-tight text-center">Operative Details</h2>
+                  <form onSubmit={handleRegSubmit} className="w-full flex flex-col gap-5 text-left">
+                    <div className="flex flex-col gap-2 w-full">
+                      <label htmlFor="playerName" className="font-bold text-black uppercase tracking-wider text-sm">Codename</label>
+                      <input
+                        id="playerName"
+                        ref={nameInputRef}
+                        type="text"
+                        value={playerName}
+                        onChange={(e) => setPlayerName(e.target.value)}
+                        placeholder="Enter your alias"
+                        className="w-full bg-white border-4 border-black px-5 py-4 font-black text-black focus:outline-none focus:bg-yellow-50 placeholder:text-zinc-400 placeholder:font-bold shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] rounded-none"
+                        required
+                        autoComplete="off"
+                        maxLength={30}
+                      />
+                    </div>
+                    <div className="flex flex-col gap-2 w-full">
+                      <label htmlFor="playerEmail" className="font-bold text-black uppercase tracking-wider text-sm">Email</label>
+                      <input
+                        id="playerEmail"
+                        type="email"
+                        value={playerEmail}
+                        onChange={(e) => setPlayerEmail(e.target.value)}
+                        placeholder="student@university.edu"
+                        className="w-full bg-white border-4 border-black px-5 py-4 font-black text-black focus:outline-none focus:bg-yellow-50 placeholder:text-zinc-400 placeholder:font-bold shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] rounded-none"
+                        required
+                      />
+                    </div>
+                    <button 
+                      type="submit" 
+                      disabled={!playerName.trim() || !playerEmail.trim()}
+                      className="w-full bg-red-600 text-white font-black text-xl py-5 border-4 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:translate-y-1 hover:translate-x-1 hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-all uppercase tracking-wider mt-4"
+                    >
+                      Initialize Run
+                    </button>
+                  </form>
+                </div>
+              </div>
+            )}
+
+          </div>
+        </div>
+      )}
+
+      {/* POPUP READY */}
+      {step === 'popup' && (
+        <div className="relative z-20 flex flex-col items-center justify-center min-h-screen p-6">
+          <div className="ready-popup bg-[#f4f0e6] p-10 sm:p-14 border-4 border-black shadow-[16px_16px_0px_0px_rgba(0,0,0,1)] rounded-none text-center w-full max-w-xl">
+            <Timer className="w-20 h-20 text-red-600 mx-auto mb-8" />
+            <h2 className="text-5xl font-black uppercase tracking-tighter mb-4 text-black">
+              System Ready
+            </h2>
+            <p className="text-xl text-black font-bold mb-10">
+              You have exactly 10 seconds per target.
+            </p>
+            <div className="inline-flex items-center gap-3 bg-white px-8 py-5 border-4 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] rounded-none">
+              <span className="text-lg font-black text-black uppercase">
+                Press <kbd className="bg-black text-white px-4 py-2 mx-2">ENTER</kbd> to begin
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* GAME */}
+      {step === 'game' && (
+        <div className="game-container flex flex-col min-h-screen z-10 relative">
+          <header className="w-full px-8 py-5 flex justify-between items-center bg-white/80 backdrop-blur-md border-b border-zinc-200 relative z-30">
+            <div className="font-bold text-zinc-900 flex items-center gap-4 text-lg">
+              Logo Game
+              <span className="text-xs px-3 py-1 bg-zinc-100 text-zinc-500 rounded-md font-mono hidden sm:inline-block border border-zinc-200">OP: {playerName}</span>
+            </div>
+            
+            {gameStatus !== 'gameover' && (
+              <div className="flex items-center gap-6">
+                <div className="flex items-center gap-2 text-black bg-[#f4f0e6] px-4 py-2 border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] rounded-none">
+                  <Timer className={`w-5 h-5 ${timeLeft <= 3 ? 'text-red-500 animate-pulse' : 'text-blue-500'}`} />
+                  <span className={`font-mono font-bold text-lg ${timeLeft <= 3 ? 'text-red-500 animate-pulse' : 'text-zinc-700'}`}>
+                    00:{timeLeft.toString().padStart(2, '0')}
+                  </span>
+                </div>
+                <div className="h-6 w-px hidden"></div>
+                <div className="text-sm font-black text-black hidden sm:block bg-white px-4 py-2 border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                  SCORE <span className="text-red-600 ml-2 font-mono text-xl">{totalScore}</span>
+                </div>
+                <button 
+                  onClick={() => setGameStatus('gameover')}
+                  className="ml-2 flex items-center gap-2 px-4 py-2 text-sm font-bold text-red-600 bg-red-50 hover:bg-red-100 rounded-xl transition-colors"
+                >
+                  <LogOut className="w-4 h-4" /> Exit
+                </button>
+              </div>
+            )}
+          </header>
+
+          <main className="flex-1 flex flex-col items-center justify-center p-4 sm:p-6 w-full max-w-5xl mx-auto">
+            {gameStatus === 'gameover' ? (
+              <div className="w-full max-w-md bg-white p-10 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-zinc-100 flex flex-col items-center text-center animate-in zoom-in-95 duration-500 relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-indigo-500"></div>
+                
+                {isSubmitting ? (
+                  <div className="py-12 flex flex-col items-center space-y-6">
+                    <MessageLoading />
+                    <div className="space-y-2">
+                      <h2 className="text-xl font-bold text-zinc-900 tracking-tight">Saving Score...</h2>
+                      <p className="text-zinc-500 text-sm font-medium">Adding your score to the leaderboard.</p>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <div className="bg-green-50 p-4 rounded-full mb-6">
+                      <CheckCircle2 className="w-10 h-10 text-green-500" />
+                    </div>
+                    <h2 className="text-4xl font-black uppercase tracking-tight mb-2 text-black">Game Over!</h2>
+                    <p className="text-zinc-500 font-medium mb-8">Your final score has been saved.</p>
+                    
+                    <div className="w-full mb-8 p-6 bg-white rounded-none border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                      <div className="text-xs text-zinc-400 font-bold uppercase tracking-widest mb-1">Final Score</div>
+                      <div className="text-6xl font-black text-red-600 tracking-tighter">{totalScore}</div>
+                    </div>
+                    
+                    <div className="w-full bg-yellow-300 border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] p-4 mb-6 text-center transform -rotate-1">
+                      <div className="font-black text-black uppercase text-sm tracking-widest">Global Ranking</div>
+                      <div className="font-bold text-black mt-1">You are better than <span className="font-black text-red-600 text-xl">{Math.min(99, Math.max(1, Math.floor(totalScore / 15) + 12))}%</span> of operatives!</div>
+                    </div>
+
+                    <div className="flex flex-col gap-4 w-full">
+                      <button 
+                        onClick={() => router.push('/leaderboard')}
+                        className="w-full bg-black hover:translate-y-1 hover:shadow-[0px_0px_0px_0px_rgba(0,0,0,1)] text-white font-black uppercase text-base py-4 px-6 rounded-none border-4 border-black transition-all flex items-center justify-center gap-2 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
+                      >
+                        View Leaderboard
+                        <ArrowRight className="w-4 h-4" />
+                      </button>
+                      <button 
+                        onClick={() => router.push('/')}
+                        className="w-full bg-white hover:bg-zinc-100 hover:translate-y-1 hover:shadow-[0px_0px_0px_0px_rgba(0,0,0,1)] text-black font-black uppercase text-base py-4 px-6 rounded-none border-4 border-black transition-all flex items-center justify-center gap-2 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
+                      >
+                        Return to Base
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
+            ) : (
+              <div className="game-content w-full flex flex-col items-center">
+                <div className="w-full flex justify-between items-center mb-3 text-sm font-bold text-zinc-400 uppercase tracking-widest">
+                  <span className="bg-black text-white px-3 py-1 font-black uppercase">Target {currentIndex + 1} of {logos.length}</span>
+                </div>
+
+                <div className="logo-container w-full h-[40vh] min-h-[250px] max-h-[450px] bg-[#f4f0e6] rounded-none border-4 border-black shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] overflow-hidden relative flex items-center justify-center p-4 sm:p-8 mb-6 transition-all">
+                  <PixelatedImage 
+                    src={currentLogo.url} 
+                    pixelSize={gameStatus === 'playing' ? pixelSize : 1} 
+                    className="w-full h-full object-contain"
+                  />
+                  
+                  {gameStatus === 'correct' && (
+                    <div className="absolute inset-0 bg-[#f4f0e6]/90 backdrop-blur-sm flex flex-col items-center justify-center z-20 animate-in fade-in duration-200">
+                      <CheckCircle2 className="w-16 h-16 sm:w-20 sm:h-20 text-green-500 mb-4 sm:mb-6 drop-shadow-sm" />
+                      <div className="text-3xl sm:text-4xl font-bold tracking-tight text-zinc-900 mb-4 sm:mb-6">Correct</div>
+                      {jokeContent && (
+                        <div className="flex items-center gap-3 sm:gap-4 text-lg sm:text-xl font-bold text-blue-700 bg-blue-50/80 backdrop-blur-md px-6 sm:px-8 py-3 sm:py-4 rounded-2xl border border-blue-200 shadow-sm mx-4 text-center">
+                          {jokeContent.text}
+                          <img src={jokeContent.emoji} className="w-10 h-10 sm:w-12 sm:h-12 drop-shadow-sm flex-shrink-0" alt="emoji" />
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {gameStatus === 'wrong' && (
+                    <div className="absolute inset-0 bg-[#f4f0e6]/90 backdrop-blur-sm flex flex-col items-center justify-center z-20 animate-in fade-in duration-200">
+                      <XCircle className="w-16 h-16 sm:w-20 sm:h-20 text-red-500 mb-4 drop-shadow-sm" />
+                      <div className="text-2xl sm:text-3xl font-bold text-zinc-900 mb-3">Time Expired</div>
+                      <div className="text-zinc-500 font-bold text-lg sm:text-xl">Target was <span className="text-zinc-900">{currentLogo.name}</span></div>
+                    </div>
+                  )}
+                </div>
+
+                <div className="w-full max-w-2xl space-y-3 sm:space-y-4">
+                  <form onSubmit={handleGuess} className="relative">
+                    <input 
+                      ref={guessInputRef}
+                      type="text" 
+                      value={guess}
+                      onChange={e => { setGuess(e.target.value); setCloseGuessWarning(false); }}
+                      placeholder="Type the brand name and press Enter..."
+                      className="guess-input w-full bg-white border-4 border-black rounded-none px-6 py-4 sm:py-5 text-xl sm:text-2xl font-black text-black focus:outline-none focus:bg-yellow-50 transition-all shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] disabled:opacity-50 text-center placeholder:text-zinc-400 placeholder:font-bold"
+                      disabled={gameStatus !== 'playing'}
+                      autoFocus
+                    />
+                    {closeGuessWarning && (
+                      <div className="absolute -bottom-8 left-0 right-0 text-center animate-in fade-in slide-in-from-top-2">
+                        <span className="bg-yellow-100 text-yellow-800 text-sm font-bold px-4 py-1.5 rounded-full">
+                          Almost there! You are very close.
+                        </span>
+                      </div>
+                    )}
+                  </form>
+
+                  <button 
+                    type="button"
+                    onClick={handleHint}
+                    disabled={pixelSize <= 5 || gameStatus !== 'playing'}
+                    className="w-full flex items-center justify-center gap-3 bg-white hover:bg-zinc-100 hover:translate-y-1 hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] disabled:opacity-50 border-4 border-black rounded-none py-3 sm:py-4 transition-all text-base sm:text-lg font-black text-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] uppercase"
+                  >
+                    <Eye className="w-5 h-5 sm:w-6 sm:h-6" />
+                    Reduce Pixelation (-20 Points)
+                  </button>
+                </div>
+              </div>
+            )}
+          </main>
+        </div>
+      )}
+    </div>
+  );
+}
