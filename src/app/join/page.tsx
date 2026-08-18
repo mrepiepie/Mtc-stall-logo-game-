@@ -1,0 +1,125 @@
+'use client';
+
+import { useState } from 'react';
+import { User, KeyRound, ArrowRight, Loader2 } from 'lucide-react';
+import gsap from 'gsap';
+
+export default function JoinPage() {
+  const [gameCode, setGameCode] = useState('');
+  const [playerName, setPlayerName] = useState('');
+  const [isJoining, setIsJoining] = useState(false);
+  const [step, setStep] = useState<'form' | 'waiting'>('form');
+
+  const handleJoin = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!gameCode || !playerName) return;
+
+    setIsJoining(true);
+    
+    // Simulate network request to join game
+    setTimeout(() => {
+      setIsJoining(false);
+      setStep('waiting');
+      gsap.fromTo('.waiting-container', { opacity: 0, scale: 0.9 }, { opacity: 1, scale: 1, duration: 0.4, ease: 'back.out(1.2)' });
+    }, 800);
+  };
+
+  return (
+    <div className="min-h-screen bg-[#111111] text-white flex flex-col items-center justify-center font-sans relative selection:bg-red-500 overflow-hidden p-4 md:p-8">
+      
+      {/* Background Dots */}
+      <div className="absolute inset-0 bg-[radial-gradient(#333_2px,transparent_2px)] bg-[size:24px_24px] pointer-events-none z-0"></div>
+
+      {step === 'form' && (
+        <div className="relative z-10 w-full max-w-md animate-in fade-in slide-in-from-bottom-8 duration-500">
+          
+          <div className="text-center mb-8">
+            <h1 className="text-5xl md:text-6xl font-black text-white tracking-tighter mb-2 uppercase drop-shadow-sm">
+              Join <span className="text-red-600 block sm:inline">Game.</span>
+            </h1>
+            <p className="text-zinc-400 font-bold uppercase tracking-widest text-sm">Enter operatives to proceed</p>
+          </div>
+
+          <div className="bg-[#f4f0e6] border-4 border-black shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] rounded-none w-full p-8 flex flex-col relative overflow-hidden">
+            <form onSubmit={handleJoin} className="flex flex-col gap-6">
+              
+              <div className="flex flex-col gap-2">
+                <label className="text-black font-black uppercase tracking-widest text-sm">Game Code</label>
+                <div className="relative">
+                  <KeyRound className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 w-6 h-6" />
+                  <input 
+                    type="text" 
+                    value={gameCode}
+                    onChange={(e) => setGameCode(e.target.value.toUpperCase())}
+                    maxLength={6}
+                    placeholder="6-DIGIT CODE" 
+                    className="w-full bg-white border-4 border-black p-4 pl-14 text-2xl font-black text-black placeholder:text-zinc-300 focus:outline-none focus:ring-4 focus:ring-red-500/20 rounded-none uppercase tracking-widest transition-all"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <label className="text-black font-black uppercase tracking-widest text-sm">Player Name</label>
+                <div className="relative">
+                  <User className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 w-6 h-6" />
+                  <input 
+                    type="text" 
+                    value={playerName}
+                    onChange={(e) => setPlayerName(e.target.value)}
+                    maxLength={15}
+                    placeholder="ENTER CODENAME" 
+                    className="w-full bg-white border-4 border-black p-4 pl-14 text-2xl font-black text-black placeholder:text-zinc-300 focus:outline-none focus:ring-4 focus:ring-red-500/20 rounded-none tracking-tight transition-all"
+                    required
+                  />
+                </div>
+              </div>
+
+              <button 
+                type="submit"
+                disabled={isJoining || gameCode.length < 6 || !playerName}
+                className="group relative w-full bg-red-600 hover:bg-red-700 disabled:bg-zinc-400 text-white p-5 border-4 border-black font-black text-2xl uppercase tracking-widest transition-all hover:translate-y-[2px] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] disabled:shadow-none disabled:translate-y-[8px] active:translate-y-[8px] active:shadow-none mt-2 flex items-center justify-center gap-3"
+              >
+                {isJoining ? (
+                  <>
+                    <Loader2 className="w-8 h-8 animate-spin" />
+                    Connecting...
+                  </>
+                ) : (
+                  <>
+                    Join Mission
+                    <ArrowRight className="w-8 h-8 group-hover:translate-x-2 transition-transform" />
+                  </>
+                )}
+              </button>
+
+            </form>
+          </div>
+        </div>
+      )}
+
+      {step === 'waiting' && (
+        <div className="waiting-container relative z-10 w-full max-w-lg flex flex-col items-center">
+          <div className="bg-[#f4f0e6] border-4 border-black shadow-[16px_16px_0px_0px_rgba(0,0,0,1)] rounded-none w-full p-10 flex flex-col items-center text-center">
+            
+            <div className="w-20 h-20 border-8 border-red-600 border-t-transparent rounded-full animate-spin mb-8"></div>
+            
+            <h2 className="text-4xl font-black text-black uppercase tracking-tighter mb-4">
+              You're In, <span className="text-red-600">{playerName}</span>.
+            </h2>
+            
+            <div className="bg-black text-white px-6 py-3 border-4 border-black font-black uppercase tracking-widest text-xl shadow-[6px_6px_0px_0px_rgba(255,0,0,1)] mb-8">
+              Lobby: {gameCode}
+            </div>
+
+            <p className="text-black font-bold uppercase tracking-widest text-lg animate-pulse">
+              Waiting for host to start...
+            </p>
+
+          </div>
+        </div>
+      )}
+
+    </div>
+  );
+}
