@@ -446,9 +446,9 @@ export default function PlayPage() {
         <div className="relative z-20 flex flex-col items-center justify-center min-h-screen p-6">
           <div className="ready-popup bg-[#f4f0e6] p-10 sm:p-14 border-4 border-black shadow-[16px_16px_0px_0px_rgba(0,0,0,1)] rounded-none text-center w-full max-w-xl">
             <Timer className="w-20 h-20 text-red-600 mx-auto mb-8" />
-            <h2 className="text-5xl font-black uppercase tracking-tighter mb-4 text-black">
-              System Ready
-            </h2>
+            <h2 className="text-4xl sm:text-5xl font-black uppercase tracking-tighter mb-4 text-black">
+                {readyTitle}
+              </h2>
             <p className="text-xl text-black font-bold mb-10">
               You have exactly 10 seconds per target.
             </p>
