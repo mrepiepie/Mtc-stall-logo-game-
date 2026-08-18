@@ -215,9 +215,9 @@ export default function PlayPage() {
   useEffect(() => {
     if (step !== 'game') return;
     if (timeLeft <= 4 && timeLeft > 0 && gameStatus === 'playing') {
-      gsap.to(mascotRef.current, { y: 0, opacity: 1, duration: 0.6, ease: 'back.out(1.5)', visibility: 'visible', overwrite: true });
+      gsap.to(mascotRef.current, { scale: 1, opacity: 1, duration: 0.5, ease: 'elastic.out(1, 0.5)', visibility: 'visible', overwrite: true });
     } else {
-      gsap.to(mascotRef.current, { y: 150, opacity: 0, duration: 0.4, ease: 'power2.in', overwrite: true, onComplete: () => {
+      gsap.to(mascotRef.current, { scale: 0, opacity: 0, duration: 0.3, ease: 'back.in(1.5)', overwrite: true, onComplete: () => {
         if (mascotRef.current) mascotRef.current.style.visibility = 'hidden';
       }});
     }
@@ -323,16 +323,7 @@ export default function PlayPage() {
       
       <div className="absolute inset-0 bg-[radial-gradient(#333_2px,transparent_2px)] bg-[size:24px_24px] pointer-events-none z-0"></div>
 
-      {/* Mascot GSAP Box */}
-      <div 
-        ref={mascotRef}
-        className="fixed bottom-8 right-8 z-50 transform translate-y-[150px] opacity-0 invisible"
-      >
-        <div className="bg-[#f4f0e6] shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] border-4 border-black p-6 flex items-center gap-6 min-w-[300px] rounded-none">
-          <div className="flex-1">
-            <div className="font-black text-red-500 text-xl uppercase tracking-widest mb-1">Hurry Up Twin!</div>
-            <div className="text-black font-bold uppercase tracking-wider">Time is ticking...</div>
-          </div>
+      
           <img src={`${NOTO_BASE}/1f47d/512.webp`} className="w-20 h-20 drop-shadow-md transform hover:scale-110 transition-transform" alt="Mascot" />
         </div>
       </div>
@@ -506,12 +497,30 @@ export default function PlayPage() {
             
             {gameStatus !== 'gameover' && (
               <div className="flex items-center gap-6">
-                <div className="flex items-center gap-2 text-black bg-[#f4f0e6] px-4 py-2 border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] rounded-none">
-                  <Timer className={`w-5 h-5 ${timeLeft <= 3 ? 'text-red-500 animate-pulse' : 'text-blue-500'}`} />
-                  <span className={`font-mono font-bold text-lg ${timeLeft <= 3 ? 'text-red-500 animate-pulse' : 'text-zinc-700'}`}>
-                    00:{timeLeft.toString().padStart(2, '0')}
-                  </span>
-                </div>
+                <div className="relative">
+                    <div className="flex items-center gap-2 text-black bg-[#f4f0e6] px-4 py-2 border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] rounded-none z-40 relative">
+                      <Timer className={`w-6 h-6 ${timeLeft <= 3 ? 'text-red-600 animate-pulse' : 'text-black'}`} />
+                      <div className={`${timeLeft <= 3 ? 'text-red-600 animate-pulse' : 'text-black'}`}>
+                        <AnimatedCounter value={timeLeft} fontSize={24} />
+                      </div>
+                    </div>
+                    
+                    {/* Mascot GSAP Speech Bubble attached to timer */}
+                    <div 
+                      ref={mascotRef}
+                      className="absolute top-[140%] left-1/2 -translate-x-1/2 z-50 transform scale-0 opacity-0 invisible origin-top"
+                    >
+                      {/* Brutalist Speech Bubble Triangle Pointing Up */}
+                      <div className="absolute -top-4 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[16px] border-l-transparent border-r-[16px] border-r-transparent border-b-[16px] border-b-black"></div>
+                      <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[16px] border-l-transparent border-r-[16px] border-r-transparent border-b-[16px] border-b-[#f4f0e6] z-10"></div>
+                      
+                      <div className="bg-[#f4f0e6] shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] border-4 border-black p-4 flex flex-col items-center justify-center min-w-[240px] rounded-none relative z-0">
+                        <img src={`${NOTO_BASE}/1f47d/512.webp`} className="w-16 h-16 drop-shadow-md mb-2 animate-[bounce_1s_infinite]" alt="Mascot" />
+                        <div className="font-black text-red-600 text-lg uppercase tracking-widest text-center leading-tight">Hurry Up Twin!</div>
+                        <div className="text-black font-black uppercase tracking-wider text-sm mt-1 text-center">Time is ticking...</div>
+                      </div>
+                    </div>
+                  </div>
                 <div className="h-6 w-px hidden"></div>
                 <div className="text-sm font-black text-black hidden sm:block bg-white px-4 py-2 border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
                   SCORE <span className="text-red-600 ml-2 font-mono text-xl">{totalScore}</span>
