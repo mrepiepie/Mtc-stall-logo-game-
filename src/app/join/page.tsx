@@ -1,14 +1,19 @@
 'use client';
 
-import { useState } from 'react';
-import { User, KeyRound, ArrowRight, Loader2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { User, KeyRound, ArrowRight, Loader2, Send } from 'lucide-react';
 import gsap from 'gsap';
 
 export default function JoinPage() {
   const [gameCode, setGameCode] = useState('');
   const [playerName, setPlayerName] = useState('');
   const [isJoining, setIsJoining] = useState(false);
-  const [step, setStep] = useState<'form' | 'waiting'>('form');
+  const [step, setStep] = useState<'form' | 'waiting' | 'playing' | 'round_over'>('form');
+  
+  // Player Game State
+  const [guess, setGuess] = useState('');
+  const [hasGuessed, setHasGuessed] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(10);
 
   const handleJoin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,7 +26,31 @@ export default function JoinPage() {
       setIsJoining(false);
       setStep('waiting');
       gsap.fromTo('.waiting-container', { opacity: 0, scale: 0.9 }, { opacity: 1, scale: 1, duration: 0.4, ease: 'back.out(1.2)' });
+      
+      // PROTOTYPE ONLY: Fake the host starting the game after 4 seconds
+      setTimeout(() => {
+        setStep('playing');
+        gsap.fromTo('.playing-container', { opacity: 0, y: 50 }, { opacity: 1, y: 0, duration: 0.5, ease: 'power3.out' });
+      }, 4000);
+
     }, 800);
+  };
+
+  // Fake timer for prototyping the "Playing" state
+  useEffect(() => {
+    if (step === 'playing' && timeLeft > 0) {
+      const timerId = setInterval(() => setTimeLeft(prev => prev - 1), 1000);
+      return () => clearInterval(timerId);
+    } else if (timeLeft === 0 && step === 'playing') {
+      setStep('round_over');
+    }
+  }, [step, timeLeft]);
+
+  const submitGuess = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!guess.trim()) return;
+    setHasGuessed(true);
+    // In the real app, this would emit the guess to the server via Supabase Realtime
   };
 
   return (
@@ -116,6 +145,71 @@ export default function JoinPage() {
               Waiting for host to start...
             </p>
 
+          </div>
+        </div>
+      )}
+
+      {step === 'playing' && (
+        <div className="playing-container relative z-10 w-full max-w-lg flex flex-col items-center">
+          
+          <div className="w-full flex justify-between items-center mb-6">
+             <div className="bg-[#f4f0e6] text-black px-4 py-2 border-4 border-black font-black text-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+               TIME: <span className="text-red-600">{timeLeft}s</span>
+             </div>
+             <div className="bg-[#f4f0e6] text-black px-4 py-2 border-4 border-black font-black text-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+               Q. 1/10
+             </div>
+          </div>
+
+          <div className="bg-[#f4f0e6] border-4 border-black shadow-[16px_16px_0px_0px_rgba(0,0,0,1)] rounded-none w-full p-8 flex flex-col items-center text-center">
+            
+            <p className="text-black font-black uppercase tracking-widest text-lg mb-6">
+              Look at the Projector!
+            </p>
+
+            {hasGuessed ? (
+               <div className="py-12 flex flex-col items-center">
+                  <div className="w-16 h-16 bg-black text-white rounded-full flex items-center justify-center font-black text-3xl mb-4">
+                    ✓
+                  </div>
+                  <h3 className="text-2xl font-black text-black uppercase tracking-wider">Answer Submitted</h3>
+                  <p className="text-zinc-600 font-bold uppercase tracking-widest text-sm mt-2">Waiting for other players...</p>
+               </div>
+            ) : (
+              <form onSubmit={submitGuess} className="w-full flex flex-col gap-4">
+                <input 
+                  type="text" 
+                  value={guess}
+                  onChange={(e) => setGuess(e.target.value)}
+                  placeholder="TYPE YOUR ANSWER..." 
+                  className="w-full bg-white border-4 border-black p-5 text-2xl font-black text-black placeholder:text-zinc-300 focus:outline-none focus:ring-4 focus:ring-red-500/20 rounded-none uppercase tracking-widest transition-all text-center"
+                  required
+                  autoFocus
+                />
+                
+                <button 
+                  type="submit"
+                  className="w-full bg-red-600 hover:bg-red-700 text-white p-5 border-4 border-black font-black text-2xl uppercase tracking-widest transition-all hover:translate-y-[2px] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] active:translate-y-[8px] active:shadow-none flex items-center justify-center gap-3"
+                >
+                  Submit Answer
+                  <Send className="w-6 h-6" />
+                </button>
+              </form>
+            )}
+
+          </div>
+        </div>
+      )}
+
+      {step === 'round_over' && (
+        <div className="relative z-10 w-full max-w-lg flex flex-col items-center animate-in fade-in zoom-in duration-500">
+          <div className="bg-black border-4 border-white shadow-[16px_16px_0px_0px_rgba(255,0,0,1)] rounded-none w-full p-10 flex flex-col items-center text-center">
+            <h2 className="text-4xl font-black text-white uppercase tracking-tighter mb-4">
+              Round Over!
+            </h2>
+            <p className="text-white font-bold uppercase tracking-widest text-lg animate-pulse">
+              Check the projector for the leaderboard!
+            </p>
           </div>
         </div>
       )}
