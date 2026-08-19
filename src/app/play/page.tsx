@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { LOGOS } from '@/data/logos';
+import { supabase } from '@/lib/supabaseClient';
 import { PixelatedImage } from '@/components/PixelatedImage';
 import gsap from 'gsap';
 import { Eye, CheckCircle2, Timer, XCircle, LogOut, ArrowRight, CornerDownLeft, User } from 'lucide-react';
