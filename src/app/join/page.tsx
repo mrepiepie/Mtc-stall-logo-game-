@@ -56,6 +56,36 @@ export default function JoinPage() {
     }
   }, [step, timeLeft]);
 
+  // --- REALTIME WEBSOCKET TUNNEL ---
+  useEffect(() => {
+    if (step !== 'waiting') return;
+
+    // Subscribe to changes on the active_game table
+    const channel = supabase
+      .channel('schema-db-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'active_game',
+          filter: 'id=eq=1'
+        },
+        (payload) => {
+          console.log('Realtime Event Received!', payload);
+          // When the admin changes status to 'playing', instantly start the game!
+          if (payload.new.status === 'playing') {
+            setStep('playing');
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [step]);
+
   const submitGuess = (e: React.FormEvent) => {
     e.preventDefault();
     if (!guess.trim()) return;
