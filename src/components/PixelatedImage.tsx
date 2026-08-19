@@ -28,11 +28,16 @@ export function PixelatedImage({ src, pixelSize, className, onLoad }: PixelatedI
   }, [src]);
 
   useEffect(() => {
-    if (!imgElement || !canvasRef.current) return;
-
+    if (!canvasRef.current) return;
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
+    
+    if (!imgElement) {
+      // CLEAR THE CANVAS ENTIRELY to prevent ghosting!
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      return;
+    }
 
     // Set canvas dimensions
     const width = imgElement.width || 300;
