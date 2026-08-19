@@ -687,7 +687,7 @@ export default function PlayPage() {
                           setCloseGuessWarning(false);
                           const normTarget = currentLogo.name.toLowerCase().replace(/[^a-z0-9]/g, '');
                           if (val.toLowerCase().replace(/[^a-z0-9]/g, '') === normTarget) {
-                            handleGuess({ preventDefault: () => {} } as any);
+                            handleGuess(undefined, val);
                           }
                         }}
                       placeholder="Type the brand name and press Enter..."
@@ -712,5 +712,6 @@ export default function PlayPage() {
     </div>
   );
 }
+
 
 
