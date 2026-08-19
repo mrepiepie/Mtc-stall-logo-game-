@@ -17,7 +17,7 @@ export const LOGOS = [
   { id: 'coca-cola', name: 'coca cola', url: '/logos/coca-cola.jpg', difficulty: 'medium', points: 100 },
   { id: 'pepsi', name: 'pepsi', url: '/logos/pepsi.png', difficulty: 'medium', points: 100 },
   { id: 'redbull', name: 'redbull', url: '/logos/redbull.png', difficulty: 'medium', points: 100 },
-  { id: 'monsterenergy', name: 'monsterenergy', url: '/logos/monsterenergy.png', difficulty: 'medium', points: 100 },
+  { id: 'monsterenergy', name: 'monster', url: '/logos/monsterenergy.png', difficulty: 'medium', points: 100 },
   { id: 'sony', name: 'sony', url: '/logos/sony.png', difficulty: 'medium', points: 100 },
   { id: 'nintendo', name: 'nintendo', url: '/logos/nintendo.png', difficulty: 'medium', points: 100 },
   { id: 'xbox', name: 'xbox', url: '/logos/xbox.png', difficulty: 'medium', points: 100 },
