@@ -644,11 +644,16 @@ export default function PlayPage() {
                   <form onSubmit={handleGuess} className="relative">
                     <div className="flex justify-center mb-6">
                       <div className="flex gap-1 sm:gap-2 text-2xl sm:text-3xl font-mono font-black text-black tracking-widest bg-[#f4f0e6] px-4 py-2 border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-                        {currentLogo.name.split('').map((char, i) => (
-                          <span key={i} className={char === ' ' ? 'w-4' : ''}>
-                            {char === ' ' ? ' ' : (char === '-' ? '-' : '_')}
-                          </span>
-                        ))}
+                        {(() => {
+                          const norm = guess.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+                          let idx = 0;
+                          return currentLogo.name.split('').map((char, i) => {
+                            if (char === ' ') return <span key={i} className="w-4"> </span>;
+                            if (char === '-') return <span key={i}>-</span>;
+                            const displayChar = idx < norm.length ? norm[idx++] : '_';
+                            return <span key={i} className={displayChar !== '_' ? 'text-blue-600' : ''}>{displayChar}</span>;
+                          });
+                        })()}
                       </div>
                     </div>
                     <input 
