@@ -269,7 +269,7 @@ export default function PlayPage() {
   const handleTimeOut = () => {
     setGameStatus('wrong');
     // No grayscale filter wanted
-    setTimeout(handleNext, 800);
+    setPixelSize(1);`n    setNextTimer(3);
   };
 
   const handleGuess = (e?: React.FormEvent, explicitGuess?: string) => {
@@ -302,7 +302,7 @@ export default function PlayPage() {
       setJokeContent(randomJoke);
 
       gsap.to('.logo-container canvas', { scale: 1.02, duration: 0.4, ease: 'power2.out' });
-      setTimeout(handleNext, 1200); 
+      setNextTimer(2); 
     } else {
       const dist = levenshtein(normGuess, normTarget);
       if (dist <= 2 && normGuess.length > 2) {
@@ -711,4 +711,5 @@ export default function PlayPage() {
     </div>
   );
 }
+
 
