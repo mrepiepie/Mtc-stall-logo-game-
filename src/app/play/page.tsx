@@ -75,6 +75,7 @@ export default function PlayPage() {
   const [timeLeft, setTimeLeft] = useState(TIMER_SECONDS);
   const [guess, setGuess] = useState('');
   const [gameStatus, setGameStatus] = useState<'playing' | 'correct' | 'wrong' | 'gameover'>('playing');
+  const [nextTimer, setNextTimer] = useState<number | null>(null);
   const [jokeContent, setJokeContent] = useState<{text: string, emoji: string} | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [finalRank, setFinalRank] = useState<number | null>(null);
@@ -254,6 +255,17 @@ export default function PlayPage() {
     }
   }, [step, gameStatus]);
 
+  
+  useEffect(() => {
+    if (nextTimer === null) return;
+    if (nextTimer > 0) {
+      const id = setTimeout(() => setNextTimer(prev => prev! - 1), 1000);
+      return () => clearTimeout(id);
+    } else {
+      handleNext();
+    }
+  }, [nextTimer]);
+  
   const handleTimeOut = () => {
     setGameStatus('wrong');
     // No grayscale filter wanted
@@ -262,7 +274,14 @@ export default function PlayPage() {
 
   const handleGuess = (e: React.FormEvent) => {
     e.preventDefault();
-    if (gameStatus !== 'playing' || !guess.trim()) return;
+    if (gameStatus !== 'playing') {
+      if (nextTimer !== null) {
+        setNextTimer(null);
+        handleNext();
+      }
+      return;
+    }
+    if (!guess.trim()) return;
 
     setCloseGuessWarning(false);
     const normalize = (str: string) => str.toLowerCase().replace(/[^a-z0-9]/g, '');
