@@ -1,54 +1,79 @@
 const fs = require('fs');
 let code = fs.readFileSync('src/app/play/page.tsx', 'utf-8');
 
-// 1. Revert timer to not depixelate. 
-// At 7dc3882, the timer is:
-//     const timerId = setInterval(() => {
-//       setTimeLeft(prev => prev - 1);
-//       setPixelSize(prev => Math.max(1, prev - 3));
-//     }, 1000);
-code = code.replace(/const timerId = setInterval\(\(\) => \{[\s\S]*?\}, 1000\);/, 'const timerId = setInterval(() => setTimeLeft(prev => prev - 1), 1000);');
+const NOTO_BASE = 'const NOTO_BASE = "https://fonts.gstatic.com/s/e/notoemoji/latest";';
+const JOKES_SLOW_END = '  ];\\r\\n  \\r\\n  export default function PlayPage() {';
 
-// 2. Add handleHint below handleTimeOut
-code = code.replace(/const handleTimeOut = \(\) => \{[\s\S]*?setTimeout\(handleNext, 800\);\s*\};/, 
-`const handleTimeOut = () => {
-    setGameStatus('wrong');
-    gsap.to('.logo-container canvas', { filter: 'grayscale(100%) opacity(50%)', duration: 0.5 });
-    setTimeout(handleNext, 800);
-  };
+const startIndex = code.indexOf(NOTO_BASE);
+const endIndex = code.indexOf('export default function PlayPage() {');
 
-  const handleHint = () => {
-    if (pixelSize > 5 && gameStatus === 'playing') {
-      setPixelSize(prev => Math.max(1, prev - 8));
-      setLogoPoints(prev => Math.max(10, prev - 20));
-      gsap.fromTo('.logo-container canvas', { opacity: 0.8 }, { opacity: 1, duration: 0.3 });
-      setTimeout(() => guessInputRef.current?.focus(), 10);
-    }
-  };`);
+const newJokes = \`const NOTO_BASE = "https://fonts.gstatic.com/s/e/notoemoji/latest";
 
-// 3. Inject Button UI
-const buttonUI = `                    </form>
+const JOKES_FAST = [
+  { text: "Woah that was quick.. calm down twin", emoji: \\\`\${NOTO_BASE}/1f480/512.webp\\\` },
+  { text: "Bro is literally a human scanner", emoji: \\\`\${NOTO_BASE}/1f92f/512.webp\\\` },
+  { text: "Are you cheating?!", emoji: \\\`\${NOTO_BASE}/1f928/512.webp\\\` },
+  { text: "Speedforce activated", emoji: \\\`\${NOTO_BASE}/26a1/512.webp\\\` },
+  { text: "Bro has 20/20 vision", emoji: \\\`\${NOTO_BASE}/1f440/512.webp\\\` },
+  { text: "Unreal reaction time", emoji: \\\`\${NOTO_BASE}/1f680/512.webp\\\` },
+];
+const JOKES_MID = [
+  { text: "Solid pace, but I've seen faster", emoji: \\\`\${NOTO_BASE}/1f971/512.webp\\\` },
+  { text: "Not bad, but don't get cocky", emoji: \\\`\${NOTO_BASE}/1f921/512.webp\\\` },
+  { text: "Acceptable... barely.", emoji: \\\`\${NOTO_BASE}/1f644/512.webp\\\` },
+  { text: "Average behavior.", emoji: \\\`\${NOTO_BASE}/1f610/512.webp\\\` },
+  { text: "You're doing okay sweetie", emoji: \\\`\${NOTO_BASE}/1f485_1f3fc/512.webp\\\` },
+  { text: "Nothing to brag about", emoji: \\\`\${NOTO_BASE}/1f937_1f3fd_200d_2642_fe0f/512.webp\\\` },
+];
+const JOKES_SLOW = [
+  { text: "Fighting for your life out here", emoji: \\\`\${NOTO_BASE}/1f975/512.webp\\\` },
+  { text: "Bro was sweating bullets", emoji: \\\`\${NOTO_BASE}/1f630/512.webp\\\` },
+  { text: "My grandma types faster...", emoji: \\\`\${NOTO_BASE}/1f475_1f3fc/512.webp\\\` },
+  { text: "Did you fall asleep?", emoji: \\\`\${NOTO_BASE}/1f634/512.webp\\\` },
+  { text: "Barely made it out alive", emoji: \\\`\${NOTO_BASE}/1f915/512.webp\\\` },
+  { text: "Bro is playing in slow motion", emoji: \\\`\${NOTO_BASE}/1f40c/512.webp\\\` },
+];
+const JOKES_FAIL = [
+  { text: "Bro was literally sleeping", emoji: \\\`\${NOTO_BASE}/1f634/512.webp\\\` },
+  { text: "Is your keyboard even plugged in?", emoji: \\\`\${NOTO_BASE}/2328_fe0f/512.webp\\\` },
+  { text: "Embarrassing tbh", emoji: \\\`\${NOTO_BASE}/1f926_1f3fc_200d_2642_fe0f/512.webp\\\` },
+  { text: "You're getting cooked out here", emoji: \\\`\${NOTO_BASE}/1f373/512.webp\\\` },
+  { text: "0 points. 0 aura.", emoji: \\\`\${NOTO_BASE}/1f480/512.webp\\\` },
+  { text: "My screen froze... yeah right.", emoji: \\\`\${NOTO_BASE}/1f976/512.webp\\\` },
+  { text: "HURRY UP TWIN! TIME IS TICKING...", emoji: \\\`\${NOTO_BASE}/1f47d/512.webp\\\` }
+];
 
-                    <button 
-                      type="button"
-                      onClick={handleHint}
-                      disabled={pixelSize <= 5 || gameStatus !== 'playing'}
-                      className="w-full flex items-center justify-center gap-3 bg-white hover:bg-zinc-100 hover:translate-y-1 hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] disabled:opacity-50 border-4 border-black rounded-none py-3 sm:py-4 transition-all text-base sm:text-lg font-black text-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] uppercase mt-4"
-                    >
-                      <Eye className="w-5 h-5 sm:w-6 sm:h-6" />
-                      REVEAL -20 POINTS
-                    </button>
-                  </div>
-                </div>
-              )}
-            </main>`;
+\`;
 
-const lastFormIdx = code.lastIndexOf('</form>');
-if (lastFormIdx !== -1) {
-  const startToForm = code.substring(0, lastFormIdx);
-  const endPart = code.substring(lastFormIdx);
-  const newEndPart = endPart.replace(/<\/form>[\s\S]*?<\/main>/, buttonUI);
-  code = startToForm + newEndPart;
+if (startIndex !== -1 && endIndex !== -1) {
+  code = code.substring(0, startIndex) + newJokes + code.substring(endIndex);
 }
 
+const timeoutRegex = /const handleTimeOut = \(\) => \\{[^}]*setNextTimer\\(2\\);\\r?\\n  \\};/s;
+
+const newTimeout = \`const handleTimeOut = () => {
+    setGameStatus('wrong');
+    const randomJoke = JOKES_FAIL[Math.floor(Math.random() * JOKES_FAIL.length)];
+    setJokeContent(randomJoke);
+    setPixelSize(1);
+    setNextTimer(2);
+  };\`;
+
+code = code.replace(timeoutRegex, newTimeout);
+
+const wrongRegex = /<div className="bg-black text-white px-6 py-3 border-4 border-black font-black uppercase tracking-widest text-lg sm:text-xl shadow-\\[6px_6px_0px_0px_rgba\\(255,0,0,1\\)\\] mt-2">Target was \\{currentLogo\\.name\\}<\\/div>\\r?\\n\\s*<\\/div>\\r?\\n\\s*\\)}/m;
+
+const newWrongRender = \`<div className="bg-black text-white px-6 py-3 border-4 border-black font-black uppercase tracking-widest text-lg sm:text-xl shadow-[6px_6px_0px_0px_rgba(255,0,0,1)] my-4">Target was {currentLogo.name}</div>
+                      {jokeContent && (
+                        <div className="flex items-center gap-3 bg-white px-6 py-4 border-4 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] rounded-none text-center mx-4">
+                          <span className="text-lg sm:text-xl font-black uppercase text-black">{jokeContent.text}</span>
+                          <img src={jokeContent.emoji} className="w-10 h-10 drop-shadow-sm flex-shrink-0" alt="emoji" />
+                        </div>
+                      )}
+                    </div>
+                  )}\`;
+
+code = code.replace(wrongRegex, newWrongRender);
+
 fs.writeFileSync('src/app/play/page.tsx', code);
+console.log('done');
