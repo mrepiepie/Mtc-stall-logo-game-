@@ -272,8 +272,9 @@ export default function PlayPage() {
     setTimeout(handleNext, 800);
   };
 
-  const handleGuess = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleGuess = (e?: React.FormEvent, explicitGuess?: string) => {
+    if (e && e.preventDefault) e.preventDefault();
+    const activeGuess = explicitGuess !== undefined ? explicitGuess : guess;
     if (gameStatus !== 'playing') {
       if (nextTimer !== null) {
         setNextTimer(null);
@@ -281,11 +282,11 @@ export default function PlayPage() {
       }
       return;
     }
-    if (!guess.trim()) return;
+    if (!activeGuess.trim()) return;
 
     setCloseGuessWarning(false);
     const normalize = (str: string) => str.toLowerCase().replace(/[^a-z0-9]/g, '');
-    const normGuess = normalize(guess);
+    const normGuess = normalize(activeGuess);
     const normTarget = normalize(currentLogo.name);
     const isCorrect = normGuess === normTarget;
 
@@ -710,3 +711,4 @@ export default function PlayPage() {
     </div>
   );
 }
+
