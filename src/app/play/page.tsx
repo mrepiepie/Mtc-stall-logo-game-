@@ -657,15 +657,7 @@ export default function PlayPage() {
                     )}
                   </form>
 
-                  <button 
-                    type="button"
-                    onClick={handleHint}
-                    disabled={pixelSize <= 5 || gameStatus !== 'playing'}
-                    className="w-full flex items-center justify-center gap-3 bg-white hover:bg-zinc-100 hover:translate-y-1 hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] disabled:opacity-50 border-4 border-black rounded-none py-3 sm:py-4 transition-all text-base sm:text-lg font-black text-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] uppercase"
-                  >
-                    <Eye className="w-5 h-5 sm:w-6 sm:h-6" />
-                    Reduce Pixelation (-20 Points)
-                  </button>
+                  
                 </div>
               </div>
             )}
