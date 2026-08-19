@@ -255,7 +255,7 @@ export default function PlayPage() {
 
   const handleTimeOut = () => {
     setGameStatus('wrong');
-    gsap.to('.logo-container canvas', { filter: 'grayscale(100%) opacity(50%)', duration: 0.5 });
+    // No grayscale filter wanted
     setTimeout(handleNext, 800);
   };
 
