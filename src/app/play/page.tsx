@@ -322,9 +322,13 @@ export default function PlayPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: playerName, email: playerEmail, score: totalScore })
       })
+      .then(res => res.json())
+      .then(data => {
+        if (data.rank) setFinalRank(data.rank);
+        if (data.percentile) setFinalPercentile(data.percentile);
+      })
       .catch(console.error)
       .finally(() => {
-        // Simulate a tiny bit of extra loading so the user actually sees the beautiful animation
         setTimeout(() => setIsSubmitting(false), 1500);
       });
     }
