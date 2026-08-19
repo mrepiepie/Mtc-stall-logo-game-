@@ -317,6 +317,7 @@ export default function PlayPage() {
   };
 
   const handleNext = () => {
+    setNextTimer(null);
     setCurrentIndex(prev => {
       if (prev < logos.length - 1) {
         setPixelSize(12);
@@ -725,6 +726,7 @@ export default function PlayPage() {
     </div>
   );
 }
+
 
 
 
