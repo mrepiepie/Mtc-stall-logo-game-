@@ -62,7 +62,7 @@ export default function PlayPage() {
   // Game State
   const [logos, setLogos] = useState<typeof LOGOS>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [pixelSize, setPixelSize] = useState(30);
+  const [pixelSize, setPixelSize] = useState(12);
   const [logoPoints, setLogoPoints] = useState(100);
 
     useEffect(() => {
@@ -222,7 +222,7 @@ export default function PlayPage() {
       setTimeLeft(prev => {
         const newTime = prev - 1;
         if (newTime <= 5) {
-          setPixelSize(p => Math.max(1, p - 6));
+          setPixelSize(p => Math.max(1, p - 2));
         }
         return newTime;
       });
@@ -297,7 +297,7 @@ export default function PlayPage() {
   const handleNext = () => {
     setCurrentIndex(prev => {
       if (prev < logos.length - 1) {
-        setPixelSize(30);
+        setPixelSize(12);
         setLogoPoints(logos[prev + 1]?.points || 100);
         setTimeLeft(TIMER_SECONDS);
         setGuess('');
