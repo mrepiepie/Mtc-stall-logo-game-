@@ -269,7 +269,8 @@ export default function PlayPage() {
   const handleTimeOut = () => {
     setGameStatus('wrong');
     // No grayscale filter wanted
-    setPixelSize(1);`n    setNextTimer(3);
+    setPixelSize(1);
+    setNextTimer(3);
   };
 
   const handleGuess = (e?: React.FormEvent, explicitGuess?: string) => {
