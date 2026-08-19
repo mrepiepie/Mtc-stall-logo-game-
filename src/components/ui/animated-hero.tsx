@@ -69,6 +69,12 @@ function AnimatedHero() {
           >
             Start Run <MoveRight className="w-5 h-5" />
           </button>
+          <button
+            onClick={() => router.push('/admin')}
+            className="bg-white text-black font-bold text-base px-10 py-4 border-4 border-black shadow-[4px_4px_0px_0px_rgba(255,255,255,1)] hover:translate-y-1 hover:translate-x-1 hover:shadow-[2px_2px_0px_0px_rgba(255,255,255,1)] transition-all flex items-center gap-3 uppercase tracking-wider"
+          >
+            Admin <MoveRight className="w-5 h-5" />
+          </button>
         </div>
         
         {/* MTC Promotion Box - Brutalist Dark */}
