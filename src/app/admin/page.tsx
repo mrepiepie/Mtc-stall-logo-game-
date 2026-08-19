@@ -7,6 +7,7 @@ import {
   Check,
   ClipboardList,
   CloudUpload,
+  Copy,
   Gamepad2,
   Image as ImageIcon,
   KeyRound,
@@ -23,6 +24,13 @@ type Question = {
   answer: string;
   image_url: string | null;
   difficulty: string;
+};
+
+type CreatedGame = {
+  gamePin: number;
+  round: number;
+  status: string;
+  questions: Question[];
 };
 
 async function loadQuestions() {
@@ -54,6 +62,10 @@ function AdminDashboard() {
   const [isSavingEdit, setIsSavingEdit] = useState(false);
   const [deleteConfirmationId, setDeleteConfirmationId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [createdGame, setCreatedGame] = useState<CreatedGame | null>(null);
+  const [isCreatingGame, setIsCreatingGame] = useState(false);
+  const [gameError, setGameError] = useState("");
+  const [isPinCopied, setIsPinCopied] = useState(false);
 
   const stats = [
     { label: "Total Questions", value: questions.length, icon: ClipboardList },
@@ -236,6 +248,38 @@ function AdminDashboard() {
     }
   };
 
+  const handleCreateGame = async () => {
+    setGameError("");
+    setIsPinCopied(false);
+    setIsCreatingGame(true);
+
+    try {
+      const response = await fetch("/api/games/create", { method: "POST" });
+      const result = await response.json().catch(() => null);
+
+      if (!response.ok || !result?.success || typeof result.gamePin !== "number" || !Array.isArray(result.questions)) {
+        throw new Error("Game creation failed");
+      }
+
+      setCreatedGame({
+        gamePin: result.gamePin,
+        round: result.round,
+        status: "waiting",
+        questions: result.questions as Question[],
+      });
+    } catch {
+      setGameError("Unable to create game. Please try again.");
+    } finally {
+      setIsCreatingGame(false);
+    }
+  };
+
+  const handleCopyPin = async () => {
+    if (!createdGame) return;
+    await navigator.clipboard.writeText(String(createdGame.gamePin));
+    setIsPinCopied(true);
+  };
+
   return (
     <main className="relative min-h-screen overflow-hidden bg-[#111111] px-4 py-6 text-white sm:px-6 lg:px-10 lg:py-8">
       <div className="pointer-events-none absolute inset-0 z-0 bg-[radial-gradient(#333_2px,transparent_2px)] bg-[size:24px_24px]" />
@@ -415,25 +459,54 @@ function AdminDashboard() {
           </div>
         </section>
 
-        <section className="mt-12 border-4 border-dashed border-[#555] bg-black/60 p-5 sm:p-7" aria-labelledby="game-rounds-heading">
-          <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
+        <section className="mt-12 border-4 border-black bg-[#f4f0e6] p-5 text-black shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] sm:p-7" aria-labelledby="game-rounds-heading">
+          <div className="flex flex-col gap-5 border-b-4 border-black pb-5 sm:flex-row sm:items-start sm:justify-between">
             <div>
-              <p className="mb-1 font-mono text-xs font-bold uppercase tracking-[0.25em] text-[#4fc3f7]">02 / Coming Soon</p>
-              <h2 id="game-rounds-heading" className="text-3xl font-black uppercase tracking-tight text-white">Game Rounds</h2>
-              <p className="mt-2 max-w-2xl font-bold leading-relaxed text-zinc-400">
-                The launch bay for live Byte Blitz sessions. Create a game, generate a unique 6-digit PIN, start a round, and send ten randomized questions into play.
-              </p>
+              <p className="mb-1 font-mono text-xs font-bold uppercase tracking-[0.25em] text-red-600">02 / Host Controls</p>
+              <h2 id="game-rounds-heading" className="text-3xl font-black uppercase tracking-tight">Game Rounds</h2>
+              <p className="mt-2 max-w-2xl font-bold leading-relaxed text-zinc-600">Create a waiting room with ten randomized questions for your next Byte Blitz round.</p>
             </div>
-            <Gamepad2 className="h-12 w-12 shrink-0 text-zinc-600" />
+            <Gamepad2 className="h-12 w-12 shrink-0 text-red-600" />
           </div>
-          <div className="mt-6 grid gap-3 text-xs font-black uppercase tracking-widest text-zinc-500 sm:grid-cols-3">
-            <div className="border-2 border-[#444] px-4 py-3">Create a game</div>
-            <div className="border-2 border-[#444] px-4 py-3">Generate 6-digit PIN</div>
-            <div className="border-2 border-[#444] px-4 py-3">Start 10-question round</div>
+
+          <div className="mt-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <button type="button" onClick={handleCreateGame} disabled={isCreatingGame} className="flex items-center justify-center gap-2 border-4 border-black bg-red-600 px-5 py-4 text-sm font-black uppercase tracking-widest text-white shadow-[5px_5px_0px_0px_rgba(0,0,0,1)] transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-none disabled:cursor-not-allowed disabled:opacity-60">
+              <Plus className="h-5 w-5" />
+              {isCreatingGame ? "Creating..." : "Create New Game"}
+            </button>
+            {gameError && <p role="alert" className="border-2 border-black bg-red-600 px-3 py-2 text-center text-xs font-black uppercase tracking-widest text-white">{gameError}</p>}
           </div>
-          <button type="button" disabled className="mt-6 border-4 border-[#444] px-5 py-3 text-xs font-black uppercase tracking-widest text-zinc-600">
-            Game Controls Locked for Now
-          </button>
+
+          {createdGame && (
+            <div className="mt-5 border-4 border-black bg-white p-4 shadow-[5px_5px_0px_0px_rgba(0,0,0,1)]">
+              <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_repeat(3,auto)] sm:items-center">
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">Game PIN</p>
+                  <p className="font-mono text-5xl font-black tracking-[0.12em] text-red-600">{createdGame.gamePin}</p>
+                </div>
+                <div><p className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Questions</p><p className="font-mono text-2xl font-black">{createdGame.questions.length}</p></div>
+                <div><p className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Round</p><p className="font-mono text-2xl font-black">{createdGame.round}</p></div>
+                <div><p className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Status</p><p className="font-black uppercase text-[#008f5a]">Waiting</p></div>
+                <button type="button" onClick={handleCopyPin} className="flex items-center justify-center gap-2 border-2 border-black bg-[#f4f0e6] px-3 py-2 text-xs font-black uppercase tracking-widest transition-colors hover:bg-yellow-300 sm:col-start-2">
+                  <Copy className="h-4 w-4" />
+                  {isPinCopied ? "Copied" : "Copy PIN"}
+                </button>
+              </div>
+
+              <div className="mt-4 grid gap-2 border-t-2 border-black/20 pt-4 sm:grid-cols-2">
+                {createdGame.questions.map((question, index) => (
+                  <div key={question.id} className="flex min-w-0 items-center gap-3 border-2 border-black/10 p-2">
+                    <span className="font-mono text-xs font-black text-red-600">{String(index + 1).padStart(2, "0")}</span>
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center border-2 border-black bg-[#f4f0e6] p-1">
+                      {question.image_url ? <img src={question.image_url} alt="" className="h-full w-full object-contain" /> : <ImageIcon className="h-4 w-4 text-zinc-400" />}
+                    </div>
+                    <span className="min-w-0 flex-1 truncate font-bold uppercase">{question.answer}</span>
+                    <span className="border-2 border-black bg-yellow-300 px-2 py-1 text-[10px] font-black uppercase">{question.difficulty}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </section>
       </div>
     </main>
