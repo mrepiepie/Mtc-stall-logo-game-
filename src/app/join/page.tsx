@@ -38,11 +38,7 @@ export default function JoinPage() {
       setStep('waiting');
       gsap.fromTo('.waiting-container', { opacity: 0, scale: 0.9 }, { opacity: 1, scale: 1, duration: 0.4, ease: 'back.out(1.2)' });
       
-      // PROTOTYPE ONLY: Fake the host starting the game after 4 seconds
-      setTimeout(() => {
-        setStep('playing');
-        gsap.fromTo('.playing-container', { opacity: 0, y: 50 }, { opacity: 1, y: 0, duration: 0.5, ease: 'power3.out' });
-      }, 4000);
+      
 
     }, 800);
   };
