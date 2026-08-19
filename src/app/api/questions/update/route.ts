@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabase";
 
-export async function POST(request: Request) {
+export async function PUT(request: Request) {
   let body: unknown;
 
   try {
@@ -20,31 +20,32 @@ export async function POST(request: Request) {
     );
   }
 
-  const { answer, image_url, difficulty } = body as {
+  const { id, answer, image_url, difficulty } = body as {
+    id?: unknown;
     answer?: unknown;
     image_url?: unknown;
     difficulty?: unknown;
   };
 
-  if (typeof answer !== "string" || !answer.trim()) {
+  if (
+    typeof id !== "string" ||
+    !id.trim() ||
+    typeof answer !== "string" ||
+    !answer.trim() ||
+    typeof image_url !== "string" ||
+    !image_url.trim()
+  ) {
     return NextResponse.json(
-      { success: false, error: "Answer is required" },
-      { status: 400 },
-    );
-  }
-
-  if (typeof image_url !== "string" || !image_url.trim()) {
-    return NextResponse.json(
-      { success: false, error: "Image URL is required" },
+      { success: false, error: "Invalid request body" },
       { status: 400 },
     );
   }
 
   const normalizedDifficulty = typeof difficulty === "string" ? difficulty.trim().toLowerCase() : "";
 
-  if (!normalizedDifficulty || !["easy", "medium", "hard"].includes(normalizedDifficulty)) {
+  if (!['easy', 'medium', 'hard'].includes(normalizedDifficulty)) {
     return NextResponse.json(
-      { success: false, error: "Difficulty must be easy, medium, or hard" },
+      { success: false, error: "Invalid difficulty" },
       { status: 400 },
     );
   }
@@ -53,25 +54,33 @@ export async function POST(request: Request) {
     const supabase = createServerSupabaseClient();
     const { data, error } = await supabase
       .from("questions")
-      .insert({
+      .update({
         answer: answer.trim().toLowerCase(),
         image_url: image_url.trim(),
         difficulty: normalizedDifficulty,
       })
+      .eq("id", id.trim())
       .select()
-      .single();
+      .maybeSingle();
 
     if (error) {
       return NextResponse.json(
-        { success: false, error: "Failed to create question" },
+        { success: false, error: "Failed to update question" },
         { status: 500 },
       );
     }
 
-    return NextResponse.json({ success: true, question: data }, { status: 201 });
+    if (!data) {
+      return NextResponse.json(
+        { success: false, error: "Question not found" },
+        { status: 404 },
+      );
+    }
+
+    return NextResponse.json({ success: true, question: data });
   } catch {
     return NextResponse.json(
-      { success: false, error: "Failed to create question" },
+      { success: false, error: "Failed to update question" },
       { status: 500 },
     );
   }

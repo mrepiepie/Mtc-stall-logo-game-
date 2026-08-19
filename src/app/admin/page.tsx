@@ -1,11 +1,10 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
 import {
   ArrowLeft,
   Check,
-  ChevronDown,
   ClipboardList,
   CloudUpload,
   Gamepad2,
@@ -14,62 +13,75 @@ import {
   Pencil,
   Plus,
   Trash2,
-  Type,
+  X,
 } from "lucide-react";
 
 const ADMIN_ACCESS_KEY = "MTC123";
 
-const questions = [
-  {
-    type: "IMAGE",
-    text: "Which brand uses the bitten apple logo?",
-    answer: "Apple",
-    points: 100,
-  },
-  {
-    type: "TEXT",
-    text: "What does HTML stand for?",
-    answer: "HyperText Markup Language",
-    points: 150,
-  },
-  {
-    type: "IMAGE",
-    text: "Identify the three-stripe sportswear brand.",
-    answer: "Adidas",
-    points: 100,
-  },
-  {
-    type: "TEXT",
-    text: "Which company created the Windows operating system?",
-    answer: "Microsoft",
-    points: 200,
-  },
-];
+type Question = {
+  id: string;
+  answer: string;
+  image_url: string | null;
+  difficulty: string;
+};
 
-const stats = [
-  { label: "Total Questions", value: "24", icon: ClipboardList },
-  { label: "Image Questions", value: "14", icon: ImageIcon },
-  { label: "Text Questions", value: "10", icon: Type },
-];
+async function loadQuestions() {
+  const response = await fetch("/api/questions");
+  const result = await response.json().catch(() => null);
+
+  if (!response.ok || !result?.success || !Array.isArray(result.questions)) {
+    throw new Error("Questions could not be loaded");
+  }
+
+  return result.questions as Question[];
+}
 
 function AdminDashboard() {
-  const [questionType, setQuestionType] = useState("TEXT");
-  const [questionText, setQuestionText] = useState("");
+  const [questions, setQuestions] = useState<Question[]>([]);
+  const [isLoadingQuestions, setIsLoadingQuestions] = useState(true);
+  const [questionsError, setQuestionsError] = useState("");
+  const [imageUrl, setImageUrl] = useState("");
   const [answer, setAnswer] = useState("");
-  const [points, setPoints] = useState("100");
+  const [difficulty, setDifficulty] = useState("medium");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formMessage, setFormMessage] = useState("");
   const [formError, setFormError] = useState("");
+  const [editingQuestionId, setEditingQuestionId] = useState<string | null>(null);
+  const [editAnswer, setEditAnswer] = useState("");
+  const [editImageUrl, setEditImageUrl] = useState("");
+  const [editDifficulty, setEditDifficulty] = useState("medium");
+  const [isSavingEdit, setIsSavingEdit] = useState(false);
+  const [deleteConfirmationId, setDeleteConfirmationId] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const stats = [
+    { label: "Total Questions", value: questions.length, icon: ClipboardList },
+    {
+      label: "Questions With Images",
+      value: questions.filter((question) => Boolean(question.image_url?.trim())).length,
+      icon: ImageIcon,
+    },
+  ];
+
+  useEffect(() => {
+    const fetchQuestions = async () => {
+      try {
+        setQuestionsError("");
+        setQuestions(await loadQuestions());
+      } catch {
+        setQuestionsError("Unable to load questions. Please try again.");
+      } finally {
+        setIsLoadingQuestions(false);
+      }
+    };
+
+    fetchQuestions();
+  }, []);
 
   const handleQuestionSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setFormMessage("");
     setFormError("");
-
-    if (questionType !== "TEXT") {
-      setFormError("Image questions are not supported yet.");
-      return;
-    }
 
     setIsSubmitting(true);
 
@@ -78,9 +90,9 @@ function AdminDashboard() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          question_text: questionText,
           answer,
-          points: Number(points),
+          image_url: imageUrl,
+          difficulty,
         }),
       });
 
@@ -90,14 +102,93 @@ function AdminDashboard() {
         throw new Error("Question creation failed");
       }
 
-      setQuestionText("");
+      setImageUrl("");
       setAnswer("");
-      setPoints("");
+      setDifficulty("medium");
+      setQuestionsError("");
+      setQuestions(await loadQuestions());
       setFormMessage("Question added successfully.");
     } catch {
       setFormError("Unable to add question. Please try again.");
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const startEditing = (question: Question) => {
+    setDeleteConfirmationId(null);
+    setEditingQuestionId(question.id);
+    setEditAnswer(question.answer);
+    setEditImageUrl(question.image_url ?? "");
+    setEditDifficulty(question.difficulty);
+    setFormMessage("");
+    setFormError("");
+  };
+
+  const cancelEditing = () => {
+    setEditingQuestionId(null);
+    setEditAnswer("");
+    setEditImageUrl("");
+    setEditDifficulty("medium");
+  };
+
+  const handleEditSubmit = async (event: FormEvent<HTMLFormElement>, id: string) => {
+    event.preventDefault();
+    setFormMessage("");
+    setFormError("");
+    setIsSavingEdit(true);
+
+    try {
+      const response = await fetch("/api/questions/update", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id,
+          answer: editAnswer,
+          image_url: editImageUrl,
+          difficulty: editDifficulty,
+        }),
+      });
+      const result = await response.json().catch(() => null);
+
+      if (!response.ok || !result?.success) {
+        throw new Error("Question update failed");
+      }
+
+      setQuestions(await loadQuestions());
+      cancelEditing();
+      setFormMessage("Question updated successfully.");
+    } catch {
+      setFormError("Unable to update question. Please try again.");
+    } finally {
+      setIsSavingEdit(false);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    setFormMessage("");
+    setFormError("");
+    setIsDeleting(true);
+
+    try {
+      const response = await fetch("/api/questions/delete", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id }),
+      });
+      const result = await response.json().catch(() => null);
+
+      if (!response.ok || !result?.success) {
+        throw new Error("Question deletion failed");
+      }
+
+      setQuestions(await loadQuestions());
+      setDeleteConfirmationId(null);
+      setFormMessage("Question deleted successfully.");
+    } catch {
+      setFormError("Unable to delete question. Please try again.");
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -156,8 +247,8 @@ function AdminDashboard() {
             ))}
           </div>
 
-          <div className="grid gap-8 xl:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]">
-            <section className="border-4 border-black bg-[#f4f0e6] text-black shadow-[10px_10px_0px_0px_rgba(0,0,0,1)]">
+          <div className="grid items-start gap-8 xl:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]">
+            <section className="self-start border-4 border-black bg-[#f4f0e6] text-black shadow-[10px_10px_0px_0px_rgba(0,0,0,1)]">
               <div className="flex items-center justify-between border-b-4 border-black bg-black p-4 text-white">
                 <div>
                   <p className="font-mono text-[10px] font-bold uppercase tracking-[0.25em] text-red-500">Create</p>
@@ -168,47 +259,37 @@ function AdminDashboard() {
 
               <form onSubmit={handleQuestionSubmit} className="space-y-5 p-5 sm:p-6">
                 <label className="block">
-                  <span className="mb-2 block text-xs font-black uppercase tracking-widest">Question Type</span>
-                  <span className="relative block">
-                    <select value={questionType} onChange={(event) => setQuestionType(event.target.value)} className="w-full appearance-none border-4 border-black bg-white px-4 py-3 font-black uppercase tracking-wider outline-none focus:bg-yellow-100">
-                      <option>TEXT</option>
-                      <option>IMAGE</option>
-                    </select>
-                    <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-5 w-5 -translate-y-1/2" />
-                  </span>
-                </label>
-
-                <label className="block">
-                  <span className="mb-2 block text-xs font-black uppercase tracking-widest">Question Text</span>
-                  <textarea
-                    rows={3}
-                    placeholder="Write the prompt for players..."
-                    value={questionText}
-                    onChange={(event) => setQuestionText(event.target.value)}
-                    className="w-full resize-none border-4 border-black bg-white px-4 py-3 font-bold outline-none placeholder:text-zinc-400 focus:bg-yellow-100"
+                  <span className="mb-2 block text-xs font-black uppercase tracking-widest">Logo Image Question</span>
+                  <input
+                    type="url"
+                    placeholder="https://example.com/logo.png"
+                    value={imageUrl}
+                    onChange={(event) => setImageUrl(event.target.value)}
+                    className="w-full border-4 border-black bg-white px-4 py-3 font-bold outline-none placeholder:text-zinc-400 focus:bg-yellow-100"
                   />
                 </label>
 
                 <div>
-                  <span className="mb-2 block text-xs font-black uppercase tracking-widest">Question Image</span>
-                  <div className="flex min-h-32 flex-col items-center justify-center border-4 border-dashed border-black bg-white p-5 text-center transition-colors hover:bg-yellow-100">
+                  <span className="mb-2 block text-xs font-black uppercase tracking-widest">Image Preview Area</span>
+                  <div className="flex min-h-24 flex-col items-center justify-center border-4 border-dashed border-black bg-white p-5 text-center">
                     <CloudUpload className="mb-2 h-8 w-8 text-red-600" />
-                    <p className="font-black uppercase tracking-wider">Drag & drop image here</p>
-                    <p className="mt-1 text-xs font-bold text-zinc-500">or select a file from your device</p>
-                    <button type="button" className="mt-4 border-2 border-black bg-black px-4 py-2 text-xs font-black uppercase tracking-widest text-white transition-transform hover:translate-x-1 hover:translate-y-1">
-                      Choose Image
-                    </button>
+                    <p className="font-black uppercase tracking-wider">URL-based image questions</p>
+                    <p className="mt-1 text-xs font-bold text-zinc-500">Local image uploading will be added later.</p>
                   </div>
                 </div>
 
                 <div className="grid gap-5 sm:grid-cols-[minmax(0,1fr)_8rem]">
                   <label className="block">
-                    <span className="mb-2 block text-xs font-black uppercase tracking-widest">Correct Answer</span>
+                    <span className="mb-2 block text-xs font-black uppercase tracking-widest">Answer</span>
                     <input type="text" placeholder="e.g. Microsoft" value={answer} onChange={(event) => setAnswer(event.target.value)} className="w-full border-4 border-black bg-white px-4 py-3 font-bold outline-none placeholder:text-zinc-400 focus:bg-yellow-100" />
                   </label>
                   <label className="block">
-                    <span className="mb-2 block text-xs font-black uppercase tracking-widest">Points</span>
-                    <input type="number" value={points} onChange={(event) => setPoints(event.target.value)} min={1} className="w-full border-4 border-black bg-white px-4 py-3 font-mono font-bold outline-none focus:bg-yellow-100" />
+                    <span className="mb-2 block text-xs font-black uppercase tracking-widest">Difficulty</span>
+                    <select value={difficulty} onChange={(event) => setDifficulty(event.target.value)} className="w-full border-4 border-black bg-white px-3 py-3 font-black uppercase outline-none focus:bg-yellow-100">
+                      <option value="easy">Easy</option>
+                      <option value="medium">Medium</option>
+                      <option value="hard">Hard</option>
+                    </select>
                   </label>
                 </div>
 
@@ -227,28 +308,65 @@ function AdminDashboard() {
                   <p className="font-mono text-[10px] font-bold uppercase tracking-[0.25em] text-red-500">Manage</p>
                   <h3 className="text-xl font-black uppercase tracking-widest">Saved Questions</h3>
                 </div>
-                <span className="border-2 border-white px-2 py-1 font-mono text-xs font-bold">04 ITEMS</span>
+                <span className="border-2 border-white px-2 py-1 font-mono text-xs font-bold">{questions.length} ITEMS</span>
               </div>
 
-              <div className="overflow-x-auto">
-                <div className="min-w-[700px]">
-                  <div className="grid grid-cols-[5.5rem_minmax(16rem,1fr)_minmax(10rem,0.7fr)_5rem_7.5rem] gap-3 border-b-2 border-black/20 bg-black/5 px-4 py-3 text-[10px] font-black uppercase tracking-widest text-zinc-600">
-                    <span>Type</span><span>Question</span><span>Answer</span><span>Pts</span><span>Actions</span>
-                  </div>
-                  {questions.map((question) => (
-                    <div key={question.text} className="grid grid-cols-[5.5rem_minmax(16rem,1fr)_minmax(10rem,0.7fr)_5rem_7.5rem] items-center gap-3 border-b-2 border-black/10 px-4 py-4 text-sm last:border-0 hover:bg-black/5">
-                      <span className={`w-fit border-2 border-black px-2 py-1 text-[10px] font-black tracking-widest ${question.type === "IMAGE" ? "bg-yellow-300" : "bg-white"}`}>
-                        {question.type}
-                      </span>
-                      <span className="font-bold leading-tight">{question.text}</span>
-                      <span className="font-bold text-zinc-600">{question.answer}</span>
-                      <span className="font-mono font-black">{question.points}</span>
-                      <span className="flex gap-2">
-                        <button type="button" aria-label={`Edit ${question.text}`} className="border-2 border-black bg-white p-2 transition-colors hover:bg-yellow-300"><Pencil className="h-4 w-4" /></button>
-                        <button type="button" aria-label={`Delete ${question.text}`} className="border-2 border-black bg-red-600 p-2 text-white transition-colors hover:bg-red-700"><Trash2 className="h-4 w-4" /></button>
-                      </span>
-                    </div>
-                  ))}
+              <div className="w-full min-w-0 overflow-hidden">
+                <div className="w-full min-w-0">
+                  {isLoadingQuestions ? (
+                    <p className="p-10 text-center text-sm font-black uppercase tracking-widest text-zinc-600">Loading questions...</p>
+                  ) : questionsError ? (
+                    <p role="alert" className="p-10 text-center text-sm font-black uppercase tracking-widest text-red-600">{questionsError}</p>
+                  ) : questions.length === 0 ? (
+                    <p className="p-10 text-center text-sm font-black uppercase tracking-widest text-zinc-600">No questions found.</p>
+                  ) : (
+                    <>
+                      <div className="hidden grid-cols-[3.5rem_minmax(0,1.2fr)_minmax(0,1fr)_5.5rem_8rem] gap-3 border-b-2 border-black/20 bg-black/5 px-4 py-3 text-[10px] font-black uppercase tracking-widest text-zinc-600 sm:grid">
+                        <span>Image</span><span>Image URL</span><span>Answer</span><span>Difficulty</span><span>Actions</span>
+                      </div>
+                      {questions.map((question) => (
+                        editingQuestionId === question.id ? (
+                          <form key={question.id} onSubmit={(event) => handleEditSubmit(event, question.id)} className="grid min-w-0 grid-cols-1 gap-3 border-b-2 border-black/10 bg-yellow-100 px-4 py-4 text-sm last:border-0 sm:grid-cols-[3.5rem_minmax(0,1.2fr)_minmax(0,1fr)_5.5rem_8rem] sm:items-center">
+                            <div className="flex h-12 w-12 items-center justify-center border-2 border-black bg-white p-1">
+                              {editImageUrl ? <img src={editImageUrl} alt="" className="h-full w-full object-contain" /> : <ImageIcon className="h-5 w-5 text-zinc-400" />}
+                            </div>
+                            <input type="url" value={editImageUrl} onChange={(event) => setEditImageUrl(event.target.value)} className="min-w-0 w-full border-2 border-black bg-white px-2 py-2 font-mono text-xs outline-none focus:bg-yellow-200" aria-label="Image URL" />
+                            <input type="text" value={editAnswer} onChange={(event) => setEditAnswer(event.target.value)} className="min-w-0 w-full border-2 border-black bg-white px-2 py-2 font-bold outline-none focus:bg-yellow-200" aria-label="Answer" />
+                            <select value={editDifficulty} onChange={(event) => setEditDifficulty(event.target.value)} className="min-w-0 w-full border-2 border-black bg-white px-2 py-2 font-black uppercase outline-none focus:bg-yellow-200" aria-label="Difficulty">
+                              <option value="easy">Easy</option>
+                              <option value="medium">Medium</option>
+                              <option value="hard">Hard</option>
+                            </select>
+                            <span className="flex min-w-0 gap-2 whitespace-nowrap">
+                              <button type="submit" disabled={isSavingEdit} className="border-2 border-black bg-red-600 px-3 py-2 text-xs font-black uppercase tracking-widest text-white disabled:cursor-not-allowed disabled:opacity-60">{isSavingEdit ? "Saving..." : "Save"}</button>
+                              <button type="button" disabled={isSavingEdit} onClick={cancelEditing} className="border-2 border-black bg-white p-2 disabled:cursor-not-allowed disabled:opacity-60" aria-label="Cancel edit"><X className="h-4 w-4" /></button>
+                            </span>
+                          </form>
+                        ) : (
+                          <div key={question.id} className="grid min-w-0 grid-cols-1 gap-3 border-b-2 border-black/10 px-4 py-4 text-sm last:border-0 hover:bg-black/5 sm:grid-cols-[3.5rem_minmax(0,1.2fr)_minmax(0,1fr)_5.5rem_8rem] sm:items-center">
+                            <div className="flex h-12 w-12 items-center justify-center border-2 border-black bg-white p-1">
+                              {question.image_url ? <img src={question.image_url} alt="" className="h-full w-full object-contain" /> : <ImageIcon className="h-5 w-5 text-zinc-400" />}
+                            </div>
+                            <span className="min-w-0 truncate font-mono text-xs font-bold text-zinc-600">{question.image_url || "No image URL"}</span>
+                            <span className="min-w-0 truncate font-bold leading-tight">{question.answer}</span>
+                            <span className="w-fit border-2 border-black bg-yellow-300 px-2 py-1 text-[10px] font-black uppercase tracking-widest">{question.difficulty}</span>
+                            {deleteConfirmationId === question.id ? (
+                              <span className="flex min-w-0 items-center gap-2 whitespace-nowrap">
+                                <span className="min-w-0 text-[10px] font-black uppercase leading-tight text-red-600">Permanently remove?</span>
+                                <button type="button" disabled={isDeleting} onClick={() => handleDelete(question.id)} className="border-2 border-black bg-red-600 p-2 text-white disabled:cursor-not-allowed disabled:opacity-60" aria-label="Confirm delete">{isDeleting ? "..." : <Check className="h-4 w-4" />}</button>
+                                <button type="button" disabled={isDeleting} onClick={() => setDeleteConfirmationId(null)} className="border-2 border-black bg-white p-2 disabled:cursor-not-allowed disabled:opacity-60" aria-label="Cancel delete"><X className="h-4 w-4" /></button>
+                              </span>
+                            ) : (
+                              <span className="flex min-w-0 gap-2 whitespace-nowrap">
+                                <button type="button" disabled={deleteConfirmationId !== null} onClick={() => startEditing(question)} className="border-2 border-black bg-white p-2 transition-colors hover:bg-yellow-300 disabled:cursor-not-allowed disabled:opacity-50" aria-label={`Edit ${question.answer}`}><Pencil className="h-4 w-4" /></button>
+                                <button type="button" disabled={editingQuestionId !== null} onClick={() => setDeleteConfirmationId(question.id)} className="border-2 border-black bg-red-600 p-2 text-white transition-colors hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50" aria-label={`Delete ${question.answer}`}><Trash2 className="h-4 w-4" /></button>
+                              </span>
+                            )}
+                          </div>
+                        )
+                      ))}
+                    </>
+                  )}
                 </div>
               </div>
             </section>
