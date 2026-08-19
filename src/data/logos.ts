@@ -1,77 +1,62 @@
 export const LOGOS = [
-  {
-    "name": "Apple",
-    "url": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgZmlsbD0iIzAwMDAwMCIgcm9sZT0iaW1nIiB2aWV3Qm94PSIwIDAgMjQgMjQiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHRpdGxlPkFwcGxlPC90aXRsZT48cGF0aCBkPSJNMTIuMTUyIDYuODk2Yy0uOTQ4IDAtMi40MTUtMS4wNzgtMy45Ni0xLjA0LTIuMDQuMDI3LTMuOTEgMS4xODMtNC45NjEgMy4wMTQtMi4xMTcgMy42NzUtLjU0NiA5LjEwMyAxLjUxOSAxMi4wOSAxLjAxMyAxLjQ1NCAyLjIwOCAzLjA5IDMuNzkyIDMuMDM5IDEuNTItLjA2NSAyLjA5LS45ODcgMy45MzUtLjk4NyAxLjgzMSAwIDIuMzUuOTg3IDMuOTYuOTQ4IDEuNjM3LS4wMjYgMi42NzYtMS40OCAzLjY3Ni0yLjk0OCAxLjE1Ni0xLjY4OCAxLjYzNi0zLjMyNSAxLjY2Mi0zLjQxNS0uMDM5LS4wMTMtMy4xODItMS4yMjEtMy4yMi00Ljg1Ny0uMDI2LTMuMDQgMi40OC00LjQ5NCAyLjU5Ny00LjU1OS0xLjQyOS0yLjA5LTMuNjIzLTIuMzI0LTQuMzktMi4zNzYtMi0uMTU2LTMuNjc1IDEuMDktNC42MSAxLjA5ek0xNS41MyAzLjgzYy44NDMtMS4wMTIgMS40LTIuNDI3IDEuMjQ1LTMuODMtMS4yMDcuMDUyLTIuNjYyLjgwNS0zLjUzMiAxLjgxOC0uNzguODk2LTEuNDU0IDIuMzM4LTEuMjczIDMuNzE0IDEuMzM4LjEwNCAyLjcxNS0uNjg4IDMuNTU5LTEuNzAxIi8+PC9zdmc+",
-    "points": 150
-  },
-  {
-    "name": "Google",
-    "url": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgZmlsbD0iIzQyODVGNCIgcm9sZT0iaW1nIiB2aWV3Qm94PSIwIDAgMjQgMjQiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHRpdGxlPkdvb2dsZTwvdGl0bGU+PHBhdGggZD0iTTEyLjQ4IDEwLjkydjMuMjhoNy44NGMtLjI0IDEuODQtLjg1MyAzLjE4Ny0xLjc4NyA0LjEzMy0xLjE0NyAxLjE0Ny0yLjkzMyAyLjQtNi4wNTMgMi40LTQuODI3IDAtOC42LTMuODkzLTguNi04LjcyczMuNzczLTguNzIgOC42LTguNzJjMi42IDAgNC41MDcgMS4wMjcgNS45MDcgMi4zNDdsMi4zMDctMi4zMDdDMTguNzQ3IDEuNDQgMTYuMTMzIDAgMTIuNDggMCA1Ljg2NyAwIC4zMDcgNS4zODcuMzA3IDEyczUuNTYgMTIgMTIuMTczIDEyYzMuNTczIDAgNi4yNjctMS4xNzMgOC4zNzMtMy4zNiAyLjE2LTIuMTYgMi44NC01LjIxMyAyLjg0LTcuNjY3IDAtLjc2LS4wNTMtMS40NjctLjE3My0yLjA1M0gxMi40OHoiLz48L3N2Zz4=",
-    "points": 50
-  },
-  {
-    "name": "McDonalds",
-    "url": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgZmlsbD0iI0ZGQzcyQyIgcm9sZT0iaW1nIiB2aWV3Qm94PSIwIDAgMjQgMjQiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHRpdGxlPk1jRG9uYWxkJ3M8L3RpdGxlPjxwYXRoIGQ9Ik0xNy4yNDMgMy4wMDZjMi4wNjYgMCAzLjc0MiA4LjcxNCAzLjc0MiAxOS40NzhIMjRjMC0xMS41ODgtMy4wNDItMjAuOTY4LTYuNzY2LTIwLjk2OC0yLjEyNyAwLTQuMDA3IDIuODEtNS4yNDggNy4yMjctMS4yNDEtNC40MTYtMy4xMjEtNy4yMjctNS4yMzEtNy4yMjdDMy4wMzEgMS41MTYgMCAxMC44ODggMCAyMi40NzZoMy4wMTRjMC0xMC43NjMgMS42NTgtMTkuNDcgMy43MjQtMTkuNDcgMi4wNjYgMCAzLjc0MSA4LjA1IDMuNzQxIDE3Ljk4aDIuOTk3YzAtOS45MyAxLjY4NC0xNy45OCAzLjc1LTE3Ljk4WiIvPjwvc3ZnPg==",
-    "points": 100
-  },
-  {
-    "name": "Nike",
-    "url": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgZmlsbD0iIzAwMDAwMCIgcm9sZT0iaW1nIiB2aWV3Qm94PSIwIDAgMjQgMjQiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHRpdGxlPk5pa2U8L3RpdGxlPjxwYXRoIGQ9Ik0yNCA3LjhMNi40NDIgMTUuMjc2Yy0xLjQ1Ni42MTYtMi42NzkuOTI1LTMuNjY4LjkyNS0xLjEyIDAtMS45MzMtLjM5Mi0yLjQzNy0xLjE3Ny0uMzE3LS41MDQtLjQxLTEuMTQzLS4yOC0xLjkxOC4xMy0uNzc1LjQ3Ni0xLjYgMS4wMzYtMi40NzguNDY3LS43MSAxLjIzMi0xLjY0MyAyLjI5Ny0yLjhhNi4xMjIgNi4xMjIgMCAwMC0uNzg0IDEuODQ4Yy0uMjggMS4xOTUtLjAyOCAyLjA3Mi43NTYgMi42MzIuMzczLjI2MS44ODYuMzkyIDEuNTQuMzkyLjUyMiAwIDEuMTEtLjA4NCAxLjc2NC0uMjUyTDI0IDcuOHoiLz48L3N2Zz4=",
-    "points": 50
-  },
-  {
-    "name": "Netflix",
-    "url": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgZmlsbD0iI0U1MDkxNCIgcm9sZT0iaW1nIiB2aWV3Qm94PSIwIDAgMjQgMjQiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHRpdGxlPk5ldGZsaXg8L3RpdGxlPjxwYXRoIGQ9Im01LjM5OCAwIDguMzQ4IDIzLjYwMmMyLjM0Ni4wNTkgNC44NTYuMzk4IDQuODU2LjM5OEwxMC4xMTMgMEg1LjM5OHptOC40ODkgMHY5LjE3Mmw0LjcxNSAxMy4zM1YwaC00LjcxNXpNNS4zOTggMS41VjI0YzEuODczLS4yMjUgMi44MS0uMzEyIDQuNzE1LS4zOThWMTQuODNMNS4zOTggMS41eiIvPjwvc3ZnPg==",
-    "points": 100
-  },
-  {
-    "name": "Spotify",
-    "url": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgZmlsbD0iIzFEQjk1NCIgcm9sZT0iaW1nIiB2aWV3Qm94PSIwIDAgMjQgMjQiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHRpdGxlPlNwb3RpZnk8L3RpdGxlPjxwYXRoIGQ9Ik0xMiAwQzUuNCAwIDAgNS40IDAgMTJzNS40IDEyIDEyIDEyIDEyLTUuNCAxMi0xMlMxOC42NiAwIDEyIDB6bTUuNTIxIDE3LjM0Yy0uMjQuMzU5LS42Ni40OC0xLjAyMS4yNC0yLjgyLTEuNzQtNi4zNi0yLjEwMS0xMC41NjEtMS4xNDEtLjQxOC4xMjItLjc3OS0uMTc5LS44OTktLjUzOS0uMTItLjQyMS4xOC0uNzguNTQtLjkgNC41Ni0xLjAyMSA4LjUyLS42IDExLjY0IDEuMzIuNDIuMTguNDc5LjY1OS4zMDEgMS4wMnptMS40NC0zLjNjLS4zMDEuNDItLjg0MS42LTEuMjYyLjMtMy4yMzktMS45OC04LjE1OS0yLjU4LTExLjkzOS0xLjM4LS40NzkuMTItMS4wMi0uMTItMS4xNC0uNi0uMTItLjQ4LjEyLTEuMDIxLjYtMS4xNDFDOS42IDkuOSAxNSAxMC41NjEgMTguNzIgMTIuODRjLjM2MS4xODEuNTQuNzguMjQxIDEuMnptLjEyLTMuMzZDMTUuMjQgOC40IDguODIgOC4xNiA1LjE2IDkuMzAxYy0uNi4xNzktMS4yLS4xODEtMS4zOC0uNzIxLS4xOC0uNjAxLjE4LTEuMi43Mi0xLjM4MSA0LjI2LTEuMjYgMTEuMjgtMS4wMiAxNS43MjEgMS42MjEuNTM5LjMuNzE5IDEuMDIuNDE5IDEuNTYtLjI5OS40MjEtMS4wMi41OTktMS41NTkuM3oiLz48L3N2Zz4=",
-    "points": 100
-  },
-  {
-    "name": "Adidas",
-    "url": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgZmlsbD0iIzAwMDAwMCIgcm9sZT0iaW1nIiB2aWV3Qm94PSIwIDAgMjQgMjQiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHRpdGxlPkFkaWRhczwvdGl0bGU+PHBhdGggZD0ibTI0IDE5LjUzNS04LjY5Ny0xNS4wNy00LjY1OSAyLjY4NyA3LjE0NSAxMi4zODNabS04LjI4NyAwTDkuOTY5IDkuNTkgNS4zMSAxMi4yNzdsNC4xOTIgNy4yNThaTTQuNjU4IDE0LjcyM2wyLjc3NiA0LjgxMkgxLjIyM0wwIDE3LjQxWiIvPjwvc3ZnPg==",
-    "points": 150
-  },
-  {
-    "name": "PlayStation",
-    "url": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgZmlsbD0iIzAwMzc5MSIgcm9sZT0iaW1nIiB2aWV3Qm94PSIwIDAgMjQgMjQiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHRpdGxlPlBsYXlTdGF0aW9uPC90aXRsZT48cGF0aCBkPSJNOC45ODQgMi41OTZ2MTcuNTQ3bDMuOTE1IDEuMjYxVjYuNjg4YzAtLjY5LjMwNC0xLjE1MS43OTQtLjk5MS42MzYuMTguNzYuODE0Ljc2IDEuNTA1djUuODc1YzIuNDQxIDEuMTkzIDQuMzYyLS4wMDIgNC4zNjItMy4xNTIgMC0zLjIzNy0xLjEyNi00LjY3NS00LjQzOC01LjgyNy0xLjMwNy0uNDQ4LTMuNzI4LTEuMTg2LTUuMzktMS41MDJ6bTQuNjU2IDE2LjI0MWw2LjI5Ni0yLjI3NWMuNzE1LS4yNTguODI2LS42MjUuMjQ2LS44MTgtLjU4Ni0uMTkyLTEuNjM3LS4xMzktMi4zNTcuMTIzbC00LjIwNSAxLjVWMTQuOThsLjI0LS4wODVzMS4yMDEtLjQyIDIuOTEzLS42MTVjMS42OTYtLjE4IDMuNzg1LjAzIDUuNDM3LjY2MSAxLjg0OC42MDEgMi4wNCAxLjQ3MiAxLjU3NiAyLjA3Mi0uNDY1LjYtMS42MjIgMS4wMzYtMS42MjIgMS4wMzZsLTguNTQ0IDMuMTA3VjE4Ljg2ek0xLjgwNyAxOC42Yy0xLjktLjU0NS0yLjIxNC0xLjY2OC0xLjM1Mi0yLjMyLjgwMS0uNTg2IDIuMTYtMS4wNTIgMi4xNi0xLjA1Mmw1LjYxNS0yLjAxM3YyLjMxM0w0LjIwNSAxN2MtLjcwNS4yNzEtLjgyNS42MzItLjIzOS44MjYuNTg2LjE5NSAxLjYzNy4xNSAyLjM0My0uMTJMOC4yNDcgMTd2Mi4wNzRjLS4xMi4wMy0uMjU2LjA0NC0uMzkuMDczLTEuOTM5LjMzMS0zLjk5Ni4xOTYtNi4wMzgtLjQ3OXoiLz48L3N2Zz4=",
-    "points": 150
-  },
-  {
-    "name": "Target",
-    "url": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgZmlsbD0iI0NDMDAwMCIgcm9sZT0iaW1nIiB2aWV3Qm94PSIwIDAgMjQgMjQiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHRpdGxlPlRhcmdldDwvdGl0bGU+PHBhdGggZD0iTTEyLjAwMDUgMEMxOC42MjcgMCAyNCA1LjM3MyAyNCAxMi4wMDA1IDI0IDE4LjYyNyAxOC42MjcgMjQgMTEuOTk5NSAyNCA1LjM3MyAyNCAwIDE4LjYyNyAwIDExLjk5OTUgMCA1LjM3MyA1LjM3MyAwIDEyLjAwMDUgMHptMCAxOS44MjZhNy44MjY1IDcuODI2NSAwIDEwLS4wMDEtMTUuNjUyQzcuNzEzMyA0LjIyNDYgNC4yNjUzIDcuNzEzNiA0LjI2NTMgMTJjMCA0LjI4NjQgMy40NDggNy43NzU0IDcuNzM0MiA3LjgyNmguMDAxem0wLTMuOTg1M2EzLjg0MDIgMy44NDAyIDAgMTEwLTcuNjgwM2MyLjEyMDQuMDAwNiAzLjgzOSAxLjcxOTcgMy44MzkgMy44NDAxcy0xLjcxODYgMy44Mzk2LTMuODM5IDMuODQwMnoiLz48L3N2Zz4=",
-    "points": 50
-  },
-  {
-    "name": "Intel",
-    "url": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgZmlsbD0iIzAwNjhCNSIgcm9sZT0iaW1nIiB2aWV3Qm94PSIwIDAgMjQgMjQiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHRpdGxlPkludGVsPC90aXRsZT48cGF0aCBkPSJNMjAuNDIgNy4zNDV2OS4xOGgxLjY1MXYtOS4xOHpNMCA3LjQ3NXYxLjczN2gxLjczN1Y3LjQ3NHptOS43OC4zNTJ2Ni4wNTNjMCAuNTEzLjA0NC45NDUuMTMgMS4yOTIuMDg3LjM0LjIzNS42MTguNDQuODI4LjIwMy4yMS40NzUuMzU5LjgwMy40NTEuMzM0LjA5My43NTQuMTM2IDEuMjU1LjEzNmguMjE2di0xLjUzM2MtLjI0IDAtLjQ0NS0uMDEyLS41OTMtLjAzN2EuNjcyLjY3MiAwIDAgMS0uMzktLjE3My42OTMuNjkzIDAgMCAxLS4xNzMtLjM3NyA0LjAwMiA0LjAwMiAwIDAgMS0uMDM3LS42MDZ2LTIuMTgyaDEuMTkzdi0xLjQxNmgtMS4xOTNWNy44Mjd6bS0zLjUwNSAyLjMxMmMtLjM5NiAwLS43Ni4wOC0xLjA4Mi4yNDEtLjMyNy4xNjEtLjYuMzg0LS44MjIuNjY4bC0uMDg3LjExN3YtLjkwMkgyLjY1OHY2LjI1NmgxLjYzOXYtMy4yMTRjLjAxOC0uNTg4LjE2LTEuMDIuNDMzLTEuMjk5LjI5LS4yOTcuNjQyLS40NDUgMS4wNDQtLjQ0NS40NzYgMCAuODQxLjE0OSAxLjA4Mi40MzMuMjM1LjI4NC4zNTkuNjg2LjM1OSAxLjJ2My4zMjRoMS42NjNWMTIuOTdjLjAwNi0uODktLjIyOS0xLjU5NS0uNjg2LTIuMDktLjQ1OC0uNDk1LTEuMS0uNzQyLTEuOTE3LS43NDJ6bTEwLjA2NS4wMDZhMy4yNTIgMy4yNTIgMCAwIDAtMi4zMDYuOTQ2Yy0uMjkuMjktLjUyNS42MzctLjY5MiAxLjAzM2EzLjE0NSAzLjE0NSAwIDAgMC0uMjU0IDEuMjczYzAgLjQ1Mi4wOC44NzguMjQxIDEuMjc0LjE2MS4zOTUuMzkuNzQyLjY3NCAxLjAzMi4yODQuMjkuNjM3LjUyNiAxLjA0NS42OTMuNDA4LjE3My44Ni4yNiAxLjM0Mi4yNiAxLjM5NyAwIDIuMjYyLS42MzcgMi43ODItMS4yM2wtMS4xODctLjkwNGMtLjI0OC4yOTctLjg0MS42OTktMS41ODMuNjk5LS40NjQgMC0uODQ3LS4xMDUtMS4xMzgtLjMyMWExLjU4OCAxLjU4OCAwIDAgMS0uNTkzLS44NzJsLS4wMTktLjA1Nmg0LjkxNXYtLjU4N2MwLS40NTEtLjA4LS44NzItLjIzNS0xLjI2N2EzLjM5MyAzLjM5MyAwIDAgMC0uNjYxLTEuMDMzIDMuMDEzIDMuMDEzIDAgMCAwLTEuMDItLjY5MiAzLjM0NSAzLjM0NSAwIDAgMC0xLjMxMS0uMjQ4em0tMTYuMjk3LjExOHY2LjI1NmgxLjY1MXYtNi4yNTZ6bTE2LjI3OCAxLjI4NmMxLjEzMiAwIDEuNjY0Ljc5NyAxLjY2NCAxLjI1NWwtMy4zMi4wMDZjMC0uNDU4LjUyNS0xLjI1NSAxLjY1Ni0xLjI2MXptNy4wNzMgMy44MTRhLjYwNi42MDYgMCAwIDAtLjYwNi42MDYuNjA2LjYwNiAwIDAgMCAuNjA2LjYwNi42MDYuNjA2IDAgMCAwIC42MDYtLjYwNi42MDYuNjA2IDAgMCAwLS42MDYtLjYwNnptLS4wMDguMTA1YS41LjUgMCAwIDEgLjAwMiAwIC41LjUgMCAwIDEgLjUuNTAxLjUuNSAwIDAgMS0uNS41LjUuNSAwIDAgMS0uNS0uNS41LjUgMCAwIDEgLjQ5OC0uNXptLS4yMzMuMTU1di42OTloLjEzdi0uMjg1aC4wOTNsLjE3My4yODVoLjEzNmwtLjE4LS4yOTdhLjE5MS4xOTEgMCAwIDAgLjExOC0uMDU2Yy4wMy0uMDMuMDUtLjA3NC4wNS0uMTM2IDAtLjA2OC0uMDItLjExNy0uMDYzLS4xNTQtLjAzNy0uMDM4LS4xMDUtLjA1Ni0uMTg1LS4wNTZ6bS4xMy4wOTloLjE1NGMuMDE5IDAgLjAzNy4wMDYuMDU2LjAxMmEuMDY0LjA2NCAwIDAgMSAuMDM3LjAzMWMuMDEzLjAxMy4wMTIuMDMxLjAxMi4wNTZhLjEyNC4xMjQgMCAwIDEtLjAxMi4wNTUuMTY0LjE2NCAwIDAgMS0uMDM3LjAzMWMtLjAxOS4wMDYtLjAzNy4wMTMtLjA1Ni4wMTNoLS4xNTRaIi8+PC9zdmc+",
-    "points": 150
-  },
-  {
-    "name": "Nvidia",
-    "url": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgZmlsbD0iIzc2QjkwMCIgcm9sZT0iaW1nIiB2aWV3Qm94PSIwIDAgMjQgMjQiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHRpdGxlPk5WSURJQTwvdGl0bGU+PHBhdGggZD0iTTguOTQ4IDguNzk4di0xLjQzYTYuNyA2LjcgMCAwIDEgLjQyNC0uMDE4YzMuOTIyLS4xMjQgNi40OTMgMy4zNzQgNi40OTMgMy4zNzRzLTIuNzc0IDMuODUxLTUuNzUgMy44NTFjLS4zOTggMC0uNzg3LS4wNjItMS4xNTgtLjE4NXYtNC4zNDZjMS41MjguMTg1IDEuODM3Ljg1NyAyLjc0NyAyLjM4NWwyLjA0LTEuNzE0cy0xLjQ5Mi0xLjk1Mi00LTEuOTUyYTYuMDE2IDYuMDE2IDAgMCAwLS43OTYuMDM1bTAtNC43MzV2Mi4xMzhsLjQyNC0uMDI3YzUuNDUtLjE4NSA5LjAxIDQuNDcgOS4wMSA0LjQ3cy00LjA4IDQuOTY0LTguMzMgNC45NjRjLS4zNyAwLS43MzMtLjAzNS0xLjA5NS0uMDk3djEuMzI1Yy4zLjAzNS42MS4wNjIuOTEuMDYyIDMuOTU3IDAgNi44Mi0yLjAyMyA5LjU5My00LjQwOC40NTkuMzcxIDIuMzQgMS4yNjMgMi43MyAxLjY1Mi0yLjYzMyAyLjIwOC04Ljc3MiAzLjk4NC0xMi4yNTMgMy45ODQtLjMzNSAwLS42NTMtLjAxOC0uOTcxLS4wNTN2MS44NjRIMjRWNC4wNjN6bTAgMTAuMzI2djEuMTMxYy0zLjY1Ny0uNjU0LTQuNjczLTQuNDYtNC42NzMtNC40NnMxLjc1OC0xLjk0NCA0LjY3My0yLjI2MnYxLjIzN0g4Ljk0Yy0xLjUyOC0uMTg2LTIuNzMgMS4yNDUtMi43MyAxLjI0NXMuNjggMi40MTIgMi43MzkgMy4xMU0yLjQ1NiAxMC45czIuMTY0LTMuMTk3IDYuNS0zLjUzM1Y2LjIwMUM0LjE1MyA2LjU5IDAgMTAuNjUzIDAgMTAuNjUzczIuMzUgNi44MDIgOC45NDggNy40MnYtMS4yMzdjLTQuODQtLjYtNi40OTItNS45MzYtNi40OTItNS45MzZ6Ii8+PC9zdmc+",
-    "points": 100
-  },
-  {
-    "name": "Tesla",
-    "url": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgZmlsbD0iI0UzMTkzNyIgcm9sZT0iaW1nIiB2aWV3Qm94PSIwIDAgMjQgMjQiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHRpdGxlPlRlc2xhPC90aXRsZT48cGF0aCBkPSJNMTIgNS4zNjJsMi40NzUtMy4wMjZzNC4yNDUuMDkgOC40NzEgMi4wNTRjLTEuMDgyIDEuNjM2LTMuMjMxIDIuNDM4LTMuMjMxIDIuNDM4LS4xNDYtMS40MzktMS4xNTQtMS43OS00LjM1NC0xLjc5TDEyIDI0IDguNjE5IDUuMDM0Yy0zLjE4IDAtNC4xODguMzU0LTQuMzM1IDEuNzkyIDAgMC0yLjE0Ni0uNzk1LTMuMjI5LTIuNDNDNS4yOCAyLjQzMSA5LjUyNSAyLjM0IDkuNTI1IDIuMzRMMTIgNS4zNjJsLS4wMDQuMDAySDEydi0uMDAyem0wLTMuODk5YzMuNDE1LS4wMyA3LjMyNi41MjggMTEuMzI4IDIuMjguNTM1LS45NjguNjcyLTEuMzk1LjY3Mi0xLjM5NUMxOS42MjUuNjEyIDE1LjUyOC4wMTUgMTIgMCA4LjQ3Mi4wMTUgNC4zNzUuNjEgMCAyLjM0OWMwIDAgLjE5NS41MjUuNjcyIDEuMzk2QzQuNjc0IDEuOTg5IDguNTg1IDEuNDM1IDEyIDEuNDZ2LjAwM3oiLz48L3N2Zz4=",
-    "points": 100
-  },
-  {
-    "name": "Discord",
-    "url": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgZmlsbD0iIzU4NjVGMiIgcm9sZT0iaW1nIiB2aWV3Qm94PSIwIDAgMjQgMjQiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHRpdGxlPkRpc2NvcmQ8L3RpdGxlPjxwYXRoIGQ9Ik0yMC4zMTcgNC4zNjk4YTE5Ljc5MTMgMTkuNzkxMyAwIDAwLTQuODg1MS0xLjUxNTIuMDc0MS4wNzQxIDAgMDAtLjA3ODUuMDM3MWMtLjIxMS4zNzUzLS40NDQ3Ljg2NDgtLjYwODMgMS4yNDk1LTEuODQ0Ny0uMjc2Mi0zLjY4LS4yNzYyLTUuNDg2OCAwLS4xNjM2LS4zOTMzLS40MDU4LS44NzQyLS42MTc3LTEuMjQ5NWEuMDc3LjA3NyAwIDAwLS4wNzg1LS4wMzcgMTkuNzM2MyAxOS43MzYzIDAgMDAtNC44ODUyIDEuNTE1LjA2OTkuMDY5OSAwIDAwLS4wMzIxLjAyNzdDLjUzMzQgOS4wNDU4LS4zMTkgMTMuNTc5OS4wOTkyIDE4LjA1NzhhLjA4MjQuMDgyNCAwIDAwLjAzMTIuMDU2MWMyLjA1MjggMS41MDc2IDQuMDQxMyAyLjQyMjggNS45OTI5IDMuMDI5NGEuMDc3Ny4wNzc3IDAgMDAuMDg0Mi0uMDI3NmMuNDYxNi0uNjMwNC44NzMxLTEuMjk1MiAxLjIyNi0xLjk5NDJhLjA3Ni4wNzYgMCAwMC0uMDQxNi0uMTA1N2MtLjY1MjgtLjI0NzYtMS4yNzQzLS41NDk1LTEuODcyMi0uODkyM2EuMDc3LjA3NyAwIDAxLS4wMDc2LS4xMjc3Yy4xMjU4LS4wOTQzLjI1MTctLjE5MjMuMzcxOC0uMjkxNGEuMDc0My4wNzQzIDAgMDEuMDc3Ni0uMDEwNWMzLjkyNzggMS43OTMzIDguMTggMS43OTMzIDEyLjA2MTQgMGEuMDczOS4wNzM5IDAgMDEuMDc4NS4wMDk1Yy4xMjAyLjA5OS4yNDYuMTk4MS4zNzI4LjI5MjRhLjA3Ny4wNzcgMCAwMS0uMDA2Ni4xMjc2IDEyLjI5ODYgMTIuMjk4NiAwIDAxLTEuODczLjg5MTQuMDc2Ni4wNzY2IDAgMDAtLjA0MDcuMTA2N2MuMzYwNC42OTguNzcxOSAxLjM2MjggMS4yMjUgMS45OTMyYS4wNzYuMDc2IDAgMDAuMDg0Mi4wMjg2YzEuOTYxLS42MDY3IDMuOTQ5NS0xLjUyMTkgNi4wMDIzLTMuMDI5NGEuMDc3LjA3NyAwIDAwLjAzMTMtLjA1NTJjLjUwMDQtNS4xNzctLjgzODItOS42NzM5LTMuNTQ4NS0xMy42NjA0YS4wNjEuMDYxIDAgMDAtLjAzMTItLjAyODZ6TTguMDIgMTUuMzMxMmMtMS4xODI1IDAtMi4xNTY5LTEuMDg1Ny0yLjE1NjktMi40MTkgMC0xLjMzMzIuOTU1NS0yLjQxODkgMi4xNTctMi40MTg5IDEuMjEwOCAwIDIuMTc1NyAxLjA5NTIgMi4xNTY4IDIuNDE5IDAgMS4zMzMyLS45NTU1IDIuNDE4OS0yLjE1NjkgMi40MTg5em03Ljk3NDggMGMtMS4xODI1IDAtMi4xNTY5LTEuMDg1Ny0yLjE1NjktMi40MTkgMC0xLjMzMzIuOTU1NC0yLjQxODkgMi4xNTY5LTIuNDE4OSAxLjIxMDggMCAyLjE3NTcgMS4wOTUyIDIuMTU2OCAyLjQxOSAwIDEuMzMzMi0uOTQ2IDIuNDE4OS0yLjE1NjggMi40MTg5WiIvPjwvc3ZnPg==",
-    "points": 50
-  },
-  {
-    "name": "Twitch",
-    "url": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgZmlsbD0iIzkxNDZGRiIgcm9sZT0iaW1nIiB2aWV3Qm94PSIwIDAgMjQgMjQiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHRpdGxlPlR3aXRjaDwvdGl0bGU+PHBhdGggZD0iTTExLjU3MSA0LjcxNGgxLjcxNXY1LjE0M0gxMS41N3ptNC43MTUgMEgxOHY1LjE0M2gtMS43MTR6TTYgMEwxLjcxNCA0LjI4NnYxNS40MjhoNS4xNDNWMjRsNC4yODYtNC4yODZoMy40MjhMMjIuMjg2IDEyVjB6bTE0LjU3MSAxMS4xNDNsLTMuNDI4IDMuNDI4aC0zLjQyOWwtMyAzdi0zSDYuODU3VjEuNzE0aDEzLjcxNFoiLz48L3N2Zz4=",
-    "points": 150
-  },
-  {
-    "name": "Github",
-    "url": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgZmlsbD0iIzE4MTcxNyIgcm9sZT0iaW1nIiB2aWV3Qm94PSIwIDAgMjQgMjQiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHRpdGxlPkdpdEh1YjwvdGl0bGU+PHBhdGggZD0iTTEyIC4yOTdjLTYuNjMgMC0xMiA1LjM3My0xMiAxMiAwIDUuMzAzIDMuNDM4IDkuOCA4LjIwNSAxMS4zODUuNi4xMTMuODItLjI1OC44Mi0uNTc3IDAtLjI4NS0uMDEtMS4wNC0uMDE1LTIuMDQtMy4zMzguNzI0LTQuMDQyLTEuNjEtNC4wNDItMS42MUM0LjQyMiAxOC4wNyAzLjYzMyAxNy43IDMuNjMzIDE3LjdjLTEuMDg3LS43NDQuMDg0LS43MjkuMDg0LS43MjkgMS4yMDUuMDg0IDEuODM4IDEuMjM2IDEuODM4IDEuMjM2IDEuMDcgMS44MzUgMi44MDkgMS4zMDUgMy40OTUuOTk4LjEwOC0uNzc2LjQxNy0xLjMwNS43Ni0xLjYwNS0yLjY2NS0uMy01LjQ2Ni0xLjMzMi01LjQ2Ni01LjkzIDAtMS4zMS40NjUtMi4zOCAxLjIzNS0zLjIyLS4xMzUtLjMwMy0uNTQtMS41MjMuMTA1LTMuMTc2IDAgMCAxLjAwNS0uMzIyIDMuMyAxLjIzLjk2LS4yNjcgMS45OC0uMzk5IDMtLjQwNSAxLjAyLjAwNiAyLjA0LjEzOCAzIC40MDUgMi4yOC0xLjU1MiAzLjI4NS0xLjIzIDMuMjg1LTEuMjMuNjQ1IDEuNjUzLjI0IDIuODczLjEyIDMuMTc2Ljc2NS44NCAxLjIzIDEuOTEgMS4yMyAzLjIyIDAgNC42MS0yLjgwNSA1LjYyNS01LjQ3NSA1LjkyLjQyLjM2LjgxIDEuMDk2LjgxIDIuMjIgMCAxLjYwNi0uMDE1IDIuODk2LS4wMTUgMy4yODYgMCAuMzE1LjIxLjY5LjgyNS41N0MyMC41NjUgMjIuMDkyIDI0IDE3LjU5MiAyNCAxMi4yOTdjMC02LjYyNy01LjM3My0xMi0xMi0xMiIvPjwvc3ZnPg==",
-    "points": 100
-  }
+  { id: 'apple', name: 'apple', path: '/logos/apple.png', difficulty: 'medium', points: 100 },
+  { id: 'google', name: 'google', path: '/logos/google.png', difficulty: 'medium', points: 100 },
+  { id: 'microsoft', name: 'microsoft', path: '/logos/microsoft.png', difficulty: 'medium', points: 100 },
+  { id: 'amazon', name: 'amazon', path: '/logos/amazon.png', difficulty: 'medium', points: 100 },
+  { id: 'netflix', name: 'netflix', path: '/logos/netflix.png', difficulty: 'medium', points: 100 },
+  { id: 'spotify', name: 'spotify', path: '/logos/spotify.png', difficulty: 'medium', points: 100 },
+  { id: 'tesla', name: 'tesla', path: '/logos/tesla.png', difficulty: 'medium', points: 100 },
+  { id: 'meta', name: 'meta', path: '/logos/meta.png', difficulty: 'medium', points: 100 },
+  { id: 'nike', name: 'nike', path: '/logos/nike.png', difficulty: 'medium', points: 100 },
+  { id: 'adidas', name: 'adidas', path: '/logos/adidas.png', difficulty: 'medium', points: 100 },
+  { id: 'mcdonalds', name: 'mcdonalds', path: '/logos/mcdonalds.png', difficulty: 'medium', points: 100 },
+  { id: 'starbucks', name: 'starbucks', path: '/logos/starbucks.png', difficulty: 'medium', points: 100 },
+  { id: 'kfc', name: 'kfc', path: '/logos/kfc.png', difficulty: 'medium', points: 100 },
+  { id: 'burgerking', name: 'burgerking', path: '/logos/burgerking.png', difficulty: 'medium', points: 100 },
+  { id: 'wendys', name: 'wendys', path: '/logos/wendys.png', difficulty: 'medium', points: 100 },
+  { id: 'coca-cola', name: 'coca cola', path: '/logos/coca-cola.png', difficulty: 'medium', points: 100 },
+  { id: 'pepsi', name: 'pepsi', path: '/logos/pepsi.png', difficulty: 'medium', points: 100 },
+  { id: 'redbull', name: 'redbull', path: '/logos/redbull.png', difficulty: 'medium', points: 100 },
+  { id: 'monsterenergy', name: 'monsterenergy', path: '/logos/monsterenergy.png', difficulty: 'medium', points: 100 },
+  { id: 'sony', name: 'sony', path: '/logos/sony.png', difficulty: 'medium', points: 100 },
+  { id: 'nintendo', name: 'nintendo', path: '/logos/nintendo.png', difficulty: 'medium', points: 100 },
+  { id: 'xbox', name: 'xbox', path: '/logos/xbox.png', difficulty: 'medium', points: 100 },
+  { id: 'playstation', name: 'playstation', path: '/logos/playstation.png', difficulty: 'medium', points: 100 },
+  { id: 'samsung', name: 'samsung', path: '/logos/samsung.png', difficulty: 'medium', points: 100 },
+  { id: 'lg', name: 'lg', path: '/logos/lg.png', difficulty: 'medium', points: 100 },
+  { id: 'intel', name: 'intel', path: '/logos/intel.png', difficulty: 'medium', points: 100 },
+  { id: 'nvidia', name: 'nvidia', path: '/logos/nvidia.png', difficulty: 'medium', points: 100 },
+  { id: 'amd', name: 'amd', path: '/logos/amd.png', difficulty: 'medium', points: 100 },
+  { id: 'cisco', name: 'cisco', path: '/logos/cisco.png', difficulty: 'medium', points: 100 },
+  { id: 'ibm', name: 'ibm', path: '/logos/ibm.png', difficulty: 'medium', points: 100 },
+  { id: 'toyota', name: 'toyota', path: '/logos/toyota.png', difficulty: 'medium', points: 100 },
+  { id: 'ford', name: 'ford', path: '/logos/ford.png', difficulty: 'medium', points: 100 },
+  { id: 'honda', name: 'honda', path: '/logos/honda.png', difficulty: 'medium', points: 100 },
+  { id: 'chevrolet', name: 'chevrolet', path: '/logos/chevrolet.png', difficulty: 'medium', points: 100 },
+  { id: 'bmw', name: 'bmw', path: '/logos/bmw.png', difficulty: 'medium', points: 100 },
+  { id: 'mercedes-benz', name: 'mercedes benz', path: '/logos/mercedes-benz.png', difficulty: 'medium', points: 100 },
+  { id: 'audi', name: 'audi', path: '/logos/audi.png', difficulty: 'medium', points: 100 },
+  { id: 'porsche', name: 'porsche', path: '/logos/porsche.png', difficulty: 'medium', points: 100 },
+  { id: 'ferrari', name: 'ferrari', path: '/logos/ferrari.png', difficulty: 'medium', points: 100 },
+  { id: 'lamborghini', name: 'lamborghini', path: '/logos/lamborghini.png', difficulty: 'medium', points: 100 },
+  { id: 'uber', name: 'uber', path: '/logos/uber.png', difficulty: 'medium', points: 100 },
+  { id: 'lyft', name: 'lyft', path: '/logos/lyft.png', difficulty: 'medium', points: 100 },
+  { id: 'airbnb', name: 'airbnb', path: '/logos/airbnb.png', difficulty: 'medium', points: 100 },
+  { id: 'tiktok', name: 'tiktok', path: '/logos/tiktok.png', difficulty: 'medium', points: 100 },
+  { id: 'instagram', name: 'instagram', path: '/logos/instagram.png', difficulty: 'medium', points: 100 },
+  { id: 'snapchat', name: 'snapchat', path: '/logos/snapchat.png', difficulty: 'medium', points: 100 },
+  { id: 'pinterest', name: 'pinterest', path: '/logos/pinterest.png', difficulty: 'medium', points: 100 },
+  { id: 'twitter', name: 'twitter', path: '/logos/twitter.png', difficulty: 'medium', points: 100 },
+  { id: 'linkedin', name: 'linkedin', path: '/logos/linkedin.png', difficulty: 'medium', points: 100 },
+  { id: 'reddit', name: 'reddit', path: '/logos/reddit.png', difficulty: 'medium', points: 100 },
+  { id: 'visa', name: 'visa', path: '/logos/visa.png', difficulty: 'medium', points: 100 },
+  { id: 'mastercard', name: 'mastercard', path: '/logos/mastercard.png', difficulty: 'medium', points: 100 },
+  { id: 'paypal', name: 'paypal', path: '/logos/paypal.png', difficulty: 'medium', points: 100 },
+  { id: 'stripe', name: 'stripe', path: '/logos/stripe.png', difficulty: 'medium', points: 100 },
+  { id: 'fedex', name: 'fedex', path: '/logos/fedex.png', difficulty: 'medium', points: 100 },
+  { id: 'ups', name: 'ups', path: '/logos/ups.png', difficulty: 'medium', points: 100 },
+  { id: 'dhl', name: 'dhl', path: '/logos/dhl.png', difficulty: 'medium', points: 100 },
+  { id: 'boeing', name: 'boeing', path: '/logos/boeing.png', difficulty: 'medium', points: 100 },
+  { id: 'airbus', name: 'airbus', path: '/logos/airbus.png', difficulty: 'medium', points: 100 },
+  { id: 'spacex', name: 'spacex', path: '/logos/spacex.png', difficulty: 'medium', points: 100 },
 ];
