@@ -221,7 +221,7 @@ export default function PlayPage() {
     const timerId = setInterval(() => {
       setTimeLeft(prev => {
         const newTime = prev - 1;
-        if (newTime <= 5) {
+        if (newTime <= 6) {
           setPixelSize(p => Math.max(1, p - 2));
         }
         return newTime;
