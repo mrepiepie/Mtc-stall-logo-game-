@@ -40,7 +40,8 @@ function AdminDashboard() {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [isLoadingQuestions, setIsLoadingQuestions] = useState(true);
   const [questionsError, setQuestionsError] = useState("");
-  const [imageUrl, setImageUrl] = useState("");
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreviewUrl, setImagePreviewUrl] = useState("");
   const [answer, setAnswer] = useState("");
   const [difficulty, setDifficulty] = useState("medium");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -78,6 +79,33 @@ function AdminDashboard() {
     fetchQuestions();
   }, []);
 
+  useEffect(() => {
+    if (!imageFile) {
+      setImagePreviewUrl("");
+      return;
+    }
+
+    const previewUrl = URL.createObjectURL(imageFile);
+    setImagePreviewUrl(previewUrl);
+    return () => URL.revokeObjectURL(previewUrl);
+  }, [imageFile]);
+
+  const handleImageSelection = (file: File | undefined) => {
+    setFormMessage("");
+    setFormError("");
+
+    if (!file) return;
+
+    const allowedTypes = ["image/png", "image/jpeg", "image/webp"];
+    if (!allowedTypes.includes(file.type) || file.size > 5 * 1024 * 1024) {
+      setImageFile(null);
+      setFormError("Please select a PNG, JPG, or WEBP image up to 5 MB.");
+      return;
+    }
+
+    setImageFile(file);
+  };
+
   const handleQuestionSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setFormMessage("");
@@ -86,12 +114,28 @@ function AdminDashboard() {
     setIsSubmitting(true);
 
     try {
+      if (!imageFile) {
+        throw new Error("Image is required");
+      }
+
+      const uploadData = new FormData();
+      uploadData.append("file", imageFile);
+      const uploadResponse = await fetch("/api/questions/upload", {
+        method: "POST",
+        body: uploadData,
+      });
+      const uploadResult = await uploadResponse.json().catch(() => null);
+
+      if (!uploadResponse.ok || !uploadResult?.success || typeof uploadResult.image_url !== "string") {
+        throw new Error("Image upload failed");
+      }
+
       const response = await fetch("/api/questions/add", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           answer,
-          image_url: imageUrl,
+          image_url: uploadResult.image_url,
           difficulty,
         }),
       });
@@ -102,7 +146,7 @@ function AdminDashboard() {
         throw new Error("Question creation failed");
       }
 
-      setImageUrl("");
+      setImageFile(null);
       setAnswer("");
       setDifficulty("medium");
       setQuestionsError("");
@@ -260,23 +304,21 @@ function AdminDashboard() {
               <form onSubmit={handleQuestionSubmit} className="space-y-5 p-5 sm:p-6">
                 <label className="block">
                   <span className="mb-2 block text-xs font-black uppercase tracking-widest">Logo Image Question</span>
-                  <input
-                    type="url"
-                    placeholder="https://example.com/logo.png"
-                    value={imageUrl}
-                    onChange={(event) => setImageUrl(event.target.value)}
-                    className="w-full border-4 border-black bg-white px-4 py-3 font-bold outline-none placeholder:text-zinc-400 focus:bg-yellow-100"
-                  />
+                  <label className="block cursor-pointer border-4 border-black bg-white px-4 py-3 font-bold transition-colors hover:bg-yellow-100">
+                    <span className="block truncate text-zinc-500">{imageFile ? imageFile.name : "Choose a logo image"}</span>
+                    <input type="file" accept="image/png,image/jpeg,image/webp" onChange={(event) => handleImageSelection(event.target.files?.[0])} className="sr-only" />
+                  </label>
                 </label>
 
                 <div>
                   <span className="mb-2 block text-xs font-black uppercase tracking-widest">Image Preview Area</span>
-                  <div className="flex min-h-24 flex-col items-center justify-center border-4 border-dashed border-black bg-white p-5 text-center">
-                    <CloudUpload className="mb-2 h-8 w-8 text-red-600" />
-                    <p className="font-black uppercase tracking-wider">URL-based image questions</p>
-                    <p className="mt-1 text-xs font-bold text-zinc-500">Local image uploading will be added later.</p>
+                  <label className="flex min-h-24 cursor-pointer flex-col items-center justify-center border-4 border-dashed border-black bg-white p-5 text-center transition-colors hover:bg-yellow-100">
+                    {imagePreviewUrl ? <img src={imagePreviewUrl} alt="Selected logo preview" className="mb-2 h-12 w-12 object-contain" /> : <CloudUpload className="mb-2 h-8 w-8 text-red-600" />}
+                    <span className="font-black uppercase tracking-wider">{imageFile ? "Image selected" : "Choose or drop image here"}</span>
+                    <span className="mt-1 text-xs font-bold text-zinc-500">PNG, JPG, or WEBP up to 5 MB</span>
+                    <input type="file" accept="image/png,image/jpeg,image/webp" onChange={(event) => handleImageSelection(event.target.files?.[0])} className="sr-only" />
+                  </label>
                   </div>
-                </div>
 
                 <div className="grid gap-5 sm:grid-cols-[minmax(0,1fr)_8rem]">
                   <label className="block">
