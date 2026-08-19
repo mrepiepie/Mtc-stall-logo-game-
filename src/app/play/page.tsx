@@ -218,7 +218,15 @@ export default function PlayPage() {
       handleTimeOut();
       return;
     }
-    const timerId = setInterval(() => setTimeLeft(prev => prev - 1), 1000);
+    const timerId = setInterval(() => {
+      setTimeLeft(prev => {
+        const newTime = prev - 1;
+        if (newTime <= 5) {
+          setPixelSize(p => Math.max(1, p - 6));
+        }
+        return newTime;
+      });
+    }, 1000);
     return () => clearInterval(timerId);
   }, [timeLeft, gameStatus, step]);
 
@@ -249,15 +257,6 @@ export default function PlayPage() {
     setGameStatus('wrong');
     gsap.to('.logo-container canvas', { filter: 'grayscale(100%) opacity(50%)', duration: 0.5 });
     setTimeout(handleNext, 800);
-  };
-
-  const handleHint = () => {
-    if (pixelSize > 5 && gameStatus === 'playing') {
-      setPixelSize(prev => Math.max(1, prev - 8));
-      setLogoPoints(prev => Math.max(10, prev - 20));
-      gsap.fromTo('.logo-container canvas', { opacity: 0.8 }, { opacity: 1, duration: 0.3 });
-      setTimeout(() => guessInputRef.current?.focus(), 10);
-    }
   };
 
   const handleGuess = (e: React.FormEvent) => {
@@ -660,16 +659,6 @@ export default function PlayPage() {
                       </div>
                     )}
                                       </form>
-
-                    <button 
-                      type="button"
-                      onClick={handleHint}
-                      disabled={pixelSize <= 5 || gameStatus !== 'playing'}
-                      className="w-full flex items-center justify-center gap-3 bg-white hover:bg-zinc-100 hover:translate-y-1 hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] disabled:opacity-50 border-4 border-black rounded-none py-3 sm:py-4 transition-all text-base sm:text-lg font-black text-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] uppercase mt-4"
-                    >
-                      <Eye className="w-5 h-5 sm:w-6 sm:h-6" />
-                      REVEAL -20 POINTS
-                    </button>
                   </div>
                 </div>
               )}
