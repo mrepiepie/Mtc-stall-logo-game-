@@ -642,6 +642,15 @@ export default function PlayPage() {
 
                 <div className="w-full max-w-2xl space-y-3 sm:space-y-4">
                   <form onSubmit={handleGuess} className="relative">
+                    <div className="flex justify-center mb-6">
+                      <div className="flex gap-1 sm:gap-2 text-2xl sm:text-3xl font-mono font-black text-black tracking-widest bg-[#f4f0e6] px-4 py-2 border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                        {currentLogo.name.split('').map((char, i) => (
+                          <span key={i} className={char === ' ' ? 'w-4' : ''}>
+                            {char === ' ' ? ' ' : (char === '-' ? '-' : '_')}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
                     <input 
                       ref={guessInputRef}
                       type="text" 
