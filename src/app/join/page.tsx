@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { User, KeyRound, ArrowRight, Loader2, Send, AlertTriangle } from 'lucide-react';
 import gsap from 'gsap';
+import { supabase } from '@/lib/supabaseClient';
 
 export default function JoinPage() {
   const [gameCode, setGameCode] = useState('');
@@ -71,7 +72,7 @@ export default function JoinPage() {
           table: 'active_game',
           filter: 'id=eq=1'
         },
-        (payload) => {
+        (payload: any) => {
           console.log('Realtime Event Received!', payload);
           // When the admin changes status to 'playing', instantly start the game!
           if (payload.new.status === 'playing') {
