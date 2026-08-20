@@ -231,7 +231,7 @@ export default function JoinPage() {
             setStep('waiting');
           } else if (newStatus === 'gameover') {
               setStep('form');
-              setError('GAME OVER. The host has ended the game. Start a new lobby.');
+              setError('GAME OVER! Check your standings on the projector. Thanks for playing!');
               setGameCode('');
               return;
             } else if (newStatus === 'crashed') {

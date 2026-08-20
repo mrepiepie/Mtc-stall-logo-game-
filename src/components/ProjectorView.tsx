@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
 import { PixelatedImage } from '@/components/PixelatedImage';
-import { Users, Timer, Trophy } from 'lucide-react';
+import { Users, Timer, Trophy, X } from 'lucide-react';
 
 export function ProjectorView({ 
   game, 
@@ -21,7 +21,6 @@ export function ProjectorView({
   const [timeLeft, setTimeLeft] = useState(10);
   const [countdown, setCountdown] = useState(3);
   const [showAnswer, setShowAnswer] = useState(false);
-  const [gameoverWait, setGameoverWait] = useState(10);
   const currentQuestion = game.questions[game.round - 1];
 
   // Local refs to prevent stale closures and infinite re-renders
@@ -147,20 +146,13 @@ if (game.status === 'leaderboard' || game.status === 'gameover') {
           </div>
         )}
         {game.status === 'gameover' && (
-          <div className="mt-8 flex flex-col items-center">
-            {gameoverWait > 0 ? (
-              <div className="text-xl font-bold text-zinc-500 uppercase">
-                Return to lobby in {gameoverWait}s...
-              </div>
-            ) : (
-              <button 
-                onClick={() => window.location.reload()} 
-                className="bg-black text-white px-8 py-4 border-4 border-black font-black text-2xl uppercase tracking-widest shadow-[8px_8px_0px_0px_rgba(255,0,0,1)] hover:translate-y-1 hover:shadow-[4px_4px_0px_0px_rgba(255,0,0,1)] transition-all"
-              >
-                Press Enter or Click to Finish
-              </button>
-            )}
-          </div>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="absolute top-4 right-4 md:top-8 md:right-8 bg-red-600 text-white p-3 border-4 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:translate-y-1 hover:translate-x-1 hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all z-50 flex items-center justify-center group"
+            title="End Game and Return to Lobby"
+          >
+            <X className="w-8 h-8 md:w-10 md:h-10 group-hover:scale-110 transition-transform" />
+          </button>
         )}
       </div>
     );
