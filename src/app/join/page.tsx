@@ -97,6 +97,20 @@ export default function JoinPage() {
       });
   };
 
+  // Fallback to fetch formats if they are missing
+  useEffect(() => {
+    if (step === 'waiting' && formats.length === 0 && gameCode) {
+      fetch(`/api/games/${gameCode}`)
+        .then(r => r.json())
+        .then(d => {
+          if (d.success && d.questions) {
+            setFormats(d.questions.map((q: any) => q.answer));
+          }
+        })
+        .catch(console.error);
+    }
+  }, [step, formats.length, gameCode]);
+
   // Local timer synced loosely when playing state starts
   useEffect(() => {
     if (step === 'countdown') {

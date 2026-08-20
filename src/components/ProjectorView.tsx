@@ -38,7 +38,6 @@ export function ProjectorView({
   useEffect(() => {
     let timerId: NodeJS.Timeout;
     let answerTimeout: NodeJS.Timeout;
-    let leaderboardTimeout: NodeJS.Timeout;
 
     if (game.status === 'countdown') {
       setCountdown(3);
@@ -65,16 +64,6 @@ export function ProjectorView({
             // Wait 2.5s to show answer
             answerTimeout = setTimeout(() => {
               callbacksRef.current.onShowLeaderboard();
-              
-              // Wait 4s on leaderboard
-              leaderboardTimeout = setTimeout(() => {
-                if (roundRef.current >= 10) {
-                  callbacksRef.current.onEndGame();
-                } else {
-                  callbacksRef.current.onNextRound(roundRef.current + 1);
-                }
-              }, 4000);
-              
             }, 2500);
             
             return 0;
@@ -87,9 +76,23 @@ export function ProjectorView({
     return () => {
       clearInterval(timerId);
       clearTimeout(answerTimeout);
-      clearTimeout(leaderboardTimeout);
     };
   }, [game.status]); // ONLY game.status dictates the timer cycle
+
+  // Leaderboard phase timeout
+  useEffect(() => {
+    let leaderboardTimeout: NodeJS.Timeout;
+    if (game.status === 'leaderboard') {
+      leaderboardTimeout = setTimeout(() => {
+        if (roundRef.current >= 10) {
+          callbacksRef.current.onEndGame();
+        } else {
+          callbacksRef.current.onNextRound(roundRef.current + 1);
+        }
+      }, 4000);
+    }
+    return () => clearTimeout(leaderboardTimeout);
+  }, [game.status]);
 
   if (game.status === 'waiting') {
     return (
