@@ -38,6 +38,13 @@ export async function POST(request: Request) {
     // 2. Append player (make sure it's an array)
     const currentPlayers = Array.isArray(game.players) ? game.players : [];
     
+    if (currentPlayers.length >= 10) {
+      return NextResponse.json(
+        { success: false, error: "Lobby is full (Max 10)" },
+        { status: 403 }
+      );
+    }
+    
     // Avoid exact duplicates (though multiple 'Sanjit' could be tricky, we'll allow it for now or just append)
     const newPlayers = [...currentPlayers, playerName.trim()];
 

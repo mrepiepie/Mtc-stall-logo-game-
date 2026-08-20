@@ -1,7 +1,8 @@
-'use client';
+const fs = require('fs');
+
+let projSrc = `'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { gsap } from 'gsap';
 import { PixelatedImage } from '@/components/PixelatedImage';
 import { Users, Timer, Trophy } from 'lucide-react';
 
@@ -97,7 +98,7 @@ export function ProjectorView({
 
   if (game.status === 'waiting') {
     return (
-      <div className="w-full min-h-screen bg-[#f4f0e6] border-4 border-black p-4 md:p-8 shadow-[16px_16px_0px_0px_rgba(0,0,0,1)] flex flex-col items-center justify-center">
+      <div className="w-full min-h-[calc(100vh-6rem)] bg-[#f4f0e6] border-4 border-black p-4 md:p-8 shadow-[16px_16px_0px_0px_rgba(0,0,0,1)] flex flex-col items-center justify-center">
         <h2 className="text-4xl font-black uppercase text-black mb-8 tracking-widest animate-pulse">Waiting to Start...</h2>
       </div>
     );
@@ -105,7 +106,7 @@ export function ProjectorView({
 
   if (game.status === 'countdown') {
     return (
-      <div className="w-full min-h-screen bg-white border-4 border-black p-4 md:p-8 shadow-[16px_16px_0px_0px_rgba(0,0,0,1)] flex flex-col items-center justify-center">
+      <div className="w-full min-h-[calc(100vh-6rem)] bg-white border-4 border-black p-4 md:p-8 shadow-[16px_16px_0px_0px_rgba(0,0,0,1)] flex flex-col items-center justify-center">
         <h2 className="text-4xl font-black uppercase text-black mb-8 tracking-widest">Get Ready...</h2>
         <div className="text-[12rem] leading-none font-black text-red-600 animate-[bounce_1s_infinite]">
           {countdown > 0 ? countdown : 'GO!'}
@@ -121,19 +122,19 @@ export function ProjectorView({
       .sort((a, b) => b.score - a.score);
 
     return (
-      <div className="w-full min-h-screen bg-[#f4f0e6] border-4 border-black p-4 md:p-8 shadow-[16px_16px_0px_0px_rgba(0,0,0,1)] flex flex-col items-center text-black">
+      <div className="w-full min-h-[calc(100vh-6rem)] bg-[#f4f0e6] border-4 border-black p-4 md:p-8 shadow-[16px_16px_0px_0px_rgba(0,0,0,1)] flex flex-col items-center text-black">
         <h2 className="text-4xl md:text-6xl font-black uppercase tracking-tighter mb-8 text-center">
-          {game.status === 'gameover' ? 'Final Standings' : `Round ${game.round} Leaderboard`}
+          {game.status === 'gameover' ? 'Final Standings' : \`Round \${game.round} Leaderboard\`}
         </h2>
         
         <div className="w-full max-w-2xl flex flex-col gap-4">
           {leaderboard.length === 0 ? (
             <div className="text-2xl font-bold text-center text-zinc-500 uppercase">No points awarded yet!</div>
           ) : (
-            leaderboard.slice(0, 10).map((player, i) => (
-              <div key={player.name} className="flex justify-between items-center bg-white border-4 border-black p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] animate-in slide-in-from-bottom-8 fade-in duration-500 fill-mode-both" style={{ animationDelay: `${i * 150}ms` }}>
+            leaderboard.slice(0, 5).map((player, i) => (
+              <div key={player.name} className="flex justify-between items-center bg-white border-4 border-black p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] animate-in slide-in-from-bottom-8 fade-in duration-500 fill-mode-both" style={{ animationDelay: \`\${i * 150}ms\` }}>
                 <div className="flex items-center gap-4">
-                  <div className={`w-12 h-12 flex items-center justify-center border-4 border-black font-black text-xl ${i === 0 ? 'bg-yellow-400' : i === 1 ? 'bg-zinc-300' : i === 2 ? 'bg-amber-600' : 'bg-white'}`}>
+                  <div className={\`w-12 h-12 flex items-center justify-center border-4 border-black font-black text-xl \${i === 0 ? 'bg-yellow-400' : i === 1 ? 'bg-zinc-300' : i === 2 ? 'bg-amber-600' : 'bg-white'}\`}>
                     #{i + 1}
                   </div>
                   <span className="text-3xl font-black uppercase">{player.name}</span>
@@ -155,7 +156,7 @@ export function ProjectorView({
 
   // Playing Mode
   return (
-    <div className="w-full min-h-screen bg-white border-4 border-black p-4 md:p-8 shadow-[16px_16px_0px_0px_rgba(0,0,0,1)] flex flex-col items-center text-black">
+    <div className="w-full min-h-[calc(100vh-6rem)] bg-white border-4 border-black p-4 md:p-8 shadow-[16px_16px_0px_0px_rgba(0,0,0,1)] flex flex-col items-center text-black">
       
       {/* Top Bar */}
       <div className="w-full flex justify-between items-center mb-4 md:mb-8">
@@ -180,7 +181,7 @@ export function ProjectorView({
         {currentQuestion && (
           <PixelatedImage 
             src={currentQuestion.image_url} 
-            pixelSize={showAnswer ? 1 : Math.max(1, timeLeft)}
+            pixelSize={showAnswer ? 1 : Math.max(1, timeLeft <= 6 ? (timeLeft * 2) : 12)}
             className="w-full max-h-[50vh] object-contain transition-all duration-1000"
           />
         )}
@@ -199,3 +200,7 @@ export function ProjectorView({
     </div>
   );
 }
+`;
+
+fs.writeFileSync('src/components/ProjectorView.tsx', projSrc);
+console.log('done');
