@@ -8,12 +8,14 @@ export function ProjectorView({
   game, 
   onNextRound, 
   onShowLeaderboard,
-  onEndGame 
+  onEndGame,
+  onCountdownComplete
 }: { 
   game: any, 
   onNextRound: (nextRound: number) => void,
   onShowLeaderboard: () => void,
-  onEndGame: () => void 
+  onEndGame: () => void,
+  onCountdownComplete: () => void 
 }) {
   const [timeLeft, setTimeLeft] = useState(10);
   const [countdown, setCountdown] = useState(3);
@@ -27,12 +29,7 @@ export function ProjectorView({
         const timerId = setInterval(() => setCountdown(prev => prev - 1), 1000);
         return () => clearInterval(timerId);
       } else {
-        // Transition to playing!
-        fetch('/api/games/set_status', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ pin: game.gamePin, status: 'playing' })
-        });
+        onCountdownComplete();
       }
     }
   }, [game.status, countdown, game.gamePin]);

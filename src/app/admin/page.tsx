@@ -316,10 +316,14 @@ function AdminDashboard() {
   if (createdGame && createdGame.status !== 'waiting') {
     return (
       <ProjectorView 
+        onCountdownComplete={async () => {
+          await fetch('/api/games/set_status', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ pin: createdGame.gamePin, status: 'playing' }) });
+          setCreatedGame(prev => prev ? { ...prev, status: 'playing' } : null);
+        }} 
         game={createdGame} 
         onNextRound={async (nextRound) => {
           await fetch('/api/games/update_round', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ pin: createdGame.gamePin, round: nextRound }) });
-          setCreatedGame(prev => prev ? { ...prev, round: nextRound, status: 'playing' } : null);
+          setCreatedGame(prev => prev ? { ...prev, round: nextRound, status: 'countdown' } : null);
         }}
         onShowLeaderboard={async () => {
           await fetch('/api/games/leaderboard', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ pin: createdGame.gamePin }) });
@@ -555,7 +559,7 @@ function AdminDashboard() {
                         type="button" 
                         onClick={async () => {
                           await fetch('/api/games/start', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ pin: createdGame.gamePin }) });
-                          setCreatedGame(prev => prev ? { ...prev, status: 'playing' } : null);
+                          setCreatedGame(prev => prev ? { ...prev, status: 'countdown' } : null);
                         }}
                         className="flex items-center justify-center gap-2 border-2 border-black bg-red-600 text-white px-3 py-2 text-xs font-black uppercase tracking-widest transition-colors hover:bg-red-500"
                       >
