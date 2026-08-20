@@ -96,7 +96,7 @@ export function ProjectorView({
     return () => clearTimeout(leaderboardTimeout);
   }, [game.status]);
 
-  if (game.status === 'waiting') {
+if (game.status === 'waiting') {
     return (
       <div className="w-full min-h-screen bg-[#f4f0e6] border-4 border-black p-4 md:p-8 shadow-[16px_16px_0px_0px_rgba(0,0,0,1)] flex flex-col items-center justify-center">
         <h2 className="text-4xl font-black uppercase text-black mb-8 tracking-widest animate-pulse">Waiting to Start...</h2>
@@ -115,28 +115,7 @@ export function ProjectorView({
     );
   }
 
-  useEffect(() => {
-    if (game.status === 'gameover') {
-      const gTimer = setInterval(() => {
-        setGameoverWait(prev => Math.max(0, prev - 1));
-      }, 1000);
-      return () => clearInterval(gTimer);
-    }
-  }, [game.status]);
-
-  useEffect(() => {
-    if (game.status === 'gameover' && gameoverWait === 0) {
-      const handleKeyDown = (e: KeyboardEvent) => {
-        if (e.key === 'Enter') {
-          window.location.reload();
-        }
-      };
-      window.addEventListener('keydown', handleKeyDown);
-      return () => window.removeEventListener('keydown', handleKeyDown);
-    }
-  }, [game.status, gameoverWait]);
-
-  if (game.status === 'leaderboard' || game.status === 'gameover') {
+if (game.status === 'leaderboard' || game.status === 'gameover') {
     const scores = game.scores || {};
     const leaderboard = Object.keys(scores)
       .map(name => ({ name, score: scores[name] }))
