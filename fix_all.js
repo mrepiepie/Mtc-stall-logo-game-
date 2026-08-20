@@ -1,51 +1,202 @@
 const fs = require('fs');
-let code = fs.readFileSync('src/app/play/page.tsx', 'utf-8');
 
-// 1. Lower pixelSize difficulty
-code = code.replace('const [pixelSize, setPixelSize] = useState(12);', 'const [pixelSize, setPixelSize] = useState(8);');
-
-// 2. Fix the Image load popup glitch (set image to null when src changes)
-code = fs.readFileSync('src/components/PixelatedImage.tsx', 'utf-8');
-code = code.replace(
-  "useEffect(() => {\n    const img = new Image();",
-  "useEffect(() => {\n    setImgElement(null);\n    const img = new Image();"
+// 1. Fix admin/page.tsx polling to NEVER overwrite round and status
+let adminSrc = fs.readFileSync('src/app/admin/page.tsx', 'utf8');
+adminSrc = adminSrc.replace(
+  `                if (data.round < prev.round) return prev;
+                if (data.round === prev.round && prev.status === 'countdown' && data.status === 'leaderboard') return prev;
+                if (data.round === prev.round && prev.status === 'playing' && data.status === 'countdown') return prev;
+                return { ...prev, players: data.players, status: data.status, round: data.round, scores: data.scores };`,
+  `                // Trust local status and round to prevent any race condition glitching.
+                // Only sync players and scores from the database.
+                return { ...prev, players: data.players, scores: data.scores };`
 );
-fs.writeFileSync('src/components/PixelatedImage.tsx', code);
+fs.writeFileSync('src/app/admin/page.tsx', adminSrc);
 
-// Reload play/page.tsx
-code = fs.readFileSync('src/app/play/page.tsx', 'utf-8');
+// 2. Completely overhaul ProjectorView.tsx to have robust timers
+let projSrc = `'use client';
 
-// 3. Delay handleTimeOut and reveal the image completely
-const oldTimeOut = `  const handleTimeOut = () => {
-    setGameStatus('wrong');
-    // No grayscale filter wanted
-    setTimeout(handleNext, 800);
-  };`;
+import { useState, useEffect, useRef } from 'react';
+import { PixelatedImage } from '@/components/PixelatedImage';
+import { Users, Timer, Trophy } from 'lucide-react';
 
-const newTimeOut = `  const handleTimeOut = () => {
-    setGameStatus('wrong');
-    setPixelSize(1); // fully reveal the image
-    setTimeout(handleNext, 2000); // 2 second delay for student to read
-  };`;
-code = code.replace(oldTimeOut, newTimeOut);
+export function ProjectorView({ 
+  game, 
+  onNextRound, 
+  onShowLeaderboard,
+  onEndGame,
+  onCountdownComplete
+}: { 
+  game: any, 
+  onNextRound: (nextRound: number) => void,
+  onShowLeaderboard: () => void,
+  onEndGame: () => void,
+  onCountdownComplete: () => void 
+}) {
+  const [timeLeft, setTimeLeft] = useState(10);
+  const [countdown, setCountdown] = useState(3);
+  const [showAnswer, setShowAnswer] = useState(false);
+  const currentQuestion = game.questions[game.round - 1];
 
-// 4. Inject Blanks Hint UI robustly!
-const formStart = '<form onSubmit={handleGuess} className="relative">';
-const formIndex = code.indexOf(formStart);
-if (formIndex !== -1) {
-  const injection = `
-                    <div className="flex justify-center mb-6">
-                      <div className="flex gap-1 sm:gap-2 text-2xl sm:text-3xl font-mono font-black text-black tracking-widest bg-[#f4f0e6] px-4 py-2 border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-                        {currentLogo.name.split('').map((char, i) => (
-                          <span key={i} className={char === ' ' ? 'w-4' : ''}>
-                            {char === ' ' ? ' ' : (char === '-' ? '-' : '_')}
-                          </span>
-                        ))}
-                      </div>
-                    </div>`;
-  
-  code = code.substring(0, formIndex + formStart.length) + injection + code.substring(formIndex + formStart.length);
+  // Local refs to prevent stale closures in timeouts
+  const roundRef = useRef(game.round);
+  useEffect(() => { roundRef.current = game.round; }, [game.round]);
+
+  // Robust timer machine
+  useEffect(() => {
+    let timerId: NodeJS.Timeout;
+    let answerTimeout: NodeJS.Timeout;
+    let leaderboardTimeout: NodeJS.Timeout;
+
+    if (game.status === 'countdown') {
+      setCountdown(3);
+      timerId = setInterval(() => {
+        setCountdown(prev => {
+          if (prev <= 1) {
+            clearInterval(timerId);
+            onCountdownComplete();
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    } 
+    else if (game.status === 'playing') {
+      setTimeLeft(10);
+      setShowAnswer(false);
+      timerId = setInterval(() => {
+        setTimeLeft(prev => {
+          if (prev <= 1) {
+            clearInterval(timerId);
+            setShowAnswer(true);
+            
+            // Wait 2.5s to show answer
+            answerTimeout = setTimeout(() => {
+              onShowLeaderboard();
+              
+              // Wait 4s on leaderboard
+              leaderboardTimeout = setTimeout(() => {
+                if (roundRef.current >= 10) {
+                  onEndGame();
+                } else {
+                  onNextRound(roundRef.current + 1);
+                }
+              }, 4000);
+              
+            }, 2500);
+            
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+
+    return () => {
+      clearInterval(timerId);
+      clearTimeout(answerTimeout);
+      clearTimeout(leaderboardTimeout);
+    };
+  }, [game.status, onCountdownComplete, onShowLeaderboard, onEndGame, onNextRound]);
+
+
+  if (game.status === 'countdown') {
+    return (
+      <div className="w-full min-h-[calc(100vh-6rem)] bg-white border-4 border-black p-4 md:p-8 shadow-[16px_16px_0px_0px_rgba(0,0,0,1)] flex flex-col items-center justify-center">
+        <h2 className="text-4xl font-black uppercase text-black mb-8 tracking-widest">Get Ready...</h2>
+        <div className="text-[12rem] leading-none font-black text-red-600 animate-[bounce_1s_infinite]">
+          {countdown > 0 ? countdown : 'GO!'}
+        </div>
+      </div>
+    );
+  }
+
+  if (game.status === 'leaderboard' || game.status === 'gameover') {
+    const scores = game.scores || {};
+    const leaderboard = Object.keys(scores)
+      .map(name => ({ name, score: scores[name] }))
+      .sort((a, b) => b.score - a.score);
+
+    return (
+      <div className="w-full min-h-[calc(100vh-6rem)] bg-[#f4f0e6] border-4 border-black p-4 md:p-8 shadow-[16px_16px_0px_0px_rgba(0,0,0,1)] flex flex-col items-center text-black">
+        <h2 className="text-4xl md:text-6xl font-black uppercase tracking-tighter mb-8 text-center">
+          {game.status === 'gameover' ? 'Final Standings' : \`Round \${game.round} Leaderboard\`}
+        </h2>
+        
+        <div className="w-full max-w-2xl flex flex-col gap-4">
+          {leaderboard.length === 0 ? (
+            <div className="text-2xl font-bold text-center text-zinc-500 uppercase">No points awarded yet!</div>
+          ) : (
+            leaderboard.slice(0, 5).map((player, i) => (
+              <div key={player.name} className="flex justify-between items-center bg-white border-4 border-black p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] animate-in slide-in-from-bottom-8 fade-in duration-500 fill-mode-both" style={{ animationDelay: \`\${i * 150}ms\` }}>
+                <div className="flex items-center gap-4">
+                  <div className={\`w-12 h-12 flex items-center justify-center border-4 border-black font-black text-xl \${i === 0 ? 'bg-yellow-400' : i === 1 ? 'bg-zinc-300' : i === 2 ? 'bg-amber-600' : 'bg-white'}\`}>
+                    #{i + 1}
+                  </div>
+                  <span className="text-3xl font-black uppercase">{player.name}</span>
+                </div>
+                <span className="text-3xl font-black text-red-600">{player.score}</span>
+              </div>
+            ))
+          )}
+        </div>
+
+        {game.status === 'leaderboard' && (
+          <div className="mt-12 text-2xl font-bold uppercase animate-pulse">
+            Next round starting soon...
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // Playing Mode
+  return (
+    <div className="w-full min-h-[calc(100vh-6rem)] bg-white border-4 border-black p-4 md:p-8 shadow-[16px_16px_0px_0px_rgba(0,0,0,1)] flex flex-col items-center text-black">
+      
+      {/* Top Bar */}
+      <div className="w-full flex justify-between items-center mb-4 md:mb-8">
+        <div className="bg-[#f4f0e6] border-4 border-black px-4 py-2 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex items-center gap-3">
+          <Users className="w-5 h-5 md:w-6 md:h-6" />
+          <span className="text-xl md:text-2xl font-black uppercase">{game.players?.length || 0} Operatives</span>
+        </div>
+        
+        <div className="bg-red-600 text-white border-4 border-black px-4 py-2 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex items-center gap-3">
+          <Timer className="w-5 h-5 md:w-6 md:h-6" />
+          <span className="text-3xl md:text-4xl font-black">{timeLeft}</span>
+        </div>
+        
+        <div className="bg-black text-white border-4 border-black px-4 py-2 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+          <span className="text-xl md:text-2xl font-black uppercase">Round {game.round}/10</span>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="relative w-full max-w-4xl flex-1 bg-[#f4f0e6] border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] md:shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] flex items-center justify-center p-4 md:p-8">
+        
+        {currentQuestion && (
+          <PixelatedImage 
+            src={currentQuestion.image_url} 
+            pixelSize={showAnswer ? 1 : Math.max(1, timeLeft <= 6 ? (timeLeft * 2) : 12)}
+            className="w-full max-h-[50vh] object-contain transition-all duration-1000"
+          />
+        )}
+
+        {showAnswer && (
+          <div className="absolute inset-0 bg-white/90 backdrop-blur-sm flex flex-col items-center justify-center animate-in fade-in zoom-in duration-500">
+            <h3 className="text-2xl md:text-3xl font-bold uppercase text-zinc-500 mb-2">The Answer Is</h3>
+            <h2 className="text-5xl md:text-7xl font-black uppercase tracking-tighter text-red-600 border-4 border-black bg-white px-6 md:px-8 py-3 md:py-4 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] transform -rotate-2">
+              {currentQuestion?.answer}
+            </h2>
+          </div>
+        )}
+
+      </div>
+
+    </div>
+  );
 }
+`;
 
-fs.writeFileSync('src/app/play/page.tsx', code);
-console.log('Fixed everything robustly!');
+fs.writeFileSync('src/components/ProjectorView.tsx', projSrc);
+console.log('done');

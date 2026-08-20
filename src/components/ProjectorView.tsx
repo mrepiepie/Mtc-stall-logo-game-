@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { PixelatedImage } from '@/components/PixelatedImage';
 import { Users, Timer, Trophy } from 'lucide-react';
 
@@ -22,68 +22,82 @@ export function ProjectorView({
   const [showAnswer, setShowAnswer] = useState(false);
   const currentQuestion = game.questions[game.round - 1];
 
-  // Countdown logic
+  // Local refs to prevent stale closures and infinite re-renders
+  const roundRef = useRef(game.round);
+  const callbacksRef = useRef({ onNextRound, onShowLeaderboard, onEndGame, onCountdownComplete });
+  
+  useEffect(() => { 
+    roundRef.current = game.round; 
+  }, [game.round]);
+  
+  useEffect(() => { 
+    callbacksRef.current = { onNextRound, onShowLeaderboard, onEndGame, onCountdownComplete }; 
+  }, [onNextRound, onShowLeaderboard, onEndGame, onCountdownComplete]);
+
+  // Robust timer machine
   useEffect(() => {
-    if (game.status !== 'countdown') return;
+    let timerId: NodeJS.Timeout;
+    let answerTimeout: NodeJS.Timeout;
+    let leaderboardTimeout: NodeJS.Timeout;
 
-    const timerId = setInterval(() => {
-      setCountdown(prev => {
-        if (prev <= 1) {
-          clearInterval(timerId);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-    return () => clearInterval(timerId);
-  }, [game.status, game.round]);
-
-  // Handle countdown complete
-  useEffect(() => {
-    if (game.status === 'countdown' && countdown === 0) {
-      onCountdownComplete();
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [countdown, game.status]);
-
-  // Playing timer logic
-  useEffect(() => {
-    if (game.status !== 'playing') return;
-
-    if (timeLeft > 0) {
-      const timerId = setInterval(() => setTimeLeft(prev => prev - 1), 1000);
-      return () => clearInterval(timerId);
-    } else if (timeLeft === 0 && !showAnswer) {
-      setShowAnswer(true);
-      
-      // Show answer for 5 seconds, then transition to leaderboard
-      setTimeout(() => {
-        onShowLeaderboard();
-        
-        // Show leaderboard for 10 seconds, then next round or end game
-        setTimeout(() => {
-          if (game.round >= 10) {
-            onEndGame();
-          } else {
-            onNextRound(game.round + 1);
-          }
-        }, 4000);
-
-      }, 2500);
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [timeLeft, game.status, game.round, showAnswer]);
-
-  // Reset timer when round changes
-  useEffect(() => {
-    if (game.status === 'playing') {
-      setTimeLeft(10);
-      setShowAnswer(false);
-    }
     if (game.status === 'countdown') {
       setCountdown(3);
+      timerId = setInterval(() => {
+        setCountdown(prev => {
+          if (prev <= 1) {
+            clearInterval(timerId);
+            callbacksRef.current.onCountdownComplete();
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    } 
+    else if (game.status === 'playing') {
+      setTimeLeft(10);
+      setShowAnswer(false);
+      timerId = setInterval(() => {
+        setTimeLeft(prev => {
+          if (prev <= 1) {
+            clearInterval(timerId);
+            setShowAnswer(true);
+            
+            // Wait 2.5s to show answer
+            answerTimeout = setTimeout(() => {
+              callbacksRef.current.onShowLeaderboard();
+              
+              // Wait 4s on leaderboard
+              leaderboardTimeout = setTimeout(() => {
+                if (roundRef.current >= 10) {
+                  callbacksRef.current.onEndGame();
+                } else {
+                  callbacksRef.current.onNextRound(roundRef.current + 1);
+                }
+              }, 4000);
+              
+            }, 2500);
+            
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
     }
-  }, [game.round, game.status]);
+
+    return () => {
+      clearInterval(timerId);
+      clearTimeout(answerTimeout);
+      clearTimeout(leaderboardTimeout);
+    };
+  }, [game.status]); // ONLY game.status dictates the timer cycle
+
+  if (game.status === 'waiting') {
+    return (
+      <div className="w-full min-h-[calc(100vh-6rem)] bg-[#f4f0e6] border-4 border-black p-4 md:p-8 shadow-[16px_16px_0px_0px_rgba(0,0,0,1)] flex flex-col items-center justify-center">
+        <h2 className="text-4xl font-black uppercase text-black mb-8 tracking-widest animate-pulse">Waiting to Start...</h2>
+      </div>
+    );
+  }
 
   if (game.status === 'countdown') {
     return (
@@ -115,7 +129,7 @@ export function ProjectorView({
             leaderboard.slice(0, 5).map((player, i) => (
               <div key={player.name} className="flex justify-between items-center bg-white border-4 border-black p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] animate-in slide-in-from-bottom-8 fade-in duration-500 fill-mode-both" style={{ animationDelay: `${i * 150}ms` }}>
                 <div className="flex items-center gap-4">
-                  <div className={`w-12 h-12 flex items-center justify-center border-4 border-black font-black text-xl \${i === 0 ? 'bg-yellow-400' : i === 1 ? 'bg-zinc-300' : i === 2 ? 'bg-amber-600' : 'bg-white'}`}>
+                  <div className={`w-12 h-12 flex items-center justify-center border-4 border-black font-black text-xl ${i === 0 ? 'bg-yellow-400' : i === 1 ? 'bg-zinc-300' : i === 2 ? 'bg-amber-600' : 'bg-white'}`}>
                     #{i + 1}
                   </div>
                   <span className="text-3xl font-black uppercase">{player.name}</span>
