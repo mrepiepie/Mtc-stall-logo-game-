@@ -48,6 +48,7 @@ async function loadQuestions() {
 }
 
 function AdminDashboard() {
+  const [isQuestionBankVisible, setIsQuestionBankVisible] = useState(false);
   const [questions, setQuestions] = useState<Question[]>([]);
   const [isLoadingQuestions, setIsLoadingQuestions] = useState(true);
   const [questionsError, setQuestionsError] = useState("");
@@ -484,10 +485,10 @@ function AdminDashboard() {
                 Question Bank
               </h2>
             </div>
-            <p className="max-w-sm text-sm font-bold text-zinc-500 sm:text-right">
-              Build the challenge one sharp question at a time.
-            </p>
-          </div>
+            <div className="flex flex-col items-end gap-2">
+              <p className="max-w-sm text-sm font-bold text-zinc-500 sm:text-right">Build the challenge one sharp question at a time.</p>
+              <button onClick={() => setIsQuestionBankVisible(!isQuestionBankVisible)} className="bg-red-600 text-white px-4 py-2 border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-1 hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all font-black uppercase text-xs tracking-widest mt-2">{isQuestionBankVisible ? "Hide Question Bank" : "Reveal Question Bank"}</button>
+            </div></div>{isQuestionBankVisible && (<div className="animate-in fade-in slide-in-from-top-4 duration-300">
 
           <div className="mb-8 grid gap-4 sm:grid-cols-3">
             {stats.map(({ label, value, icon: Icon }) => (
@@ -623,6 +624,8 @@ function AdminDashboard() {
               </div>
             </section>
           </div>
+            </div>
+          )}
         </section>
       </div>
     </main>
