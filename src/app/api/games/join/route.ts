@@ -17,7 +17,7 @@ export async function POST(request: Request) {
     // 1. Fetch current game
     const { data: game, error: lookupError } = await supabase
       .from("active_game")
-      .select("id, status, players")
+      .select("id, status, players, logos")
       .eq("id", Number(pin))
       .single();
 
@@ -54,7 +54,9 @@ export async function POST(request: Request) {
       );
     }
 
-    return NextResponse.json({ success: true, gamePin: pin });
+    const { data: qs } = await supabase.from('questions').select('id, answer');
+    const formats = (game.logos || []).map((id: string) => qs?.find((q: any) => q.id === id)?.answer || '');
+    return NextResponse.json({ success: true, gamePin: pin, formats });
 
   } catch (err) {
     return NextResponse.json(

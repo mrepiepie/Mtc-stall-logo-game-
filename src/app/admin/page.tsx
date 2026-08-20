@@ -253,10 +253,10 @@ function AdminDashboard() {
 
   // Poll for players (with 10-minute auto-timeout to save limits)
   useEffect(() => {
-    if (!createdGame || createdGame.status !== 'waiting') return;
+    if (!createdGame || createdGame.status === 'timed_out' || createdGame.status === 'gameover') return;
     
     let pollCount = 0;
-    const MAX_POLLS = 300; // 300 * 2s = 10 minutes
+    const MAX_POLLS = 1800; // 1 hour // 300 * 2s = 10 minutes
 
     const interval = setInterval(() => {
       pollCount++;

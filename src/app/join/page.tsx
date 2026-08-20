@@ -52,6 +52,7 @@ export default function JoinPage() {
   const [countdown, setCountdown] = useState(3);
   const [round, setRound] = useState(1);
   const [timeLeft, setTimeLeft] = useState(10);
+  const [formats, setFormats] = useState<string[]>([]);
   
   const [guess, setGuess] = useState('');
   const [hasGuessed, setHasGuessed] = useState(false);
@@ -84,6 +85,7 @@ export default function JoinPage() {
           return;
         }
 
+        if (data.formats) setFormats(data.formats);
         setIsJoining(false);
         setStep('waiting');
         gsap.fromTo('.waiting-container', { opacity: 0, scale: 0.9 }, { opacity: 1, scale: 1, duration: 0.4, ease: 'back.out(1.2)' });
@@ -348,10 +350,10 @@ export default function JoinPage() {
           {/* Mascot GSAP Speech Bubble dropping from top right */}
           <div 
             ref={mascotRef}
-            className="absolute -top-4 -right-4 md:-right-12 z-50 opacity-0 invisible origin-top-right"
+            className="fixed top-4 right-4 md:top-12 md:right-12 z-50 opacity-0 invisible origin-top-right"
           >
             <div className="bg-[#f4f0e6] shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] border-4 border-black p-4 flex flex-col items-center justify-center min-w-[200px] rounded-none relative z-0">
-              <div className="text-6xl drop-shadow-md mb-2 animate-[bounce_1s_infinite]">👽</div>
+              <img src="https://raw.githubusercontent.com/googlefonts/noto-emoji/main/png/512/emoji_u1f47d.png" className="w-16 h-16 drop-shadow-md mb-2 animate-[bounce_1s_infinite]" alt="Mascot" />
               <div className="font-black text-red-600 text-lg uppercase tracking-widest text-center leading-tight">Hurry Up Twin!</div>
               <div className="text-black font-black uppercase tracking-wider text-sm mt-1 text-center">Time is ticking...</div>
             </div>

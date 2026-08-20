@@ -55,9 +55,9 @@ export function ProjectorView({
           } else {
             onNextRound(game.round + 1);
           }
-        }, 10000);
+        }, 4000);
 
-      }, 5000);
+      }, 2500);
     }
   }, [timeLeft, game.status, game.round, onNextRound, onShowLeaderboard, onEndGame, showAnswer]);
 
@@ -100,7 +100,7 @@ export function ProjectorView({
             <div className="text-2xl font-bold text-center text-zinc-500 uppercase">No points awarded yet!</div>
           ) : (
             leaderboard.slice(0, 5).map((player, i) => (
-              <div key={player.name} className="flex justify-between items-center bg-white border-4 border-black p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+              <div key={player.name} className="flex justify-between items-center bg-white border-4 border-black p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] animate-in slide-in-from-bottom-8 fade-in duration-500 fill-mode-both" style={{ animationDelay: `${i * 150}ms` }}>
                 <div className="flex items-center gap-4">
                   <div className={`w-12 h-12 flex items-center justify-center border-4 border-black font-black text-xl \${i === 0 ? 'bg-yellow-400' : i === 1 ? 'bg-zinc-300' : i === 2 ? 'bg-amber-600' : 'bg-white'}`}>
                     #{i + 1}
