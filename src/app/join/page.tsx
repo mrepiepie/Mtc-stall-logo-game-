@@ -65,34 +65,38 @@ export default function JoinPage() {
     }
   }, [step, timeLeft]);
 
-  // --- REALTIME WEBSOCKET TUNNEL ---
+  // Poll the server to see if game started (with 10 min timeout)
   useEffect(() => {
-    if (step !== 'waiting' || !gameCode) return;
+    if (step !== 'waiting') return;
+    
+    let pollCount = 0;
+    const MAX_POLLS = 300; // 10 minutes
 
-    // Subscribe to changes on the active_game table for THIS specific PIN
-    const channel = supabase
-      .channel('schema-db-changes')
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'active_game',
-          filter: `id=eq=${gameCode}`
-        },
-        (payload: any) => {
-          console.log('Realtime Event Received!', payload);
-          // When the admin changes status to 'playing', teleport them!
-          if (payload.new.status === 'playing') {
-             router.push(`/play?pin=${gameCode}&player=${playerName}`);
+    const interval = setInterval(() => {
+      pollCount++;
+      if (pollCount >= MAX_POLLS) {
+        clearInterval(interval);
+        setError('LOBBY TIMED OUT (HOST AFK)');
+        setStep('form');
+        gsap.fromTo('.code-input-wrapper', { x: -6 }, { x: 0, duration: 0.1, yoyo: true, repeat: 4 });
+        return;
+      }
+
+      fetch(`/api/games/${gameCode}?t=${Date.now()}`, { cache: 'no-store' })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success && data.status === 'playing') {
+            clearInterval(interval);
+            setStep('playing');
+            setTimeout(() => {
+              router.push(`/play?pin=${gameCode}&player=${playerName}`);
+            }, 1000);
           }
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
+        })
+        .catch(console.error);
+    }, 2000);
+    
+    return () => clearInterval(interval);
   }, [step, gameCode, playerName, router]);
 
   const submitGuess = (e: React.FormEvent) => {
