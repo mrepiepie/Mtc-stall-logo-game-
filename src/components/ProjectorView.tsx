@@ -24,15 +24,27 @@ export function ProjectorView({
 
   // Countdown logic
   useEffect(() => {
-    if (game.status === 'countdown') {
-      if (countdown > 0) {
-        const timerId = setInterval(() => setCountdown(prev => prev - 1), 1000);
-        return () => clearInterval(timerId);
-      } else {
-        onCountdownComplete();
-      }
+    if (game.status !== 'countdown') return;
+
+    const timerId = setInterval(() => {
+      setCountdown(prev => {
+        if (prev <= 1) {
+          clearInterval(timerId);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(timerId);
+  }, [game.status, game.round]);
+
+  // Handle countdown complete
+  useEffect(() => {
+    if (game.status === 'countdown' && countdown === 0) {
+      onCountdownComplete();
     }
-  }, [game.status, countdown, game.gamePin]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [countdown, game.status]);
 
   // Playing timer logic
   useEffect(() => {
@@ -59,7 +71,8 @@ export function ProjectorView({
 
       }, 2500);
     }
-  }, [timeLeft, game.status, game.round, onNextRound, onShowLeaderboard, onEndGame, showAnswer]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [timeLeft, game.status, game.round, showAnswer]);
 
   // Reset timer when round changes
   useEffect(() => {

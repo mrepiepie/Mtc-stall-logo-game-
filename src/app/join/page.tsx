@@ -99,20 +99,36 @@ export default function JoinPage() {
 
   // Local timer synced loosely when playing state starts
   useEffect(() => {
-    if (step === 'countdown' && countdown > 0) {
-      const timerId = setInterval(() => setCountdown(prev => prev - 1), 1000);
+    if (step === 'countdown') {
+      const timerId = setInterval(() => {
+        setCountdown(prev => {
+          if (prev <= 1) {
+            clearInterval(timerId);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
       return () => clearInterval(timerId);
     }
 
-    if (step === 'playing' && timeLeft > 0) {
-      const timerId = setInterval(() => setTimeLeft(prev => prev - 1), 1000);
+    if (step === 'playing') {
+      const timerId = setInterval(() => {
+        setTimeLeft(prev => {
+          if (prev <= 1) {
+            clearInterval(timerId);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
       return () => clearInterval(timerId);
     }
-  }, [step, timeLeft, countdown]);
+  }, [step, round]);
 
   // Mascot trigger
   useEffect(() => {
-    if (step !== 'playing' || hasGuessed) {
+    if (step !== 'playing' || hasGuessed || timeLeft <= 0) {
       if (mascotRef.current?.classList.contains('is-showing')) {
         mascotRef.current?.classList.remove('is-showing');
         gsap.to(mascotRef.current, { y: -20, opacity: 0, scale: 0.8, duration: 0.3, ease: 'back.in(1.5)', overwrite: true, onComplete: () => {
