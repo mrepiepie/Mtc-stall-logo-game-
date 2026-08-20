@@ -38,6 +38,7 @@ function AnimatedHero() {
 
   return (
     <div className="w-full relative h-full flex flex-col justify-center pl-8 lg:pl-16 xl:pl-24 py-6">
+      <button onClick={() => window.open("/admin", "_blank")} className="absolute top-4 right-4 md:top-8 md:right-8 z-50 group bg-[#111] text-zinc-400 hover:text-white font-bold text-xs px-4 py-2 border-2 border-zinc-800 hover:border-zinc-500 transition-all flex items-center gap-2 uppercase tracking-widest">Admin <MoveRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" /></button>
       <div className="relative z-10 flex flex-col items-start justify-center">
         {/* MTC Top Badge */}
         <div className="flex items-center gap-2 mb-4">
@@ -95,13 +96,6 @@ function AnimatedHero() {
             Multiplayer
             {/* Mario visual flair */}
             <span className="absolute -bottom-2 -right-2 text-3xl opacity-50 group-hover:opacity-100 group-hover:-translate-y-2 transition-all duration-300">⭐</span>
-          </button>
-          
-          <button 
-            onClick={() => window.open('/admin', '_blank')}
-            className="group relative flex-none bg-[#111] text-zinc-400 font-bold text-sm px-6 py-5 border-4 border-zinc-800 hover:border-zinc-500 hover:text-white transition-all flex items-center justify-center gap-2 uppercase tracking-widest sm:w-auto w-full"
-          >
-            Admin <MoveRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
           </button>
         </div>
         

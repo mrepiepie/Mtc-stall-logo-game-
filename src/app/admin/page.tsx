@@ -462,19 +462,7 @@ function AdminDashboard() {
                   </div>
                 </div>
 
-              <div className="mt-4 grid gap-2 border-t-2 border-black/20 pt-4 sm:grid-cols-2">
-                {createdGame.questions.map((question, index) => (
-                  <div key={question.id} className="flex min-w-0 items-center gap-3 border-2 border-black/10 p-2">
-                    <span className="font-mono text-xs font-black text-red-600">{String(index + 1).padStart(2, "0")}</span>
-                    <div className="flex h-8 w-8 shrink-0 items-center justify-center border-2 border-black bg-[#f4f0e6] p-1">
-                      {question.image_url ? <img src={question.image_url} alt="" className="h-full w-full object-contain" /> : <ImageIcon className="h-4 w-4 text-zinc-400" />}
-                    </div>
-                    <span className="min-w-0 flex-1 truncate font-bold uppercase">{question.answer}</span>
-                    <span className="border-2 border-black bg-yellow-300 px-2 py-1 text-[10px] font-black uppercase">{question.difficulty}</span>
-                  </div>
-                ))}
               </div>
-            </div>
           )}
         </section>
         <section className="mt-12" aria-labelledby="question-bank-heading">
