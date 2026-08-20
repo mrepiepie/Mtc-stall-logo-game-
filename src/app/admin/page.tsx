@@ -251,6 +251,20 @@ function AdminDashboard() {
     }
   };
 
+  // Send beacon on unload to notify students if admin drops
+  useEffect(() => {
+    if (!createdGame?.gamePin || createdGame.status === 'gameover' || createdGame.status === 'timed_out') return;
+    
+    const handleBeforeUnload = () => {
+      // Use sendBeacon to reliably fire a request when the tab is closing
+      const payload = JSON.stringify({ pin: createdGame.gamePin, status: 'crashed' });
+      navigator.sendBeacon('/api/games/set_status', new Blob([payload], { type: 'application/json' }));
+    };
+    
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [createdGame?.gamePin, createdGame?.status]);
+
   // Poll for players (with 10-minute auto-timeout to save limits)
   useEffect(() => {
     if (!createdGame || createdGame.status === 'timed_out' || createdGame.status === 'gameover') return;

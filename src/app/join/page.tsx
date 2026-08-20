@@ -229,8 +229,16 @@ export default function JoinPage() {
           } else if (newStatus === 'waiting' && step !== 'waiting') {
             setStep('waiting');
           } else if (newStatus === 'gameover') {
-            setStep('leaderboard');
-          }
+              setStep('form');
+              setError('GAME OVER. The host has ended the game. Start a new lobby.');
+              setGameCode('');
+              return;
+            } else if (newStatus === 'crashed') {
+              setStep('form');
+              setError('HOST DISCONNECTED. The admin panel closed. Start a new lobby.');
+              setGameCode('');
+              return;
+            }
         }
       )
       .subscribe();
