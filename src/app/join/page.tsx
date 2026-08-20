@@ -1,11 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { User, KeyRound, ArrowRight, Loader2, Send, AlertTriangle } from 'lucide-react';
 import gsap from 'gsap';
 import { supabase } from '@/lib/supabaseClient';
 
 export default function JoinPage() {
+  const router = useRouter();
   const [gameCode, setGameCode] = useState('');
   const [playerName, setPlayerName] = useState('');
   const [isJoining, setIsJoining] = useState(false);
@@ -19,30 +21,38 @@ export default function JoinPage() {
 
   const handleJoin = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!gameCode || !playerName) return;
+    if (!gameCode || !playerName) {
+      setError('PLEASE ENTER CODE AND NAME');
+      gsap.fromTo('.code-input-wrapper', { x: -6 }, { x: 0, duration: 0.1, yoyo: true, repeat: 4 });
+      return;
+    }
 
     setError('');
     setIsJoining(true);
-        // Hit the backend API to validate the PIN
-      fetch(`/api/games/${gameCode}`)
-        .then(res => res.json())
-        .then(data => {
-          if (!data.success) {
-            setIsJoining(false);
-            setError(data.error || 'INVALID CODE');
-            gsap.fromTo('.code-input-wrapper', { x: -6 }, { x: 0, duration: 0.1, yoyo: true, repeat: 4 });
-            return;
-          }
 
+    fetch('/api/games/join', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ pin: gameCode, playerName })
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (!data.success) {
           setIsJoining(false);
-          setStep('waiting');
-          gsap.fromTo('.waiting-container', { opacity: 0, scale: 0.9 }, { opacity: 1, scale: 1, duration: 0.4, ease: 'back.out(1.2)' });
-        })
-        .catch(err => {
-          setIsJoining(false);
-          setError('NETWORK ERROR');
+          setError(data.error || 'INVALID CODE');
           gsap.fromTo('.code-input-wrapper', { x: -6 }, { x: 0, duration: 0.1, yoyo: true, repeat: 4 });
-        });
+          return;
+        }
+
+        setIsJoining(false);
+        setStep('waiting');
+        gsap.fromTo('.waiting-container', { opacity: 0, scale: 0.9 }, { opacity: 1, scale: 1, duration: 0.4, ease: 'back.out(1.2)' });
+      })
+      .catch(err => {
+        setIsJoining(false);
+        setError('NETWORK ERROR');
+        gsap.fromTo('.code-input-wrapper', { x: -6 }, { x: 0, duration: 0.1, yoyo: true, repeat: 4 });
+      });
   };
 
   // Fake timer for prototyping the "Playing" state
@@ -57,9 +67,9 @@ export default function JoinPage() {
 
   // --- REALTIME WEBSOCKET TUNNEL ---
   useEffect(() => {
-    if (step !== 'waiting') return;
+    if (step !== 'waiting' || !gameCode) return;
 
-    // Subscribe to changes on the active_game table
+    // Subscribe to changes on the active_game table for THIS specific PIN
     const channel = supabase
       .channel('schema-db-changes')
       .on(
@@ -68,13 +78,13 @@ export default function JoinPage() {
           event: 'UPDATE',
           schema: 'public',
           table: 'active_game',
-          filter: 'id=eq=1'
+          filter: `id=eq=${gameCode}`
         },
         (payload: any) => {
           console.log('Realtime Event Received!', payload);
-          // When the admin changes status to 'playing', instantly start the game!
+          // When the admin changes status to 'playing', teleport them!
           if (payload.new.status === 'playing') {
-            setStep('playing');
+             router.push(`/play?pin=${gameCode}&player=${playerName}`);
           }
         }
       )
@@ -83,7 +93,7 @@ export default function JoinPage() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [step]);
+  }, [step, gameCode, playerName, router]);
 
   const submitGuess = (e: React.FormEvent) => {
     e.preventDefault();
