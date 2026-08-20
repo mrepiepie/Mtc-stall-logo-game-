@@ -381,10 +381,105 @@ function AdminDashboard() {
           </div>
         </header>
 
-        <section aria-labelledby="question-bank-heading">
+        <section className="border-4 border-black bg-[#f4f0e6] p-5 text-black shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] sm:p-7" aria-labelledby="game-rounds-heading">
+          <div className="flex flex-col gap-5 border-b-4 border-black pb-5 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <p className="mb-1 font-mono text-xs font-bold uppercase tracking-[0.25em] text-red-600">01 / Host Controls</p>
+              <h2 id="game-rounds-heading" className="text-3xl font-black uppercase tracking-tight">Game Rounds</h2>
+              <p className="mt-2 max-w-2xl font-bold leading-relaxed text-zinc-600">Create a waiting room with ten randomized questions for your next Byte Blitz round.</p>
+            </div>
+            <Gamepad2 className="h-12 w-12 shrink-0 text-red-600" />
+          </div>
+
+          <div className="mt-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <button type="button" onClick={handleCreateGame} disabled={isCreatingGame} className="flex items-center justify-center gap-2 border-4 border-black bg-red-600 px-5 py-4 text-sm font-black uppercase tracking-widest text-white shadow-[5px_5px_0px_0px_rgba(0,0,0,1)] transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-none disabled:cursor-not-allowed disabled:opacity-60">
+              <Plus className="h-5 w-5" />
+              {isCreatingGame ? "Creating..." : "Create New Game"}
+            </button>
+            {gameError && <p role="alert" className="border-2 border-black bg-red-600 px-3 py-2 text-center text-xs font-black uppercase tracking-widest text-white">{gameError}</p>}
+          </div>
+
+          {createdGame && (
+            <div className="mt-5 border-4 border-black bg-white p-4 shadow-[5px_5px_0px_0px_rgba(0,0,0,1)]">
+              <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_repeat(3,auto)] sm:items-center">
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">Game PIN</p>
+                  <p className="font-mono text-5xl font-black tracking-[0.12em] text-red-600">{createdGame.gamePin}</p>
+                </div>
+                <div><p className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Questions</p><p className="font-mono text-2xl font-black">{createdGame.questions.length}</p></div>
+                <div><p className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Round</p><p className="font-mono text-2xl font-black">{createdGame.round}</p></div>
+                <div>
+                    <p className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Status</p>
+                    <p className={`font-black uppercase ${createdGame.status === 'playing' ? 'text-blue-600' : 'text-[#008f5a]'}`}>
+                      {createdGame.status === 'timed_out' ? 'Timed Out' : createdGame.status}
+                    </p>
+                  </div>
+                  <div className="flex flex-col gap-2 sm:col-start-2">
+                    <button type="button" onClick={handleCopyPin} className="flex items-center justify-center gap-2 border-2 border-black bg-[#f4f0e6] px-3 py-2 text-xs font-black uppercase tracking-widest transition-colors hover:bg-yellow-300">
+                      <Copy className="h-4 w-4" />
+                      {isPinCopied ? "Copied" : "Copy PIN"}
+                    </button>
+                    {createdGame.status === 'waiting' && (
+                      <button 
+                        type="button" 
+                        onClick={async () => {
+                          await fetch('/api/games/start', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ pin: createdGame.gamePin }) });
+                          setCreatedGame(prev => prev ? { ...prev, status: 'countdown' } : null);
+                        }}
+                        className="flex items-center justify-center gap-2 border-2 border-black bg-red-600 text-white px-3 py-2 text-xs font-black uppercase tracking-widest transition-colors hover:bg-red-500"
+                      >
+                        Start Lobby
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                <div className="mt-4 border-t-2 border-black/20 pt-4">
+                  <p className="mb-2 text-xs font-black uppercase tracking-widest text-zinc-500">Players Joined ({createdGame.players?.length || 0}/10)</p>
+                  <div className="flex flex-wrap gap-2">
+                    {createdGame.players?.map((p: string, i: number) => (
+                      <span key={i} className="group flex items-center gap-1 bg-yellow-300 border-2 border-black px-2 py-1 text-xs font-bold uppercase">
+                        {p}
+                        {createdGame.status === 'waiting' && (
+                          <button 
+                            type="button" 
+                            onClick={async () => {
+                              await fetch('/api/games/kick', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ pin: createdGame.gamePin, playerName: p }) });
+                              setCreatedGame(prev => prev ? { ...prev, players: (prev.players || []).filter(name => name !== p) } : null);
+                            }} 
+                            className="text-red-600 hover:bg-red-200 rounded px-1 ml-1" 
+                            title="Kick Player"
+                          >
+                            ✕
+                          </button>
+                        )}
+                      </span>
+                    ))}
+                    {(!createdGame.players || createdGame.players.length === 0) && (
+                      <span className="text-sm font-bold text-zinc-400">Waiting for players...</span>
+                    )}
+                  </div>
+                </div>
+
+              <div className="mt-4 grid gap-2 border-t-2 border-black/20 pt-4 sm:grid-cols-2">
+                {createdGame.questions.map((question, index) => (
+                  <div key={question.id} className="flex min-w-0 items-center gap-3 border-2 border-black/10 p-2">
+                    <span className="font-mono text-xs font-black text-red-600">{String(index + 1).padStart(2, "0")}</span>
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center border-2 border-black bg-[#f4f0e6] p-1">
+                      {question.image_url ? <img src={question.image_url} alt="" className="h-full w-full object-contain" /> : <ImageIcon className="h-4 w-4 text-zinc-400" />}
+                    </div>
+                    <span className="min-w-0 flex-1 truncate font-bold uppercase">{question.answer}</span>
+                    <span className="border-2 border-black bg-yellow-300 px-2 py-1 text-[10px] font-black uppercase">{question.difficulty}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </section>
+        <section className="mt-12" aria-labelledby="question-bank-heading">
           <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <p className="font-mono text-xs font-bold uppercase tracking-[0.25em] text-red-500">01 / Content Ops</p>
+              <p className="font-mono text-xs font-bold uppercase tracking-[0.25em] text-red-500">02 / Content Ops</p>
               <h2 id="question-bank-heading" className="text-3xl font-black uppercase tracking-tight text-white sm:text-4xl">
                 Question Bank
               </h2>
@@ -528,102 +623,6 @@ function AdminDashboard() {
               </div>
             </section>
           </div>
-        </section>
-
-        <section className="mt-12 border-4 border-black bg-[#f4f0e6] p-5 text-black shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] sm:p-7" aria-labelledby="game-rounds-heading">
-          <div className="flex flex-col gap-5 border-b-4 border-black pb-5 sm:flex-row sm:items-start sm:justify-between">
-            <div>
-              <p className="mb-1 font-mono text-xs font-bold uppercase tracking-[0.25em] text-red-600">02 / Host Controls</p>
-              <h2 id="game-rounds-heading" className="text-3xl font-black uppercase tracking-tight">Game Rounds</h2>
-              <p className="mt-2 max-w-2xl font-bold leading-relaxed text-zinc-600">Create a waiting room with ten randomized questions for your next Byte Blitz round.</p>
-            </div>
-            <Gamepad2 className="h-12 w-12 shrink-0 text-red-600" />
-          </div>
-
-          <div className="mt-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <button type="button" onClick={handleCreateGame} disabled={isCreatingGame} className="flex items-center justify-center gap-2 border-4 border-black bg-red-600 px-5 py-4 text-sm font-black uppercase tracking-widest text-white shadow-[5px_5px_0px_0px_rgba(0,0,0,1)] transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-none disabled:cursor-not-allowed disabled:opacity-60">
-              <Plus className="h-5 w-5" />
-              {isCreatingGame ? "Creating..." : "Create New Game"}
-            </button>
-            {gameError && <p role="alert" className="border-2 border-black bg-red-600 px-3 py-2 text-center text-xs font-black uppercase tracking-widest text-white">{gameError}</p>}
-          </div>
-
-          {createdGame && (
-            <div className="mt-5 border-4 border-black bg-white p-4 shadow-[5px_5px_0px_0px_rgba(0,0,0,1)]">
-              <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_repeat(3,auto)] sm:items-center">
-                <div>
-                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">Game PIN</p>
-                  <p className="font-mono text-5xl font-black tracking-[0.12em] text-red-600">{createdGame.gamePin}</p>
-                </div>
-                <div><p className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Questions</p><p className="font-mono text-2xl font-black">{createdGame.questions.length}</p></div>
-                <div><p className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Round</p><p className="font-mono text-2xl font-black">{createdGame.round}</p></div>
-                <div>
-                    <p className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Status</p>
-                    <p className={`font-black uppercase ${createdGame.status === 'playing' ? 'text-blue-600' : 'text-[#008f5a]'}`}>
-                      {createdGame.status === 'timed_out' ? 'Timed Out' : createdGame.status}
-                    </p>
-                  </div>
-                  <div className="flex flex-col gap-2 sm:col-start-2">
-                    <button type="button" onClick={handleCopyPin} className="flex items-center justify-center gap-2 border-2 border-black bg-[#f4f0e6] px-3 py-2 text-xs font-black uppercase tracking-widest transition-colors hover:bg-yellow-300">
-                      <Copy className="h-4 w-4" />
-                      {isPinCopied ? "Copied" : "Copy PIN"}
-                    </button>
-                    {createdGame.status === 'waiting' && (
-                      <button 
-                        type="button" 
-                        onClick={async () => {
-                          await fetch('/api/games/start', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ pin: createdGame.gamePin }) });
-                          setCreatedGame(prev => prev ? { ...prev, status: 'countdown' } : null);
-                        }}
-                        className="flex items-center justify-center gap-2 border-2 border-black bg-red-600 text-white px-3 py-2 text-xs font-black uppercase tracking-widest transition-colors hover:bg-red-500"
-                      >
-                        Start Lobby
-                      </button>
-                    )}
-                  </div>
-                </div>
-
-                <div className="mt-4 border-t-2 border-black/20 pt-4">
-                  <p className="mb-2 text-xs font-black uppercase tracking-widest text-zinc-500">Players Joined ({createdGame.players?.length || 0}/10)</p>
-                  <div className="flex flex-wrap gap-2">
-                    {createdGame.players?.map((p: string, i: number) => (
-                      <span key={i} className="group flex items-center gap-1 bg-yellow-300 border-2 border-black px-2 py-1 text-xs font-bold uppercase">
-                        {p}
-                        {createdGame.status === 'waiting' && (
-                          <button 
-                            type="button" 
-                            onClick={async () => {
-                              await fetch('/api/games/kick', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ pin: createdGame.gamePin, playerName: p }) });
-                              setCreatedGame(prev => prev ? { ...prev, players: (prev.players || []).filter(name => name !== p) } : null);
-                            }} 
-                            className="text-red-600 hover:bg-red-200 rounded px-1 ml-1" 
-                            title="Kick Player"
-                          >
-                            ✕
-                          </button>
-                        )}
-                      </span>
-                    ))}
-                    {(!createdGame.players || createdGame.players.length === 0) && (
-                      <span className="text-sm font-bold text-zinc-400">Waiting for players...</span>
-                    )}
-                  </div>
-                </div>
-
-              <div className="mt-4 grid gap-2 border-t-2 border-black/20 pt-4 sm:grid-cols-2">
-                {createdGame.questions.map((question, index) => (
-                  <div key={question.id} className="flex min-w-0 items-center gap-3 border-2 border-black/10 p-2">
-                    <span className="font-mono text-xs font-black text-red-600">{String(index + 1).padStart(2, "0")}</span>
-                    <div className="flex h-8 w-8 shrink-0 items-center justify-center border-2 border-black bg-[#f4f0e6] p-1">
-                      {question.image_url ? <img src={question.image_url} alt="" className="h-full w-full object-contain" /> : <ImageIcon className="h-4 w-4 text-zinc-400" />}
-                    </div>
-                    <span className="min-w-0 flex-1 truncate font-bold uppercase">{question.answer}</span>
-                    <span className="border-2 border-black bg-yellow-300 px-2 py-1 text-[10px] font-black uppercase">{question.difficulty}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
         </section>
       </div>
     </main>
