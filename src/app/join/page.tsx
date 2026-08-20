@@ -357,17 +357,18 @@ export default function JoinPage() {
               <button 
                 type="submit"
                 disabled={isJoining || gameCode.length < 6 || !playerName}
-                className="group relative w-full bg-red-600 hover:bg-red-700 disabled:bg-zinc-400 text-white p-5 border-4 border-black font-black text-2xl uppercase tracking-widest transition-all hover:translate-y-[2px] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] disabled:shadow-none disabled:translate-y-[8px] active:translate-y-[8px] active:shadow-none mt-2 flex items-center justify-center gap-3"
+                className="group relative overflow-hidden w-full bg-red-600 hover:bg-red-700 disabled:bg-zinc-400 text-white p-5 border-4 border-black font-black text-2xl uppercase tracking-widest transition-all hover:translate-y-[2px] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] disabled:shadow-none disabled:translate-y-[8px] active:translate-y-[8px] active:shadow-none mt-2 flex items-center justify-center gap-3"
               >
                 {isJoining ? (
                   <>
-                    <Loader2 className="w-8 h-8 animate-spin" />
-                    Connecting...
+                    <Loader2 className="w-8 h-8 animate-spin z-10" />
+                    <span className="z-10">Connecting...</span>
                   </>
                 ) : (
                   <>
-                    Join Mission
-                    <ArrowRight className="w-8 h-8 group-hover:translate-x-2 transition-transform" />
+                    <span className="z-10">Join Mission</span>
+                    <ArrowRight className="w-8 h-8 group-hover:translate-x-2 transition-transform z-10" />
+                    <span className="absolute -bottom-2 -right-2 text-4xl opacity-50 group-hover:opacity-100 group-hover:-translate-y-2 transition-all duration-300">🍄</span>
                   </>
                 )}
               </button>
@@ -504,10 +505,11 @@ export default function JoinPage() {
                 <button 
                   type="submit"
                   disabled={isSubmitting || timeLeft <= 0}
-                  className="w-full bg-red-600 hover:bg-red-700 disabled:bg-zinc-400 text-white p-5 border-4 border-black font-black text-2xl uppercase tracking-widest transition-all hover:translate-y-[2px] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] active:translate-y-[8px] active:shadow-none flex items-center justify-center gap-3 disabled:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] disabled:translate-y-[2px]"
+                  className="group relative overflow-hidden w-full bg-red-600 hover:bg-red-700 disabled:bg-zinc-400 text-white p-5 border-4 border-black font-black text-2xl uppercase tracking-widest transition-all hover:translate-y-[2px] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] active:translate-y-[8px] active:shadow-none flex items-center justify-center gap-3 disabled:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] disabled:translate-y-[2px]"
                 >
-                  {isSubmitting ? <Loader2 className="w-6 h-6 animate-spin" /> : "Submit Answer"}
-                  {!isSubmitting && <Send className="w-6 h-6" />}
+                  <span className="z-10">{isSubmitting ? <Loader2 className="w-6 h-6 animate-spin inline" /> : "Submit Answer"}</span>
+                  {!isSubmitting && <Send className="w-6 h-6 z-10 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />}
+                  <span className="absolute -bottom-2 -left-2 text-4xl opacity-50 group-hover:opacity-100 group-hover:-translate-y-2 transition-all duration-300">⭐</span>
                 </button>
               </form>
             )}
