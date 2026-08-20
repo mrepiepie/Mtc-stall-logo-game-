@@ -63,7 +63,11 @@ export default function JoinPage() {
 
   const handleJoin = (e: React.FormEvent) => {
     if (e && e.preventDefault) e.preventDefault();
-    if (!gameCode || !playerName) {
+    
+    const trimmedName = playerName.trim();
+    const trimmedCode = gameCode.trim();
+
+    if (!trimmedCode || !trimmedName) {
       setError('PLEASE ENTER CODE AND NAME');
       gsap.fromTo('.code-input-wrapper', { x: -6 }, { x: 0, duration: 0.1, yoyo: true, repeat: 4 });
       return;
@@ -71,11 +75,15 @@ export default function JoinPage() {
 
     setError('');
     setIsJoining(true);
+    
+    // Update local state to trimmed versions so realtime payload matches
+    setPlayerName(trimmedName);
+    setGameCode(trimmedCode.toUpperCase());
 
     fetch('/api/games/join', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ pin: gameCode, playerName })
+      body: JSON.stringify({ pin: trimmedCode.toUpperCase(), playerName: trimmedName })
     })
       .then(res => res.json())
       .then(data => {
@@ -203,7 +211,8 @@ export default function JoinPage() {
             const newPlayers = payload.new.players || [];
             
             // Handle Kicking
-            if (step === 'waiting' && !newPlayers.includes(playerName)) {
+            const isStillInLobby = newPlayers.some((p: string) => p.trim().toLowerCase() === playerName.trim().toLowerCase());
+            if (step === 'waiting' && !isStillInLobby) {
               setStep('form');
               setError('YOU WERE KICKED FROM THE LOBBY');
               setGameCode('');
@@ -247,7 +256,7 @@ export default function JoinPage() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [step, gameCode, round]);
+  }, [step, gameCode, round, playerName]);
 
   const submitGuess = (e?: React.FormEvent) => {
     if (e && e.preventDefault) e.preventDefault();
