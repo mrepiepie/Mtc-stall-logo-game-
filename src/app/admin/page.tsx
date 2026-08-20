@@ -271,7 +271,7 @@ function AdminDashboard() {
         .then(res => res.json())
         .then(data => {
           if (data.success && data.players) {
-            setCreatedGame(prev => prev ? { ...prev, players: data.players, status: data.status, round: data.round, scores: data.scores } : null);
+            setCreatedGame(prev => prev ? { ...prev, players: data.players, scores: data.scores } : null);
           }
         })
         .catch(console.error);

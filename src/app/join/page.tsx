@@ -468,9 +468,10 @@ export default function JoinPage() {
                       const rawGuess = guess.replace(/ /g, '');
                       const guessChar = rawGuess[nonSpaceIdx] || '';
                       const isFilled = guessChar !== '';
+                      const isCorrect = rawGuess.toLowerCase() === expectedNoSpaces.toLowerCase();
                       
                       return (
-                        <div key={i} className={`w-8 h-10 md:w-10 md:h-12 border-b-4 flex items-center justify-center font-black text-2xl uppercase transition-all duration-150 ${isFilled ? 'border-red-600 text-red-600 -translate-y-1' : 'border-black text-black'}`}>
+                        <div key={i} className={`w-8 h-10 md:w-10 md:h-12 border-b-4 flex items-center justify-center font-black text-2xl uppercase transition-all duration-150 ${isFilled ? (isCorrect ? 'border-green-600 text-green-600 -translate-y-1' : 'border-red-600 text-red-600 -translate-y-1') : 'border-black text-black'}`}>
                           {guessChar}
                         </div>
                       );
