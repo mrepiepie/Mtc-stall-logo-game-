@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { User, KeyRound, ArrowRight, Loader2, Send, AlertTriangle } from 'lucide-react';
 import gsap from 'gsap';
 import { supabase } from '@/lib/supabaseClient';
+import { DeBugger } from '@/components/ui/de-bugger';
 
 const JOKES_FAST = [
   { text: "Woah that was quick.. calm down twin", emoji: "💀" },
@@ -297,6 +298,13 @@ export default function JoinPage() {
       
       {/* Background Dots */}
       <div className="absolute inset-0 bg-[radial-gradient(#333_2px,transparent_2px)] bg-[size:24px_24px] pointer-events-none z-0"></div>
+
+      {/* Retro arcade DeBugger animation in the background */}
+      <div className="absolute inset-0 z-0 pointer-events-none flex items-center justify-center overflow-hidden">
+        <div className="scale-[2] sm:scale-[3] opacity-20 mix-blend-screen w-full h-full relative">
+          <DeBugger />
+        </div>
+      </div>
 
       {step === 'form' && (
         <div className="relative z-10 w-full max-w-md animate-in fade-in slide-in-from-bottom-8 duration-500">
