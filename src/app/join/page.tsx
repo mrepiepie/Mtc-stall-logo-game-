@@ -6,40 +6,38 @@ import { User, KeyRound, ArrowRight, Loader2, Send, AlertTriangle } from 'lucide
 import gsap from 'gsap';
 import { supabase } from '@/lib/supabaseClient';
 
-const NOTO_BASE = 'https://raw.githubusercontent.com/googlefonts/noto-emoji/main/png/512/emoji_u';
-
 const JOKES_FAST = [
-  { text: "Woah that was quick.. calm down twin", emoji: `${NOTO_BASE}/1f480/512.webp` },
-  { text: "Bro is literally a human scanner", emoji: `${NOTO_BASE}/1f92f/512.webp` },
-  { text: "Are you cheating?!", emoji: `${NOTO_BASE}/1f928/512.webp` },
-  { text: "Speedforce activated", emoji: `${NOTO_BASE}/26a1/512.webp` },
-  { text: "Bro has 20/20 vision", emoji: `${NOTO_BASE}/1f440/512.webp` },
-  { text: "Unreal reaction time", emoji: `${NOTO_BASE}/1f680/512.webp` },
+  { text: "Woah that was quick.. calm down twin", emoji: "💀" },
+  { text: "Bro is literally a human scanner", emoji: "🤯" },
+  { text: "Are you cheating?!", emoji: "🤨" },
+  { text: "Speedforce activated", emoji: "⚡" },
+  { text: "Bro has 20/20 vision", emoji: "👀" },
+  { text: "Unreal reaction time", emoji: "🚀" },
 ];
 const JOKES_MID = [
-  { text: "Solid pace, but I've seen faster", emoji: `${NOTO_BASE}/1f971/512.webp` },
-  { text: "Not bad, but don't get cocky", emoji: `${NOTO_BASE}/1f921/512.webp` },
-  { text: "Acceptable... barely.", emoji: `${NOTO_BASE}/1f644/512.webp` },
-  { text: "Average behavior.", emoji: `${NOTO_BASE}/1f610/512.webp` },
-  { text: "You're doing okay sweetie", emoji: `${NOTO_BASE}/1f485_1f3fc/512.webp` },
-  { text: "Nothing to brag about", emoji: `${NOTO_BASE}/1f937_1f3fd_200d_2642_fe0f/512.webp` },
+  { text: "Solid pace, but I've seen faster", emoji: "🥱" },
+  { text: "Not bad, but don't get cocky", emoji: "🤡" },
+  { text: "Acceptable... barely.", emoji: "🙄" },
+  { text: "Average behavior.", emoji: "😐" },
+  { text: "You're doing okay sweetie", emoji: "💅" },
+  { text: "Nothing to brag about", emoji: "🤷‍♂️" },
 ];
 const JOKES_SLOW = [
-  { text: "Fighting for your life out here", emoji: `${NOTO_BASE}/1f975/512.webp` },
-  { text: "Bro was sweating bullets", emoji: `${NOTO_BASE}/1f630/512.webp` },
-  { text: "My grandma types faster...", emoji: `${NOTO_BASE}/1f475_1f3fc/512.webp` },
-  { text: "Did you fall asleep?", emoji: `${NOTO_BASE}/1f634/512.webp` },
-  { text: "Barely made it out alive", emoji: `${NOTO_BASE}/1f915/512.webp` },
-  { text: "Bro is playing in slow motion", emoji: `${NOTO_BASE}/1f40c/512.webp` },
+  { text: "Fighting for your life out here", emoji: "🥵" },
+  { text: "Bro was sweating bullets", emoji: "😰" },
+  { text: "My grandma types faster...", emoji: "👵" },
+  { text: "Did you fall asleep?", emoji: "😴" },
+  { text: "Barely made it out alive", emoji: "🤕" },
+  { text: "Bro is playing in slow motion", emoji: "🐌" },
 ];
 const JOKES_FAIL = [
-  { text: "Bro was literally sleeping", emoji: `${NOTO_BASE}/1f634/512.webp` },
-  { text: "Is your keyboard even plugged in?", emoji: `${NOTO_BASE}/2328_fe0f/512.webp` },
-  { text: "Embarrassing tbh", emoji: `${NOTO_BASE}/1f926_1f3fc_200d_2642_fe0f/512.webp` },
-  { text: "You're getting cooked out here", emoji: `${NOTO_BASE}/1f373/512.webp` },
-  { text: "0 points. 0 aura.", emoji: `${NOTO_BASE}/1f480/512.webp` },
-  { text: "My screen froze... yeah right.", emoji: `${NOTO_BASE}/1f976/512.webp` },
-  { text: "HURRY UP TWIN! TIME IS TICKING...", emoji: `${NOTO_BASE}/1f47d/512.webp` }
+  { text: "Bro was literally sleeping", emoji: "😴" },
+  { text: "Is your keyboard even plugged in?", emoji: "⌨️" },
+  { text: "Embarrassing tbh", emoji: "🤦‍♂️" },
+  { text: "You're getting cooked out here", emoji: "🍳" },
+  { text: "0 points. 0 aura.", emoji: "💀" },
+  { text: "My screen froze... yeah right.", emoji: "🥶" },
+  { text: "HURRY UP TWIN! TIME IS TICKING...", emoji: "👽" }
 ];
 
 export default function JoinPage() {
@@ -307,7 +305,6 @@ export default function JoinPage() {
         </div>
       )}
 
-      
       {step === 'countdown' && (
         <div className="relative z-10 w-full max-w-lg flex flex-col items-center justify-center animate-in fade-in zoom-in duration-500">
           <div className="bg-[#f4f0e6] border-4 border-black shadow-[16px_16px_0px_0px_rgba(0,0,0,1)] rounded-none w-full p-10 flex flex-col items-center justify-center text-center">
@@ -354,7 +351,7 @@ export default function JoinPage() {
             className="absolute -top-4 -right-4 md:-right-12 z-50 opacity-0 invisible origin-top-right"
           >
             <div className="bg-[#f4f0e6] shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] border-4 border-black p-4 flex flex-col items-center justify-center min-w-[200px] rounded-none relative z-0">
-              <img src={`${NOTO_BASE}/1f47d/512.webp`} className="w-16 h-16 drop-shadow-md mb-2 animate-[bounce_1s_infinite]" alt="Mascot" />
+              <div className="text-6xl drop-shadow-md mb-2 animate-[bounce_1s_infinite]">👽</div>
               <div className="font-black text-red-600 text-lg uppercase tracking-widest text-center leading-tight">Hurry Up Twin!</div>
               <div className="text-black font-black uppercase tracking-wider text-sm mt-1 text-center">Time is ticking...</div>
             </div>
@@ -382,9 +379,9 @@ export default function JoinPage() {
                   )}
 
                   {joke && (
-                    <div className="flex items-center gap-3 bg-white px-6 py-4 border-4 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] rounded-none text-center mx-4 mt-6">
+                    <div className="flex items-center justify-center gap-3 bg-white px-6 py-4 border-4 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] rounded-none text-center mx-4 mt-6 max-w-full">
                       <span className="text-lg font-black uppercase text-black">{joke.text}</span>
-                      <img src={joke.emoji} className="w-10 h-10 drop-shadow-sm flex-shrink-0" alt="emoji" />
+                      <span className="text-4xl drop-shadow-sm flex-shrink-0">{joke.emoji}</span>
                     </div>
                   )}
 
@@ -396,16 +393,17 @@ export default function JoinPage() {
                   type="text" 
                   value={guess}
                   onChange={(e) => setGuess(e.target.value)}
-                  placeholder="TYPE YOUR ANSWER..." 
+                  placeholder={timeLeft <= 0 ? "TIME IS UP!" : "TYPE YOUR ANSWER..."}
                   className="w-full bg-white border-4 border-black p-5 text-2xl font-black text-black placeholder:text-zinc-300 focus:outline-none focus:ring-4 focus:ring-red-500/20 rounded-none uppercase tracking-widest transition-all text-center"
                   required
                   autoFocus
+                  disabled={isSubmitting || timeLeft <= 0}
                 />
                 
                 <button 
                   type="submit"
-                  disabled={isSubmitting}
-                  className="w-full bg-red-600 hover:bg-red-700 disabled:bg-red-400 text-white p-5 border-4 border-black font-black text-2xl uppercase tracking-widest transition-all hover:translate-y-[2px] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] active:translate-y-[8px] active:shadow-none flex items-center justify-center gap-3"
+                  disabled={isSubmitting || timeLeft <= 0}
+                  className="w-full bg-red-600 hover:bg-red-700 disabled:bg-zinc-400 text-white p-5 border-4 border-black font-black text-2xl uppercase tracking-widest transition-all hover:translate-y-[2px] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] active:translate-y-[8px] active:shadow-none flex items-center justify-center gap-3 disabled:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] disabled:translate-y-[2px]"
                 >
                   {isSubmitting ? <Loader2 className="w-6 h-6 animate-spin" /> : "Submit Answer"}
                   {!isSubmitting && <Send className="w-6 h-6" />}
