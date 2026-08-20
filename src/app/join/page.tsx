@@ -61,7 +61,7 @@ export default function JoinPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleJoin = (e: React.FormEvent) => {
-    e.preventDefault();
+    if (e && e.preventDefault) e.preventDefault();
     if (!gameCode || !playerName) {
       setError('PLEASE ENTER CODE AND NAME');
       gsap.fromTo('.code-input-wrapper', { x: -6 }, { x: 0, duration: 0.1, yoyo: true, repeat: 4 });
@@ -96,6 +96,28 @@ export default function JoinPage() {
         gsap.fromTo('.code-input-wrapper', { x: -6 }, { x: 0, duration: 0.1, yoyo: true, repeat: 4 });
       });
   };
+
+  // Auto-submit when typing correct answer
+  useEffect(() => {
+    if (step === 'playing' && guess && formats[round - 1] && !hasGuessed && !isSubmitting) {
+      const target = formats[round - 1].replace(/ /g, '').toLowerCase();
+      const current = guess.replace(/ /g, '').toLowerCase();
+      if (target === current) {
+        submitGuess();
+      }
+    }
+  }, [guess, formats, round, hasGuessed, isSubmitting, step]);
+
+  // Auto-submit when typing correct answer
+  useEffect(() => {
+    if (step === 'playing' && guess && formats[round - 1] && !hasGuessed && !isSubmitting) {
+      const target = formats[round - 1].replace(/ /g, '').toLowerCase();
+      const current = guess.replace(/ /g, '').toLowerCase();
+      if (target === current) {
+        submitGuess();
+      }
+    }
+  }, [guess, formats, round, hasGuessed, isSubmitting, step]);
 
   // Fallback to fetch formats if they are missing
   useEffect(() => {
@@ -177,6 +199,15 @@ export default function JoinPage() {
         (payload: any) => {
           const newStatus = payload.new.status;
           const newRound = payload.new.round;
+            const newPlayers = payload.new.players || [];
+            
+            // Handle Kicking
+            if (step === 'waiting' && !newPlayers.includes(playerName)) {
+              setStep('form');
+              setError('YOU WERE KICKED FROM THE LOBBY');
+              setGameCode('');
+              return;
+            }
           
           if (newRound !== round) {
             setRound(newRound);
@@ -209,8 +240,8 @@ export default function JoinPage() {
     };
   }, [step, gameCode, round]);
 
-  const submitGuess = (e: React.FormEvent) => {
-    e.preventDefault();
+  const submitGuess = (e?: React.FormEvent) => {
+    if (e && e.preventDefault) e.preventDefault();
     if (!guess.trim() || isSubmitting || hasGuessed) return;
     
     setIsSubmitting(true);
