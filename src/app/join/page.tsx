@@ -99,7 +99,7 @@ export default function JoinPage() {
 
   // Fallback to fetch formats if they are missing
   useEffect(() => {
-    if (step === 'waiting' && formats.length === 0 && gameCode) {
+    if (step !== 'form' && formats.length === 0 && gameCode) {
       fetch(`/api/games/${gameCode}`)
         .then(r => r.json())
         .then(d => {

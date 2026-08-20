@@ -179,7 +179,7 @@ export function ProjectorView({
         {currentQuestion && (
           <PixelatedImage 
             src={currentQuestion.image_url} 
-            pixelSize={showAnswer ? 1 : Math.max(1, timeLeft <= 6 ? (timeLeft * 2) : 12)}
+            pixelSize={showAnswer ? 1 : Math.max(1, timeLeft)}
             className="w-full max-h-[50vh] object-contain transition-all duration-1000"
           />
         )}
