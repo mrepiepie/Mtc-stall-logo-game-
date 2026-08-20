@@ -96,7 +96,7 @@ export function ProjectorView({
 
   if (game.status === 'waiting') {
     return (
-      <div className="w-full min-h-[calc(100vh-6rem)] bg-[#f4f0e6] border-4 border-black p-4 md:p-8 shadow-[16px_16px_0px_0px_rgba(0,0,0,1)] flex flex-col items-center justify-center">
+      <div className="w-full min-h-screen bg-[#f4f0e6] border-4 border-black p-4 md:p-8 shadow-[16px_16px_0px_0px_rgba(0,0,0,1)] flex flex-col items-center justify-center">
         <h2 className="text-4xl font-black uppercase text-black mb-8 tracking-widest animate-pulse">Waiting to Start...</h2>
       </div>
     );
@@ -104,7 +104,7 @@ export function ProjectorView({
 
   if (game.status === 'countdown') {
     return (
-      <div className="w-full min-h-[calc(100vh-6rem)] bg-white border-4 border-black p-4 md:p-8 shadow-[16px_16px_0px_0px_rgba(0,0,0,1)] flex flex-col items-center justify-center">
+      <div className="w-full min-h-screen bg-white border-4 border-black p-4 md:p-8 shadow-[16px_16px_0px_0px_rgba(0,0,0,1)] flex flex-col items-center justify-center">
         <h2 className="text-4xl font-black uppercase text-black mb-8 tracking-widest">Get Ready...</h2>
         <div className="text-[12rem] leading-none font-black text-red-600 animate-[bounce_1s_infinite]">
           {countdown > 0 ? countdown : 'GO!'}
@@ -120,7 +120,7 @@ export function ProjectorView({
       .sort((a, b) => b.score - a.score);
 
     return (
-      <div className="w-full min-h-[calc(100vh-6rem)] bg-[#f4f0e6] border-4 border-black p-4 md:p-8 shadow-[16px_16px_0px_0px_rgba(0,0,0,1)] flex flex-col items-center text-black">
+      <div className="w-full min-h-screen bg-[#f4f0e6] border-4 border-black p-4 md:p-8 shadow-[16px_16px_0px_0px_rgba(0,0,0,1)] flex flex-col items-center text-black">
         <h2 className="text-4xl md:text-6xl font-black uppercase tracking-tighter mb-8 text-center">
           {game.status === 'gameover' ? 'Final Standings' : `Round ${game.round} Leaderboard`}
         </h2>
@@ -154,7 +154,7 @@ export function ProjectorView({
 
   // Playing Mode
   return (
-    <div className="w-full min-h-[calc(100vh-6rem)] bg-white border-4 border-black p-4 md:p-8 shadow-[16px_16px_0px_0px_rgba(0,0,0,1)] flex flex-col items-center text-black">
+    <div className="w-full min-h-screen bg-white border-4 border-black p-4 md:p-8 shadow-[16px_16px_0px_0px_rgba(0,0,0,1)] flex flex-col items-center text-black">
       
       {/* Top Bar */}
       <div className="w-full flex justify-between items-center mb-4 md:mb-8">
