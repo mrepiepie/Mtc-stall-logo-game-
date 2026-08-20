@@ -15,7 +15,7 @@ export function PixelatedImage({ src, pixelSize, className, onLoad }: PixelatedI
   useEffect(() => {
     setImgElement(null);
     const img = new Image();
-    img.crossOrigin = 'anonymous';
+    
     // Use direct src since we now encode logos as base64 data URIs
     img.src = src;
     img.onload = () => {

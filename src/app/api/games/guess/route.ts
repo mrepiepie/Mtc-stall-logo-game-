@@ -58,7 +58,7 @@ export async function POST(request: Request) {
 
       // Speed bonus: score = max_points * (time_remaining / total_time)
       // Minimum 10 points for getting it right even at the last second
-      pointsAwarded = Math.max(10, Math.floor(basePoints * (timeLeft / (maxTime || 30))));
+      pointsAwarded = Math.max(10, Math.floor(basePoints * (timeLeft / (maxTime || 10))));
     }
 
     // Update scores and guesses

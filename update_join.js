@@ -1,9 +1,68 @@
 const fs = require('fs');
-let code = fs.readFileSync('src/app/join/page.tsx', 'utf8');
 
-// Replace the handleJoin method
-const regexJoin = /const handleJoin = \(e: React\.FormEvent\) => \{[\s\S]*?fetch\(\`\/api\/games\/\$\{gameCode\}\`\)[\s\S]*?\}\);/;
-const newJoin = `const handleJoin = (e: React.FormEvent) => {
+const code = `'use client';
+
+import { useState, useEffect, useRef } from 'react';
+import { useRouter } from 'next/navigation';
+import { User, KeyRound, ArrowRight, Loader2, Send, AlertTriangle } from 'lucide-react';
+import gsap from 'gsap';
+import { supabase } from '@/lib/supabaseClient';
+
+const NOTO_BASE = 'https://raw.githubusercontent.com/googlefonts/noto-emoji/main/png/512/emoji_u';
+
+const JOKES_FAST = [
+  { text: "Woah that was quick.. calm down twin", emoji: \`\${NOTO_BASE}/1f480/512.webp\` },
+  { text: "Bro is literally a human scanner", emoji: \`\${NOTO_BASE}/1f92f/512.webp\` },
+  { text: "Are you cheating?!", emoji: \`\${NOTO_BASE}/1f928/512.webp\` },
+  { text: "Speedforce activated", emoji: \`\${NOTO_BASE}/26a1/512.webp\` },
+  { text: "Bro has 20/20 vision", emoji: \`\${NOTO_BASE}/1f440/512.webp\` },
+  { text: "Unreal reaction time", emoji: \`\${NOTO_BASE}/1f680/512.webp\` },
+];
+const JOKES_MID = [
+  { text: "Solid pace, but I've seen faster", emoji: \`\${NOTO_BASE}/1f971/512.webp\` },
+  { text: "Not bad, but don't get cocky", emoji: \`\${NOTO_BASE}/1f921/512.webp\` },
+  { text: "Acceptable... barely.", emoji: \`\${NOTO_BASE}/1f644/512.webp\` },
+  { text: "Average behavior.", emoji: \`\${NOTO_BASE}/1f610/512.webp\` },
+  { text: "You're doing okay sweetie", emoji: \`\${NOTO_BASE}/1f485_1f3fc/512.webp\` },
+  { text: "Nothing to brag about", emoji: \`\${NOTO_BASE}/1f937_1f3fd_200d_2642_fe0f/512.webp\` },
+];
+const JOKES_SLOW = [
+  { text: "Fighting for your life out here", emoji: \`\${NOTO_BASE}/1f975/512.webp\` },
+  { text: "Bro was sweating bullets", emoji: \`\${NOTO_BASE}/1f630/512.webp\` },
+  { text: "My grandma types faster...", emoji: \`\${NOTO_BASE}/1f475_1f3fc/512.webp\` },
+  { text: "Did you fall asleep?", emoji: \`\${NOTO_BASE}/1f634/512.webp\` },
+  { text: "Barely made it out alive", emoji: \`\${NOTO_BASE}/1f915/512.webp\` },
+  { text: "Bro is playing in slow motion", emoji: \`\${NOTO_BASE}/1f40c/512.webp\` },
+];
+const JOKES_FAIL = [
+  { text: "Bro was literally sleeping", emoji: \`\${NOTO_BASE}/1f634/512.webp\` },
+  { text: "Is your keyboard even plugged in?", emoji: \`\${NOTO_BASE}/2328_fe0f/512.webp\` },
+  { text: "Embarrassing tbh", emoji: \`\${NOTO_BASE}/1f926_1f3fc_200d_2642_fe0f/512.webp\` },
+  { text: "You're getting cooked out here", emoji: \`\${NOTO_BASE}/1f373/512.webp\` },
+  { text: "0 points. 0 aura.", emoji: \`\${NOTO_BASE}/1f480/512.webp\` },
+  { text: "My screen froze... yeah right.", emoji: \`\${NOTO_BASE}/1f976/512.webp\` },
+  { text: "HURRY UP TWIN! TIME IS TICKING...", emoji: \`\${NOTO_BASE}/1f47d/512.webp\` }
+];
+
+export default function JoinPage() {
+  const router = useRouter();
+  const mascotRef = useRef<HTMLDivElement>(null);
+
+  const [gameCode, setGameCode] = useState('');
+  const [playerName, setPlayerName] = useState('');
+  const [isJoining, setIsJoining] = useState(false);
+  const [error, setError] = useState('');
+  const [step, setStep] = useState<'form' | 'waiting' | 'playing' | 'leaderboard'>('form');
+  const [round, setRound] = useState(1);
+  const [timeLeft, setTimeLeft] = useState(10);
+  
+  const [guess, setGuess] = useState('');
+  const [hasGuessed, setHasGuessed] = useState(false);
+  const [guessResult, setGuessResult] = useState<{isCorrect?: boolean; points?: number} | null>(null);
+  const [joke, setJoke] = useState<{text: string, emoji: string} | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleJoin = (e: React.FormEvent) => {
     e.preventDefault();
     if (!gameCode || !playerName) {
       setError('PLEASE ENTER CODE AND NAME');
@@ -37,38 +96,327 @@ const newJoin = `const handleJoin = (e: React.FormEvent) => {
         setError('NETWORK ERROR');
         gsap.fromTo('.code-input-wrapper', { x: -6 }, { x: 0, duration: 0.1, yoyo: true, repeat: 4 });
       });
-  };`;
+  };
 
-code = code.replace(regexJoin, newJoin);
-
-// Replace the Fake timer with a polling mechanism
-const regexPoll = /\/\/ Fake timer for prototyping the "Playing" state[\s\S]*?\}, \[step, router\]\);/;
-const newPoll = `// Poll the server to see if game started
+  // Local timer synced loosely when playing state starts
   useEffect(() => {
-    if (step !== 'waiting') return;
-    
-    const interval = setInterval(() => {
-      fetch(\`/api/games/\${gameCode}\`)
-        .then(res => res.json())
-        .then(data => {
-          if (data.success && data.status === 'playing') {
-            clearInterval(interval);
-            setStep('playing');
-            // Navigate to play screen, maybe pass pin in query params or just go there.
-            // For now, since multiplayer synced state isn't strictly defined on the play page,
-            // we will just route them to the game.
-            setTimeout(() => {
-              router.push(\`/play?pin=\${gameCode}&player=\${playerName}\`);
-            }, 1000);
-          }
-        })
-        .catch(console.error);
-    }, 2000);
-    
-    return () => clearInterval(interval);
-  }, [step, gameCode, playerName, router]);`;
+    if (step === 'playing' && timeLeft > 0) {
+      const timerId = setInterval(() => setTimeLeft(prev => prev - 1), 1000);
+      return () => clearInterval(timerId);
+    }
+  }, [step, timeLeft]);
 
-code = code.replace(regexPoll, newPoll);
+  // Mascot trigger
+  useEffect(() => {
+    if (step !== 'playing' || hasGuessed) {
+      if (mascotRef.current?.classList.contains('is-showing')) {
+        mascotRef.current?.classList.remove('is-showing');
+        gsap.to(mascotRef.current, { y: -20, opacity: 0, scale: 0.8, duration: 0.3, ease: 'back.in(1.5)', overwrite: true, onComplete: () => {
+          if (mascotRef.current) mascotRef.current.style.visibility = 'hidden';
+        }});
+      }
+      return;
+    }
+
+    if (timeLeft <= 4 && timeLeft > 0) {
+      if (!mascotRef.current?.classList.contains('is-showing')) {
+        mascotRef.current?.classList.add('is-showing');
+        gsap.fromTo(mascotRef.current, { y: -20, opacity: 0, scale: 0.8 }, { y: 0, opacity: 1, scale: 1, duration: 0.6, ease: 'elastic.out(1, 0.5)', visibility: 'visible', overwrite: true });
+      }
+    }
+  }, [timeLeft, step, hasGuessed]);
+
+  // Realtime game state subscription
+  useEffect(() => {
+    if (step === 'form' || !gameCode) return;
+
+    const channel = supabase
+      .channel(\`game-\${gameCode}\`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'active_game',
+          filter: \`id=eq=\${gameCode}\`
+        },
+        (payload: any) => {
+          const newStatus = payload.new.status;
+          const newRound = payload.new.round;
+          
+          if (newRound !== round) {
+            setRound(newRound);
+            setHasGuessed(false);
+            setGuessResult(null);
+            setJoke(null);
+            setGuess('');
+            setTimeLeft(10); // reset local timer
+          }
+
+          if (newStatus === 'playing' && step !== 'playing') {
+            setStep('playing');
+            setTimeLeft(10);
+          } else if (newStatus === 'leaderboard' && step !== 'leaderboard') {
+            setStep('leaderboard');
+          } else if (newStatus === 'waiting' && step !== 'waiting') {
+            setStep('waiting');
+          } else if (newStatus === 'gameover') {
+            setStep('leaderboard');
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [step, gameCode, round]);
+
+  const submitGuess = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!guess.trim() || isSubmitting || hasGuessed) return;
+    
+    setIsSubmitting(true);
+    const timeSubmitted = timeLeft;
+    
+    fetch('/api/games/guess', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        pin: gameCode, 
+        playerName, 
+        guess: guess,
+        timeLeft: timeSubmitted, 
+        maxTime: 10
+      })
+    })
+    .then(res => res.json())
+    .then(data => {
+      setIsSubmitting(false);
+      setHasGuessed(true);
+      
+      let newJoke;
+      if (data.success && data.isCorrect) {
+        if (timeSubmitted >= 7) newJoke = JOKES_FAST[Math.floor(Math.random() * JOKES_FAST.length)];
+        else if (timeSubmitted >= 4) newJoke = JOKES_MID[Math.floor(Math.random() * JOKES_MID.length)];
+        else newJoke = JOKES_SLOW[Math.floor(Math.random() * JOKES_SLOW.length)];
+      } else {
+        newJoke = JOKES_FAIL[Math.floor(Math.random() * JOKES_FAIL.length)];
+      }
+      setJoke(newJoke);
+
+      if (data.success) {
+        setGuessResult({ isCorrect: data.isCorrect, points: data.pointsAwarded });
+      } else {
+        setGuessResult({ isCorrect: false, points: 0 });
+      }
+    })
+    .catch(() => {
+      setIsSubmitting(false);
+    });
+  };
+
+  return (
+    <div className="min-h-screen bg-[#111111] text-white flex flex-col items-center justify-center font-sans relative selection:bg-red-500 overflow-hidden p-4 md:p-8">
+      
+      {/* Background Dots */}
+      <div className="absolute inset-0 bg-[radial-gradient(#333_2px,transparent_2px)] bg-[size:24px_24px] pointer-events-none z-0"></div>
+
+      {step === 'form' && (
+        <div className="relative z-10 w-full max-w-md animate-in fade-in slide-in-from-bottom-8 duration-500">
+          
+          <div className="text-center mb-8">
+            <h1 className="text-5xl md:text-6xl font-black text-white tracking-tighter mb-2 uppercase drop-shadow-sm">
+              Join <span className="text-red-600 block sm:inline">Game.</span>
+            </h1>
+            <p className="text-zinc-400 font-bold uppercase tracking-widest text-sm">Enter operatives to proceed</p>
+          </div>
+
+          <div className="bg-[#f4f0e6] border-4 border-black shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] rounded-none w-full p-8 flex flex-col relative overflow-hidden">
+            
+            {error && (
+              <div className="bg-red-600 text-white p-3 border-4 border-black mb-6 font-black uppercase tracking-widest text-sm flex items-center gap-2 animate-in fade-in zoom-in duration-300">
+                <AlertTriangle className="w-5 h-5" />
+                {error}
+              </div>
+            )}
+
+            <form onSubmit={handleJoin} className="flex flex-col gap-6">
+              
+              <div className="flex flex-col gap-2">
+                <label className="text-black font-black uppercase tracking-widest text-sm">Game Code</label>
+                <div className="relative code-input-wrapper">
+                  <KeyRound className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 w-6 h-6" />
+                  <input 
+                    type="text" 
+                    value={gameCode}
+                    onChange={(e) => {
+                      setGameCode(e.target.value.toUpperCase());
+                      setError('');
+                    }}
+                    maxLength={6}
+                    placeholder="6-DIGIT CODE" 
+                    className={\`w-full bg-white border-4 \${error ? 'border-red-600 text-red-600' : 'border-black text-black'} p-4 pl-14 text-2xl font-black placeholder:text-zinc-300 focus:outline-none focus:ring-4 focus:ring-red-500/20 rounded-none uppercase tracking-widest transition-all\`}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <label className="text-black font-black uppercase tracking-widest text-sm">Player Name</label>
+                <div className="relative">
+                  <User className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 w-6 h-6" />
+                  <input 
+                    type="text" 
+                    value={playerName}
+                    onChange={(e) => setPlayerName(e.target.value)}
+                    maxLength={15}
+                    placeholder="ENTER CODENAME" 
+                    className="w-full bg-white border-4 border-black p-4 pl-14 text-2xl font-black text-black placeholder:text-zinc-300 focus:outline-none focus:ring-4 focus:ring-red-500/20 rounded-none tracking-tight transition-all"
+                    required
+                  />
+                </div>
+              </div>
+
+              <button 
+                type="submit"
+                disabled={isJoining || gameCode.length < 6 || !playerName}
+                className="group relative w-full bg-red-600 hover:bg-red-700 disabled:bg-zinc-400 text-white p-5 border-4 border-black font-black text-2xl uppercase tracking-widest transition-all hover:translate-y-[2px] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] disabled:shadow-none disabled:translate-y-[8px] active:translate-y-[8px] active:shadow-none mt-2 flex items-center justify-center gap-3"
+              >
+                {isJoining ? (
+                  <>
+                    <Loader2 className="w-8 h-8 animate-spin" />
+                    Connecting...
+                  </>
+                ) : (
+                  <>
+                    Join Mission
+                    <ArrowRight className="w-8 h-8 group-hover:translate-x-2 transition-transform" />
+                  </>
+                )}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {step === 'waiting' && (
+        <div className="waiting-container relative z-10 w-full max-w-lg flex flex-col items-center">
+          <div className="bg-[#f4f0e6] border-4 border-black shadow-[16px_16px_0px_0px_rgba(0,0,0,1)] rounded-none w-full p-10 flex flex-col items-center text-center">
+            <div className="w-20 h-20 border-8 border-red-600 border-t-transparent rounded-full animate-spin mb-8"></div>
+            <h2 className="text-4xl font-black text-black uppercase tracking-tighter mb-4">
+              You're In, <span className="text-red-600">{playerName}</span>.
+            </h2>
+            <div className="bg-black text-white px-6 py-3 border-4 border-black font-black uppercase tracking-widest text-xl shadow-[6px_6px_0px_0px_rgba(255,0,0,1)] mb-8">
+              Lobby: {gameCode}
+            </div>
+            <p className="text-black font-bold uppercase tracking-widest text-lg animate-pulse">
+              Waiting for host to start...
+            </p>
+          </div>
+        </div>
+      )}
+
+      {step === 'playing' && (
+        <div className="playing-container relative z-10 w-full max-w-lg flex flex-col items-center">
+          
+          <div className="w-full flex justify-between items-center mb-6">
+             <div className="bg-[#f4f0e6] text-black px-4 py-2 border-4 border-black font-black text-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex items-center gap-2">
+               ⏱ <span className="text-red-600">{timeLeft}s</span>
+             </div>
+             <div className="bg-[#f4f0e6] text-black px-4 py-2 border-4 border-black font-black text-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+               ROUND <span className="text-red-600">{round}</span>
+             </div>
+          </div>
+
+          {/* Mascot GSAP Speech Bubble dropping from top right */}
+          <div 
+            ref={mascotRef}
+            className="absolute -top-4 -right-4 md:-right-12 z-50 opacity-0 invisible origin-top-right"
+          >
+            <div className="bg-[#f4f0e6] shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] border-4 border-black p-4 flex flex-col items-center justify-center min-w-[200px] rounded-none relative z-0">
+              <img src={\`\${NOTO_BASE}/1f47d/512.webp\`} className="w-16 h-16 drop-shadow-md mb-2 animate-[bounce_1s_infinite]" alt="Mascot" />
+              <div className="font-black text-red-600 text-lg uppercase tracking-widest text-center leading-tight">Hurry Up Twin!</div>
+              <div className="text-black font-black uppercase tracking-wider text-sm mt-1 text-center">Time is ticking...</div>
+            </div>
+          </div>
+
+          <div className="bg-[#f4f0e6] border-4 border-black shadow-[16px_16px_0px_0px_rgba(0,0,0,1)] rounded-none w-full p-8 flex flex-col items-center text-center relative">
+            <p className="text-black font-black uppercase tracking-widest text-lg mb-6">
+              Look at the Projector!
+            </p>
+
+            {hasGuessed ? (
+               <div className="py-8 flex flex-col items-center">
+                  <div className="w-16 h-16 bg-black text-white rounded-full flex items-center justify-center font-black text-3xl mb-4">
+                    ✓
+                  </div>
+                  <h3 className="text-2xl font-black text-black uppercase tracking-wider">Answer Submitted</h3>
+                  {guessResult && (
+                    <div className="mt-4">
+                      {guessResult.isCorrect ? (
+                        <p className="text-green-600 font-black text-xl uppercase">+{guessResult.points} POINTS!</p>
+                      ) : (
+                        <p className="text-red-600 font-black text-xl uppercase">INCORRECT</p>
+                      )}
+                    </div>
+                  )}
+
+                  {joke && (
+                    <div className="flex items-center gap-3 bg-white px-6 py-4 border-4 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] rounded-none text-center mx-4 mt-6">
+                      <span className="text-lg font-black uppercase text-black">{joke.text}</span>
+                      <img src={joke.emoji} className="w-10 h-10 drop-shadow-sm flex-shrink-0" alt="emoji" />
+                    </div>
+                  )}
+
+                  <p className="text-zinc-600 font-bold uppercase tracking-widest text-sm mt-8">Waiting for round to end...</p>
+               </div>
+            ) : (
+              <form onSubmit={submitGuess} className="w-full flex flex-col gap-4">
+                <input 
+                  type="text" 
+                  value={guess}
+                  onChange={(e) => setGuess(e.target.value)}
+                  placeholder="TYPE YOUR ANSWER..." 
+                  className="w-full bg-white border-4 border-black p-5 text-2xl font-black text-black placeholder:text-zinc-300 focus:outline-none focus:ring-4 focus:ring-red-500/20 rounded-none uppercase tracking-widest transition-all text-center"
+                  required
+                  autoFocus
+                />
+                
+                <button 
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="w-full bg-red-600 hover:bg-red-700 disabled:bg-red-400 text-white p-5 border-4 border-black font-black text-2xl uppercase tracking-widest transition-all hover:translate-y-[2px] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] active:translate-y-[8px] active:shadow-none flex items-center justify-center gap-3"
+                >
+                  {isSubmitting ? <Loader2 className="w-6 h-6 animate-spin" /> : "Submit Answer"}
+                  {!isSubmitting && <Send className="w-6 h-6" />}
+                </button>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
+
+      {step === 'leaderboard' && (
+        <div className="relative z-10 w-full max-w-lg flex flex-col items-center animate-in fade-in zoom-in duration-500">
+          <div className="bg-[#f4f0e6] border-4 border-black shadow-[16px_16px_0px_0px_rgba(0,0,0,1)] rounded-none w-full p-10 flex flex-col items-center text-center">
+            <h2 className="text-4xl font-black text-black uppercase tracking-tighter mb-4">
+              Round Over!
+            </h2>
+            <div className="bg-black text-white px-6 py-3 border-4 border-black font-black uppercase tracking-widest text-xl shadow-[6px_6px_0px_0px_rgba(255,0,0,1)] mb-8">
+              Check the projector!
+            </div>
+            <p className="text-zinc-500 font-bold uppercase tracking-widest text-lg animate-pulse">
+              Get ready for the next round...
+            </p>
+          </div>
+        </div>
+      )}
+
+    </div>
+  );
+}
+`;
 
 fs.writeFileSync('src/app/join/page.tsx', code);
 console.log('done');

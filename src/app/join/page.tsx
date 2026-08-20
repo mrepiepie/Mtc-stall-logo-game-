@@ -1,23 +1,63 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { User, KeyRound, ArrowRight, Loader2, Send, AlertTriangle } from 'lucide-react';
 import gsap from 'gsap';
 import { supabase } from '@/lib/supabaseClient';
 
+const NOTO_BASE = 'https://raw.githubusercontent.com/googlefonts/noto-emoji/main/png/512/emoji_u';
+
+const JOKES_FAST = [
+  { text: "Woah that was quick.. calm down twin", emoji: `${NOTO_BASE}/1f480/512.webp` },
+  { text: "Bro is literally a human scanner", emoji: `${NOTO_BASE}/1f92f/512.webp` },
+  { text: "Are you cheating?!", emoji: `${NOTO_BASE}/1f928/512.webp` },
+  { text: "Speedforce activated", emoji: `${NOTO_BASE}/26a1/512.webp` },
+  { text: "Bro has 20/20 vision", emoji: `${NOTO_BASE}/1f440/512.webp` },
+  { text: "Unreal reaction time", emoji: `${NOTO_BASE}/1f680/512.webp` },
+];
+const JOKES_MID = [
+  { text: "Solid pace, but I've seen faster", emoji: `${NOTO_BASE}/1f971/512.webp` },
+  { text: "Not bad, but don't get cocky", emoji: `${NOTO_BASE}/1f921/512.webp` },
+  { text: "Acceptable... barely.", emoji: `${NOTO_BASE}/1f644/512.webp` },
+  { text: "Average behavior.", emoji: `${NOTO_BASE}/1f610/512.webp` },
+  { text: "You're doing okay sweetie", emoji: `${NOTO_BASE}/1f485_1f3fc/512.webp` },
+  { text: "Nothing to brag about", emoji: `${NOTO_BASE}/1f937_1f3fd_200d_2642_fe0f/512.webp` },
+];
+const JOKES_SLOW = [
+  { text: "Fighting for your life out here", emoji: `${NOTO_BASE}/1f975/512.webp` },
+  { text: "Bro was sweating bullets", emoji: `${NOTO_BASE}/1f630/512.webp` },
+  { text: "My grandma types faster...", emoji: `${NOTO_BASE}/1f475_1f3fc/512.webp` },
+  { text: "Did you fall asleep?", emoji: `${NOTO_BASE}/1f634/512.webp` },
+  { text: "Barely made it out alive", emoji: `${NOTO_BASE}/1f915/512.webp` },
+  { text: "Bro is playing in slow motion", emoji: `${NOTO_BASE}/1f40c/512.webp` },
+];
+const JOKES_FAIL = [
+  { text: "Bro was literally sleeping", emoji: `${NOTO_BASE}/1f634/512.webp` },
+  { text: "Is your keyboard even plugged in?", emoji: `${NOTO_BASE}/2328_fe0f/512.webp` },
+  { text: "Embarrassing tbh", emoji: `${NOTO_BASE}/1f926_1f3fc_200d_2642_fe0f/512.webp` },
+  { text: "You're getting cooked out here", emoji: `${NOTO_BASE}/1f373/512.webp` },
+  { text: "0 points. 0 aura.", emoji: `${NOTO_BASE}/1f480/512.webp` },
+  { text: "My screen froze... yeah right.", emoji: `${NOTO_BASE}/1f976/512.webp` },
+  { text: "HURRY UP TWIN! TIME IS TICKING...", emoji: `${NOTO_BASE}/1f47d/512.webp` }
+];
+
 export default function JoinPage() {
   const router = useRouter();
+  const mascotRef = useRef<HTMLDivElement>(null);
+
   const [gameCode, setGameCode] = useState('');
   const [playerName, setPlayerName] = useState('');
   const [isJoining, setIsJoining] = useState(false);
   const [error, setError] = useState('');
   const [step, setStep] = useState<'form' | 'waiting' | 'playing' | 'leaderboard'>('form');
   const [round, setRound] = useState(1);
+  const [timeLeft, setTimeLeft] = useState(10);
   
   const [guess, setGuess] = useState('');
   const [hasGuessed, setHasGuessed] = useState(false);
   const [guessResult, setGuessResult] = useState<{isCorrect?: boolean; points?: number} | null>(null);
+  const [joke, setJoke] = useState<{text: string, emoji: string} | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleJoin = (e: React.FormEvent) => {
@@ -56,7 +96,35 @@ export default function JoinPage() {
       });
   };
 
-  // Realtime game state subscription (Requires user to run the SQL snippet for RLS)
+  // Local timer synced loosely when playing state starts
+  useEffect(() => {
+    if (step === 'playing' && timeLeft > 0) {
+      const timerId = setInterval(() => setTimeLeft(prev => prev - 1), 1000);
+      return () => clearInterval(timerId);
+    }
+  }, [step, timeLeft]);
+
+  // Mascot trigger
+  useEffect(() => {
+    if (step !== 'playing' || hasGuessed) {
+      if (mascotRef.current?.classList.contains('is-showing')) {
+        mascotRef.current?.classList.remove('is-showing');
+        gsap.to(mascotRef.current, { y: -20, opacity: 0, scale: 0.8, duration: 0.3, ease: 'back.in(1.5)', overwrite: true, onComplete: () => {
+          if (mascotRef.current) mascotRef.current.style.visibility = 'hidden';
+        }});
+      }
+      return;
+    }
+
+    if (timeLeft <= 4 && timeLeft > 0) {
+      if (!mascotRef.current?.classList.contains('is-showing')) {
+        mascotRef.current?.classList.add('is-showing');
+        gsap.fromTo(mascotRef.current, { y: -20, opacity: 0, scale: 0.8 }, { y: 0, opacity: 1, scale: 1, duration: 0.6, ease: 'elastic.out(1, 0.5)', visibility: 'visible', overwrite: true });
+      }
+    }
+  }, [timeLeft, step, hasGuessed]);
+
+  // Realtime game state subscription
   useEffect(() => {
     if (step === 'form' || !gameCode) return;
 
@@ -78,11 +146,14 @@ export default function JoinPage() {
             setRound(newRound);
             setHasGuessed(false);
             setGuessResult(null);
+            setJoke(null);
             setGuess('');
+            setTimeLeft(10); // reset local timer
           }
 
           if (newStatus === 'playing' && step !== 'playing') {
             setStep('playing');
+            setTimeLeft(10);
           } else if (newStatus === 'leaderboard' && step !== 'leaderboard') {
             setStep('leaderboard');
           } else if (newStatus === 'waiting' && step !== 'waiting') {
@@ -99,48 +170,12 @@ export default function JoinPage() {
     };
   }, [step, gameCode, round]);
 
-  // Fallback Polling (in case RLS blocks WebSockets because the user didn't run the SQL)
-  useEffect(() => {
-    if (step === 'form') return;
-    
-    const interval = setInterval(() => {
-      fetch(`/api/games/${gameCode}?t=${Date.now()}`, { cache: 'no-store' })
-        .then(res => res.json())
-        .then(data => {
-          if (data.success) {
-            if (data.round !== round) {
-              setRound(data.round);
-              setHasGuessed(false);
-              setGuessResult(null);
-              setGuess('');
-            }
-            if (data.status === 'playing' && step !== 'playing') {
-              setStep('playing');
-            } else if (data.status === 'leaderboard' && step !== 'leaderboard') {
-              setStep('leaderboard');
-            } else if (data.status === 'gameover' && step !== 'leaderboard') {
-              setStep('leaderboard');
-            }
-          }
-        })
-        .catch(console.error);
-    }, 2500);
-    
-    return () => clearInterval(interval);
-  }, [step, gameCode, round]);
-
   const submitGuess = (e: React.FormEvent) => {
     e.preventDefault();
     if (!guess.trim() || isSubmitting || hasGuessed) return;
     
     setIsSubmitting(true);
-    
-    // We send a fixed maxTime for the calculation (the backend calculates actual points)
-    // To be perfectly synced, we'd need the real time_remaining from the server, 
-    // but for the remote, we will just pass a rough estimate or let the server use 15s.
-    // Wait, the API requires timeLeft. For simplicity, we just send a generic timeLeft.
-    // Actually, in a perfect world, the server knows when the round started.
-    // Let's just send 15 as a dummy, the Admin panel will do the real tracking.
+    const timeSubmitted = timeLeft;
     
     fetch('/api/games/guess', {
       method: 'POST',
@@ -149,16 +184,29 @@ export default function JoinPage() {
         pin: gameCode, 
         playerName, 
         guess: guess,
-        timeLeft: 15, // Fallback, real implementation should compute diff from start
-        maxTime: 30
+        timeLeft: timeSubmitted, 
+        maxTime: 10
       })
     })
     .then(res => res.json())
     .then(data => {
       setIsSubmitting(false);
       setHasGuessed(true);
+      
+      let newJoke;
+      if (data.success && data.isCorrect) {
+        if (timeSubmitted >= 7) newJoke = JOKES_FAST[Math.floor(Math.random() * JOKES_FAST.length)];
+        else if (timeSubmitted >= 4) newJoke = JOKES_MID[Math.floor(Math.random() * JOKES_MID.length)];
+        else newJoke = JOKES_SLOW[Math.floor(Math.random() * JOKES_SLOW.length)];
+      } else {
+        newJoke = JOKES_FAIL[Math.floor(Math.random() * JOKES_FAIL.length)];
+      }
+      setJoke(newJoke);
+
       if (data.success) {
         setGuessResult({ isCorrect: data.isCorrect, points: data.pointsAwarded });
+      } else {
+        setGuessResult({ isCorrect: false, points: 0 });
       }
     })
     .catch(() => {
@@ -269,19 +317,35 @@ export default function JoinPage() {
 
       {step === 'playing' && (
         <div className="playing-container relative z-10 w-full max-w-lg flex flex-col items-center">
+          
           <div className="w-full flex justify-between items-center mb-6">
+             <div className="bg-[#f4f0e6] text-black px-4 py-2 border-4 border-black font-black text-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex items-center gap-2">
+               ⏱ <span className="text-red-600">{timeLeft}s</span>
+             </div>
              <div className="bg-[#f4f0e6] text-black px-4 py-2 border-4 border-black font-black text-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
                ROUND <span className="text-red-600">{round}</span>
              </div>
           </div>
 
-          <div className="bg-[#f4f0e6] border-4 border-black shadow-[16px_16px_0px_0px_rgba(0,0,0,1)] rounded-none w-full p-8 flex flex-col items-center text-center">
+          {/* Mascot GSAP Speech Bubble dropping from top right */}
+          <div 
+            ref={mascotRef}
+            className="absolute -top-4 -right-4 md:-right-12 z-50 opacity-0 invisible origin-top-right"
+          >
+            <div className="bg-[#f4f0e6] shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] border-4 border-black p-4 flex flex-col items-center justify-center min-w-[200px] rounded-none relative z-0">
+              <img src={`${NOTO_BASE}/1f47d/512.webp`} className="w-16 h-16 drop-shadow-md mb-2 animate-[bounce_1s_infinite]" alt="Mascot" />
+              <div className="font-black text-red-600 text-lg uppercase tracking-widest text-center leading-tight">Hurry Up Twin!</div>
+              <div className="text-black font-black uppercase tracking-wider text-sm mt-1 text-center">Time is ticking...</div>
+            </div>
+          </div>
+
+          <div className="bg-[#f4f0e6] border-4 border-black shadow-[16px_16px_0px_0px_rgba(0,0,0,1)] rounded-none w-full p-8 flex flex-col items-center text-center relative">
             <p className="text-black font-black uppercase tracking-widest text-lg mb-6">
               Look at the Projector!
             </p>
 
             {hasGuessed ? (
-               <div className="py-12 flex flex-col items-center">
+               <div className="py-8 flex flex-col items-center">
                   <div className="w-16 h-16 bg-black text-white rounded-full flex items-center justify-center font-black text-3xl mb-4">
                     ✓
                   </div>
@@ -295,7 +359,15 @@ export default function JoinPage() {
                       )}
                     </div>
                   )}
-                  <p className="text-zinc-600 font-bold uppercase tracking-widest text-sm mt-4">Waiting for round to end...</p>
+
+                  {joke && (
+                    <div className="flex items-center gap-3 bg-white px-6 py-4 border-4 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] rounded-none text-center mx-4 mt-6">
+                      <span className="text-lg font-black uppercase text-black">{joke.text}</span>
+                      <img src={joke.emoji} className="w-10 h-10 drop-shadow-sm flex-shrink-0" alt="emoji" />
+                    </div>
+                  )}
+
+                  <p className="text-zinc-600 font-bold uppercase tracking-widest text-sm mt-8">Waiting for round to end...</p>
                </div>
             ) : (
               <form onSubmit={submitGuess} className="w-full flex flex-col gap-4">

@@ -15,7 +15,7 @@ export function ProjectorView({
   onShowLeaderboard: () => void,
   onEndGame: () => void 
 }) {
-  const [timeLeft, setTimeLeft] = useState(30);
+  const [timeLeft, setTimeLeft] = useState(10);
   const [showAnswer, setShowAnswer] = useState(false);
   const currentQuestion = game.questions[game.round - 1];
 
@@ -48,7 +48,7 @@ export function ProjectorView({
   // Reset timer when round changes
   useEffect(() => {
     if (game.status === 'playing') {
-      setTimeLeft(30);
+      setTimeLeft(10);
       setShowAnswer(false);
     }
   }, [game.round, game.status]);
@@ -120,7 +120,7 @@ export function ProjectorView({
         {currentQuestion && (
           <PixelatedImage 
             src={currentQuestion.image_url} 
-            pixelSize={showAnswer ? 1 : Math.max(1, Math.floor(timeLeft / 3))}
+            pixelSize={showAnswer ? 1 : Math.max(1, timeLeft <= 6 ? timeLeft * 2 : 12)}
             className="w-full h-[50vh] object-contain transition-all duration-1000"
           />
         )}
