@@ -15,6 +15,7 @@ type GameRow = {
   round: number;
   logos: unknown;
   players: string[];
+  scores: any;
 };
 
 export async function GET(_request: Request, { params }: RouteContext) {
@@ -31,7 +32,7 @@ export async function GET(_request: Request, { params }: RouteContext) {
     const supabase = createServerSupabaseClient();
     const { data: game, error: gameError } = await supabase
       .from("active_game")
-      .select("id, status, round, logos, players")
+      .select("id, status, round, logos, players, scores")
       .eq("id", Number(pin))
       .maybeSingle<GameRow>();
 
@@ -88,6 +89,7 @@ export async function GET(_request: Request, { params }: RouteContext) {
       round: game.round,
       questions: orderedQuestions,
       players: game.players || [],
+      scores: game.scores || {},
     });
   } catch {
     return NextResponse.json(

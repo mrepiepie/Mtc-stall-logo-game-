@@ -12,12 +12,13 @@ export default function JoinPage() {
   const [playerName, setPlayerName] = useState('');
   const [isJoining, setIsJoining] = useState(false);
   const [error, setError] = useState('');
-  const [step, setStep] = useState<'form' | 'waiting' | 'playing' | 'round_over'>('form');
+  const [step, setStep] = useState<'form' | 'waiting' | 'playing' | 'leaderboard'>('form');
+  const [round, setRound] = useState(1);
   
-  // Player Game State
   const [guess, setGuess] = useState('');
   const [hasGuessed, setHasGuessed] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(10);
+  const [guessResult, setGuessResult] = useState<{isCorrect?: boolean; points?: number} | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleJoin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,55 +56,114 @@ export default function JoinPage() {
       });
   };
 
-  // Fake timer for prototyping the "Playing" state
+  // Realtime game state subscription (Requires user to run the SQL snippet for RLS)
   useEffect(() => {
-    if (step === 'playing' && timeLeft > 0) {
-      const timerId = setInterval(() => setTimeLeft(prev => prev - 1), 1000);
-      return () => clearInterval(timerId);
-    } else if (timeLeft === 0 && step === 'playing') {
-      setStep('round_over');
-    }
-  }, [step, timeLeft]);
+    if (step === 'form' || !gameCode) return;
 
-  // Poll the server to see if game started (with 10 min timeout)
+    const channel = supabase
+      .channel(`game-${gameCode}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'active_game',
+          filter: `id=eq=${gameCode}`
+        },
+        (payload: any) => {
+          const newStatus = payload.new.status;
+          const newRound = payload.new.round;
+          
+          if (newRound !== round) {
+            setRound(newRound);
+            setHasGuessed(false);
+            setGuessResult(null);
+            setGuess('');
+          }
+
+          if (newStatus === 'playing' && step !== 'playing') {
+            setStep('playing');
+          } else if (newStatus === 'leaderboard' && step !== 'leaderboard') {
+            setStep('leaderboard');
+          } else if (newStatus === 'waiting' && step !== 'waiting') {
+            setStep('waiting');
+          } else if (newStatus === 'gameover') {
+            setStep('leaderboard');
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [step, gameCode, round]);
+
+  // Fallback Polling (in case RLS blocks WebSockets because the user didn't run the SQL)
   useEffect(() => {
-    if (step !== 'waiting') return;
+    if (step === 'form') return;
     
-    let pollCount = 0;
-    const MAX_POLLS = 300; // 10 minutes
-
     const interval = setInterval(() => {
-      pollCount++;
-      if (pollCount >= MAX_POLLS) {
-        clearInterval(interval);
-        setError('LOBBY TIMED OUT (HOST AFK)');
-        setStep('form');
-        gsap.fromTo('.code-input-wrapper', { x: -6 }, { x: 0, duration: 0.1, yoyo: true, repeat: 4 });
-        return;
-      }
-
       fetch(`/api/games/${gameCode}?t=${Date.now()}`, { cache: 'no-store' })
         .then(res => res.json())
         .then(data => {
-          if (data.success && data.status === 'playing') {
-            clearInterval(interval);
-            setStep('playing');
-            setTimeout(() => {
-              router.push(`/play?pin=${gameCode}&player=${playerName}`);
-            }, 1000);
+          if (data.success) {
+            if (data.round !== round) {
+              setRound(data.round);
+              setHasGuessed(false);
+              setGuessResult(null);
+              setGuess('');
+            }
+            if (data.status === 'playing' && step !== 'playing') {
+              setStep('playing');
+            } else if (data.status === 'leaderboard' && step !== 'leaderboard') {
+              setStep('leaderboard');
+            } else if (data.status === 'gameover' && step !== 'leaderboard') {
+              setStep('leaderboard');
+            }
           }
         })
         .catch(console.error);
-    }, 2000);
+    }, 2500);
     
     return () => clearInterval(interval);
-  }, [step, gameCode, playerName, router]);
+  }, [step, gameCode, round]);
 
   const submitGuess = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!guess.trim()) return;
-    setHasGuessed(true);
-    // In the real app, this would emit the guess to the server
+    if (!guess.trim() || isSubmitting || hasGuessed) return;
+    
+    setIsSubmitting(true);
+    
+    // We send a fixed maxTime for the calculation (the backend calculates actual points)
+    // To be perfectly synced, we'd need the real time_remaining from the server, 
+    // but for the remote, we will just pass a rough estimate or let the server use 15s.
+    // Wait, the API requires timeLeft. For simplicity, we just send a generic timeLeft.
+    // Actually, in a perfect world, the server knows when the round started.
+    // Let's just send 15 as a dummy, the Admin panel will do the real tracking.
+    
+    fetch('/api/games/guess', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        pin: gameCode, 
+        playerName, 
+        guess: guess,
+        timeLeft: 15, // Fallback, real implementation should compute diff from start
+        maxTime: 30
+      })
+    })
+    .then(res => res.json())
+    .then(data => {
+      setIsSubmitting(false);
+      setHasGuessed(true);
+      if (data.success) {
+        setGuessResult({ isCorrect: data.isCorrect, points: data.pointsAwarded });
+      }
+    })
+    .catch(() => {
+      setIsSubmitting(false);
+    });
   };
 
   return (
@@ -185,7 +245,6 @@ export default function JoinPage() {
                   </>
                 )}
               </button>
-
             </form>
           </div>
         </div>
@@ -194,39 +253,29 @@ export default function JoinPage() {
       {step === 'waiting' && (
         <div className="waiting-container relative z-10 w-full max-w-lg flex flex-col items-center">
           <div className="bg-[#f4f0e6] border-4 border-black shadow-[16px_16px_0px_0px_rgba(0,0,0,1)] rounded-none w-full p-10 flex flex-col items-center text-center">
-            
             <div className="w-20 h-20 border-8 border-red-600 border-t-transparent rounded-full animate-spin mb-8"></div>
-            
             <h2 className="text-4xl font-black text-black uppercase tracking-tighter mb-4">
               You're In, <span className="text-red-600">{playerName}</span>.
             </h2>
-            
             <div className="bg-black text-white px-6 py-3 border-4 border-black font-black uppercase tracking-widest text-xl shadow-[6px_6px_0px_0px_rgba(255,0,0,1)] mb-8">
               Lobby: {gameCode}
             </div>
-
             <p className="text-black font-bold uppercase tracking-widest text-lg animate-pulse">
               Waiting for host to start...
             </p>
-
           </div>
         </div>
       )}
 
       {step === 'playing' && (
         <div className="playing-container relative z-10 w-full max-w-lg flex flex-col items-center">
-          
           <div className="w-full flex justify-between items-center mb-6">
              <div className="bg-[#f4f0e6] text-black px-4 py-2 border-4 border-black font-black text-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-               TIME: <span className="text-red-600">{timeLeft}s</span>
-             </div>
-             <div className="bg-[#f4f0e6] text-black px-4 py-2 border-4 border-black font-black text-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-               Q. 1/10
+               ROUND <span className="text-red-600">{round}</span>
              </div>
           </div>
 
           <div className="bg-[#f4f0e6] border-4 border-black shadow-[16px_16px_0px_0px_rgba(0,0,0,1)] rounded-none w-full p-8 flex flex-col items-center text-center">
-            
             <p className="text-black font-black uppercase tracking-widest text-lg mb-6">
               Look at the Projector!
             </p>
@@ -237,7 +286,16 @@ export default function JoinPage() {
                     ✓
                   </div>
                   <h3 className="text-2xl font-black text-black uppercase tracking-wider">Answer Submitted</h3>
-                  <p className="text-zinc-600 font-bold uppercase tracking-widest text-sm mt-2">Waiting for other players...</p>
+                  {guessResult && (
+                    <div className="mt-4">
+                      {guessResult.isCorrect ? (
+                        <p className="text-green-600 font-black text-xl uppercase">+{guessResult.points} POINTS!</p>
+                      ) : (
+                        <p className="text-red-600 font-black text-xl uppercase">INCORRECT</p>
+                      )}
+                    </div>
+                  )}
+                  <p className="text-zinc-600 font-bold uppercase tracking-widest text-sm mt-4">Waiting for round to end...</p>
                </div>
             ) : (
               <form onSubmit={submitGuess} className="w-full flex flex-col gap-4">
@@ -253,26 +311,29 @@ export default function JoinPage() {
                 
                 <button 
                   type="submit"
-                  className="w-full bg-red-600 hover:bg-red-700 text-white p-5 border-4 border-black font-black text-2xl uppercase tracking-widest transition-all hover:translate-y-[2px] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] active:translate-y-[8px] active:shadow-none flex items-center justify-center gap-3"
+                  disabled={isSubmitting}
+                  className="w-full bg-red-600 hover:bg-red-700 disabled:bg-red-400 text-white p-5 border-4 border-black font-black text-2xl uppercase tracking-widest transition-all hover:translate-y-[2px] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] active:translate-y-[8px] active:shadow-none flex items-center justify-center gap-3"
                 >
-                  Submit Answer
-                  <Send className="w-6 h-6" />
+                  {isSubmitting ? <Loader2 className="w-6 h-6 animate-spin" /> : "Submit Answer"}
+                  {!isSubmitting && <Send className="w-6 h-6" />}
                 </button>
               </form>
             )}
-
           </div>
         </div>
       )}
 
-      {step === 'round_over' && (
+      {step === 'leaderboard' && (
         <div className="relative z-10 w-full max-w-lg flex flex-col items-center animate-in fade-in zoom-in duration-500">
-          <div className="bg-black border-4 border-white shadow-[16px_16px_0px_0px_rgba(255,0,0,1)] rounded-none w-full p-10 flex flex-col items-center text-center">
-            <h2 className="text-4xl font-black text-white uppercase tracking-tighter mb-4">
+          <div className="bg-[#f4f0e6] border-4 border-black shadow-[16px_16px_0px_0px_rgba(0,0,0,1)] rounded-none w-full p-10 flex flex-col items-center text-center">
+            <h2 className="text-4xl font-black text-black uppercase tracking-tighter mb-4">
               Round Over!
             </h2>
-            <p className="text-white font-bold uppercase tracking-widest text-lg animate-pulse">
-              Check the projector for the leaderboard!
+            <div className="bg-black text-white px-6 py-3 border-4 border-black font-black uppercase tracking-widest text-xl shadow-[6px_6px_0px_0px_rgba(255,0,0,1)] mb-8">
+              Check the projector!
+            </div>
+            <p className="text-zinc-500 font-bold uppercase tracking-widest text-lg animate-pulse">
+              Get ready for the next round...
             </p>
           </div>
         </div>

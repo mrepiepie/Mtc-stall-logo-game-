@@ -1,4 +1,5 @@
 "use client";
+import { ProjectorView } from '@/components/ProjectorView';
 
 import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
@@ -32,6 +33,7 @@ type CreatedGame = {
   status: string;
   questions: Question[];
   players?: string[];
+  scores?: Record<string, number>;
 };
 
 async function loadQuestions() {
@@ -269,7 +271,7 @@ function AdminDashboard() {
         .then(res => res.json())
         .then(data => {
           if (data.success && data.players) {
-            setCreatedGame(prev => prev ? { ...prev, players: data.players, status: data.status } : null);
+            setCreatedGame(prev => prev ? { ...prev, players: data.players, status: data.status, round: data.round, scores: data.scores } : null);
           }
         })
         .catch(console.error);
@@ -310,6 +312,26 @@ function AdminDashboard() {
     await navigator.clipboard.writeText(String(createdGame.gamePin));
     setIsPinCopied(true);
   };
+
+  if (createdGame && createdGame.status !== 'waiting') {
+    return (
+      <ProjectorView 
+        game={createdGame} 
+        onNextRound={async (nextRound) => {
+          await fetch('/api/games/update_round', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ pin: createdGame.gamePin, round: nextRound }) });
+          setCreatedGame(prev => prev ? { ...prev, round: nextRound, status: 'playing' } : null);
+        }}
+        onShowLeaderboard={async () => {
+          await fetch('/api/games/leaderboard', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ pin: createdGame.gamePin }) });
+          setCreatedGame(prev => prev ? { ...prev, status: 'leaderboard' } : null);
+        }}
+        onEndGame={async () => {
+          await fetch('/api/games/end', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ pin: createdGame.gamePin }) });
+          setCreatedGame(prev => prev ? { ...prev, status: 'gameover' } : null);
+        }}
+      />
+    );
+  }
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-[#111111] px-4 py-6 text-white sm:px-6 lg:px-10 lg:py-8">
