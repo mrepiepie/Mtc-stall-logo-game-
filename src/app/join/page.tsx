@@ -50,7 +50,8 @@ export default function JoinPage() {
   const [playerName, setPlayerName] = useState('');
   const [isJoining, setIsJoining] = useState(false);
   const [error, setError] = useState('');
-  const [step, setStep] = useState<'form' | 'waiting' | 'playing' | 'leaderboard'>('form');
+  const [step, setStep] = useState<'form' | 'waiting' | 'countdown' | 'playing' | 'leaderboard'>('form');
+  const [countdown, setCountdown] = useState(3);
   const [round, setRound] = useState(1);
   const [timeLeft, setTimeLeft] = useState(10);
   
@@ -98,11 +99,16 @@ export default function JoinPage() {
 
   // Local timer synced loosely when playing state starts
   useEffect(() => {
+    if (step === 'countdown' && countdown > 0) {
+      const timerId = setInterval(() => setCountdown(prev => prev - 1), 1000);
+      return () => clearInterval(timerId);
+    }
+
     if (step === 'playing' && timeLeft > 0) {
       const timerId = setInterval(() => setTimeLeft(prev => prev - 1), 1000);
       return () => clearInterval(timerId);
     }
-  }, [step, timeLeft]);
+  }, [step, timeLeft, countdown]);
 
   // Mascot trigger
   useEffect(() => {
@@ -136,7 +142,7 @@ export default function JoinPage() {
           event: 'UPDATE',
           schema: 'public',
           table: 'active_game',
-          filter: `id=eq=${gameCode}`
+          filter: `id=eq.${gameCode}`
         },
         (payload: any) => {
           const newStatus = payload.new.status;
@@ -151,7 +157,10 @@ export default function JoinPage() {
             setTimeLeft(10); // reset local timer
           }
 
-          if (newStatus === 'playing' && step !== 'playing') {
+          if (newStatus === 'countdown' && step !== 'countdown') {
+            setStep('countdown');
+            setCountdown(3);
+          } else if (newStatus === 'playing' && step !== 'playing') {
             setStep('playing');
             setTimeLeft(10);
           } else if (newStatus === 'leaderboard' && step !== 'leaderboard') {
@@ -294,6 +303,18 @@ export default function JoinPage() {
                 )}
               </button>
             </form>
+          </div>
+        </div>
+      )}
+
+      
+      {step === 'countdown' && (
+        <div className="relative z-10 w-full max-w-lg flex flex-col items-center justify-center animate-in fade-in zoom-in duration-500">
+          <div className="bg-[#f4f0e6] border-4 border-black shadow-[16px_16px_0px_0px_rgba(0,0,0,1)] rounded-none w-full p-10 flex flex-col items-center justify-center text-center">
+            <h2 className="text-4xl font-black text-black uppercase tracking-widest mb-4">Get Ready...</h2>
+            <div className="text-[10rem] leading-none font-black text-red-600 animate-[bounce_1s_infinite]">
+              {countdown > 0 ? countdown : 'GO!'}
+            </div>
           </div>
         </div>
       )}

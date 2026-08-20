@@ -3,21 +3,15 @@ import { createServerSupabaseClient } from "@/lib/supabase";
 
 export async function POST(request: Request) {
   try {
-    const { pin, round } = await request.json();
-    if (!pin || typeof round !== "number") {
+    const { pin, status } = await request.json();
+    if (!pin || !status) {
       return NextResponse.json({ success: false }, { status: 400 });
     }
 
     const supabase = createServerSupabaseClient();
-    
-    // Clear guesses for the new round and update round number and status
     const { error } = await supabase
       .from("active_game")
-      .update({ 
-        round: round, 
-        status: "countdown",
-        guesses: {} // reset round guesses
-      })
+      .update({ status })
       .eq("id", Number(pin));
 
     if (error) {

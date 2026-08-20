@@ -13,7 +13,7 @@ export async function POST(request: Request) {
     
     const { error: updateError } = await supabase
       .from("active_game")
-      .update({ status: "playing" })
+      .update({ status: "countdown" })
       .eq("id", Number(pin));
 
     if (updateError) {
