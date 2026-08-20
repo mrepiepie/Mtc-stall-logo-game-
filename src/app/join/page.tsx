@@ -420,7 +420,33 @@ export default function JoinPage() {
                   <p className="text-zinc-600 font-bold uppercase tracking-widest text-sm mt-8">Waiting for round to end...</p>
                </div>
             ) : (
-              <form onSubmit={submitGuess} className="w-full flex flex-col gap-4">
+              <form onSubmit={submitGuess} className="w-full flex flex-col gap-4 relative">
+                {formats[round - 1] && (
+                  <div className="flex flex-wrap justify-center gap-1.5 md:gap-2 mb-2 pointer-events-none">
+                    {formats[round - 1].split('').map((char, i) => {
+                      if (char === ' ') {
+                        return <div key={i} className="w-4 md:w-6"></div>;
+                      }
+                      
+                      const expectedNoSpaces = formats[round - 1].replace(/ /g, '');
+                      let nonSpaceIdx = 0;
+                      for(let j = 0; j < i; j++) {
+                        if (formats[round - 1][j] !== ' ') nonSpaceIdx++;
+                      }
+                      
+                      const rawGuess = guess.replace(/ /g, '');
+                      const guessChar = rawGuess[nonSpaceIdx] || '';
+                      const isFilled = guessChar !== '';
+                      
+                      return (
+                        <div key={i} className={`w-8 h-10 md:w-10 md:h-12 border-b-4 flex items-center justify-center font-black text-2xl uppercase transition-all duration-150 ${isFilled ? 'border-red-600 text-red-600 -translate-y-1' : 'border-black text-black'}`}>
+                          {guessChar}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+                
                 <input 
                   type="text" 
                   value={guess}
@@ -430,6 +456,9 @@ export default function JoinPage() {
                   required
                   autoFocus
                   disabled={isSubmitting || timeLeft <= 0}
+                  autoComplete="off"
+                  autoCorrect="off"
+                  spellCheck="false"
                 />
                 
                 <button 
