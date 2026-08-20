@@ -23,24 +23,26 @@ export default function JoinPage() {
 
     setError('');
     setIsJoining(true);
-    
-    // Simulate network validation
-    setTimeout(() => {
-      // PROTOTYPE VALIDATION: Only accept 'MTC123' or 'MARIO1'
-      if (gameCode !== 'MTC123' && gameCode !== 'MARIO1') {
-        setIsJoining(false);
-        setError('INVALID CODE. TEST CODES: MTC123 OR MARIO1');
-        gsap.fromTo('.code-input-wrapper', { x: -6 }, { x: 0, duration: 0.1, yoyo: true, repeat: 4 });
-        return;
-      }
+        // Hit the backend API to validate the PIN
+      fetch(`/api/games/${gameCode}`)
+        .then(res => res.json())
+        .then(data => {
+          if (!data.success) {
+            setIsJoining(false);
+            setError(data.error || 'INVALID CODE');
+            gsap.fromTo('.code-input-wrapper', { x: -6 }, { x: 0, duration: 0.1, yoyo: true, repeat: 4 });
+            return;
+          }
 
-      setIsJoining(false);
-      setStep('waiting');
-      gsap.fromTo('.waiting-container', { opacity: 0, scale: 0.9 }, { opacity: 1, scale: 1, duration: 0.4, ease: 'back.out(1.2)' });
-      
-      
-
-    }, 800);
+          setIsJoining(false);
+          setStep('waiting');
+          gsap.fromTo('.waiting-container', { opacity: 0, scale: 0.9 }, { opacity: 1, scale: 1, duration: 0.4, ease: 'back.out(1.2)' });
+        })
+        .catch(err => {
+          setIsJoining(false);
+          setError('NETWORK ERROR');
+          gsap.fromTo('.code-input-wrapper', { x: -6 }, { x: 0, duration: 0.1, yoyo: true, repeat: 4 });
+        });
   };
 
   // Fake timer for prototyping the "Playing" state
