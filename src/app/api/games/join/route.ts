@@ -55,7 +55,7 @@ export async function POST(request: Request) {
     }
 
     const { data: qs } = await supabase.from('questions').select('id, answer');
-    const formats = (game.logos || []).map((id: string) => qs?.find((q: any) => q.id === id)?.answer || '');
+    const formats = (game.logos || []).map((id: string) => qs?.find((q: any) => String(q.id) === String(id))?.answer || '?');
     return NextResponse.json({ success: true, gamePin: pin, formats });
 
   } catch (err) {
