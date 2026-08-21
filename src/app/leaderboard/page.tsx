@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Trophy, ArrowLeft, Gamepad2 } from 'lucide-react';
+import { Trophy, ArrowLeft, Gamepad2, MoveRight } from 'lucide-react';
 import gsap from 'gsap';
 
 export default function LeaderboardPage() {
@@ -83,6 +83,31 @@ export default function LeaderboardPage() {
             )}
           </div>
         </div>
+
+        {/* MTC Promotion Box - Brutalist Dark */}
+        <div className="w-full bg-[#111] text-white p-5 lg:p-6 border-4 border-[#333] text-left relative overflow-hidden group hover:border-[#555] transition-colors shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] mt-4">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-red-600 rounded-full blur-[80px] opacity-10 group-hover:opacity-30 transition-opacity"></div>
+          <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div>
+              <h3 className="text-xl md:text-2xl font-black mb-2 tracking-tighter uppercase flex items-center gap-2 text-white">
+                <Gamepad2 className="w-6 h-6 text-red-500" />
+                Inspired by the tech?
+              </h3>
+              <p className="text-sm md:text-base text-zinc-400 font-bold tracking-wide uppercase">
+                Wanna learn how to build all these things? Join MTC and level up.
+              </p>
+            </div>
+            <a 
+              href="https://www.instagram.com/mtc_bpdc" 
+              target="_blank" 
+              rel="noreferrer"
+              className="inline-flex items-center justify-center gap-2 bg-white text-black px-6 py-4 text-sm font-black hover:bg-zinc-200 transition-colors uppercase tracking-widest border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-[4px] hover:translate-y-[4px] whitespace-nowrap"
+            >
+              Join MTC Today <MoveRight className="w-5 h-5" />
+            </a>
+          </div>
+        </div>
+
       </div>
     </div>
   );
