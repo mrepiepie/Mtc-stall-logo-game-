@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Trophy, ArrowLeft, RotateCcw } from 'lucide-react';
+import { Trophy, ArrowLeft, Gamepad2 } from 'lucide-react';
 import gsap from 'gsap';
 
 export default function LeaderboardPage() {
@@ -20,57 +20,68 @@ export default function LeaderboardPage() {
   useEffect(() => {
     if (!loading && scores.length > 0) {
       gsap.fromTo('.score-item', 
-        { opacity: 0, y: 10 }, 
-        { opacity: 1, y: 0, duration: 0.4, stagger: 0.05, ease: 'power2.out' }
+        { opacity: 0, x: -20 }, 
+        { opacity: 1, x: 0, duration: 0.5, stagger: 0.05, ease: 'power3.out' }
       );
     }
   }, [loading, scores]);
 
   return (
-    <div className="min-h-screen bg-[#fafafa] text-zinc-900 flex flex-col items-center py-12 px-6 font-sans">
-      <div className="w-full max-w-3xl">
-        <header className="flex justify-between items-center mb-8">
-          <div className="flex items-center gap-3">
-            <Link href="/" className="p-2 text-zinc-400 hover:text-zinc-900 transition-colors rounded-lg hover:bg-zinc-100">
+    <div className="min-h-screen bg-[#111111] flex flex-col items-center py-12 px-4 sm:px-6 relative overflow-hidden">
+      {/* Dot Pattern Background */}
+      <div className="absolute inset-0 bg-[radial-gradient(#333_2px,transparent_2px)] bg-[size:24px_24px] pointer-events-none z-0"></div>
+      
+      <div className="w-full max-w-3xl relative z-10 flex flex-col gap-8">
+        
+        <header className="flex justify-between items-center bg-[#f4f0e6] border-4 border-black p-4 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+          <div className="flex items-center gap-4">
+            <Link href="/" className="bg-black text-white p-2 border-2 border-black hover:bg-zinc-800 transition-colors">
               <ArrowLeft className="w-5 h-5" />
             </Link>
-            <h1 className="text-2xl font-bold text-zinc-900">
-              Leaderboard
+            <h1 className="text-xl md:text-3xl font-black uppercase tracking-tighter text-black flex items-center gap-3">
+              <Trophy className="w-6 h-6 md:w-8 md:h-8 text-black" />
+              Global Standings
             </h1>
           </div>
           
-          <Link href="/play" className="px-4 py-2 bg-zinc-900 text-white hover:bg-zinc-800 rounded-lg transition-colors flex items-center gap-2 text-sm font-medium shadow-sm">
-            <RotateCcw className="w-4 h-4" />
+          <Link href="/play" className="bg-red-600 text-white font-bold text-xs md:text-sm px-4 py-3 border-2 border-black hover:bg-red-500 transition-colors flex items-center gap-2 uppercase tracking-widest shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-[4px] hover:translate-y-[4px]">
+            <Gamepad2 className="w-4 h-4 hidden sm:block" />
             Play Again
           </Link>
         </header>
 
-        <div className="bg-white rounded-2xl border border-zinc-200 shadow-sm overflow-hidden">
-          {loading ? (
-            <div className="p-12 text-center text-zinc-500 font-medium">Loading scores...</div>
-          ) : scores.length === 0 ? (
-            <div className="p-12 text-center text-zinc-500 font-medium">No scores yet today.</div>
-          ) : (
-            <div className="divide-y divide-zinc-100">
-              <div className="flex px-6 py-4 bg-zinc-50/50 text-xs font-semibold text-zinc-500 uppercase tracking-wider">
-                <div className="w-12 text-center">Rank</div>
-                <div className="flex-1">Player</div>
-                <div className="w-24 text-right">Score</div>
-              </div>
-              {scores.map((s, idx) => (
-                <div key={s.id} className="score-item flex px-6 py-4 items-center hover:bg-zinc-50 transition-colors">
-                  <div className="w-12 text-center font-medium">
-                    {idx === 0 ? <span className="text-yellow-600 font-bold">1</span> :
-                     idx === 1 ? <span className="text-zinc-400 font-bold">2</span> :
-                     idx === 2 ? <span className="text-amber-700 font-bold">3</span> : 
-                     <span className="text-zinc-400">{idx + 1}</span>}
+        <div className="bg-[#f4f0e6] border-4 border-black shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] flex flex-col relative rounded-none overflow-hidden">
+          {/* Header Row */}
+          <div className="bg-black text-white px-4 py-3 md:px-6 md:py-4 flex text-xs md:text-sm font-bold uppercase tracking-widest border-b-4 border-black">
+            <div className="w-16 md:w-20 text-center text-zinc-400">Rank</div>
+            <div className="flex-1 text-red-500">Operative</div>
+            <div className="w-24 text-right text-zinc-400">Score</div>
+          </div>
+
+          <div className="flex flex-col bg-[#f4f0e6]">
+            {loading ? (
+              <div className="p-16 text-center text-black font-black uppercase tracking-widest text-xl animate-pulse">Loading intel...</div>
+            ) : scores.length === 0 ? (
+              <div className="p-16 text-center text-zinc-500 font-bold uppercase tracking-widest">No scores recorded yet.</div>
+            ) : (
+              scores.map((s, idx) => (
+                <div key={s.id} className="score-item flex px-4 py-3 md:px-6 md:py-4 items-center border-b-2 border-black/10 last:border-0 hover:bg-black/5 transition-colors">
+                  <div className="w-16 md:w-20 flex justify-center">
+                    <div className={`w-8 h-8 md:w-10 md:h-10 flex items-center justify-center font-black text-sm md:text-base border-2 border-black ${
+                      idx === 0 ? 'bg-yellow-400 text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]' :
+                      idx === 1 ? 'bg-zinc-300 text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]' :
+                      idx === 2 ? 'bg-amber-500 text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]' :
+                      'bg-transparent text-black'
+                    }`}>
+                      {idx + 1}
+                    </div>
                   </div>
-                  <div className="flex-1 font-medium text-zinc-900">{s.name}</div>
-                  <div className="w-24 text-right font-mono font-medium text-zinc-900">{s.score}</div>
+                  <div className="flex-1 font-black text-black uppercase tracking-widest text-sm md:text-lg truncate pl-2">{s.name}</div>
+                  <div className="w-24 text-right font-black tabular-nums text-black text-base md:text-xl">{s.score.toLocaleString()}</div>
                 </div>
-              ))}
-            </div>
-          )}
+              ))
+            )}
+          </div>
         </div>
       </div>
     </div>
