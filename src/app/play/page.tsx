@@ -659,6 +659,8 @@ export default function PlayPage() {
                             setGameStatus('playing');
                             setTotalScore(0);
                             setCurrentIndex(0);
+                            setGuess('');
+                            setCloseGuessWarning(false);
                             setPlayCount(c => c + 1);
                           }}
                           className="w-full bg-red-600 hover:bg-red-500 hover:translate-y-1 hover:shadow-[0px_0px_0px_0px_rgba(0,0,0,1)] text-white font-black uppercase text-sm sm:text-base py-3 sm:py-4 px-4 sm:px-6 rounded-none border-4 border-black transition-all flex items-center justify-center gap-2 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
