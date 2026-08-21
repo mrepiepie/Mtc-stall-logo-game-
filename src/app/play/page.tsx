@@ -1,7 +1,6 @@
 'use client';
 import { useState, useEffect, useRef, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
-import { LOGOS } from '@/data/logos';
 import { supabase } from '@/lib/supabaseClient';
 import { PixelatedImage } from '@/components/PixelatedImage';
 import gsap from 'gsap';
@@ -73,7 +72,8 @@ export default function PlayPage() {
   const [playerEmail, setPlayerEmail] = useState('');
   
   // Game State
-  const [logos, setLogos] = useState<typeof LOGOS>([]);
+  const [logos, setLogos] = useState<{ id: string | number, url: string, name: string, points: number }[]>([]);
+  const [playCount, setPlayCount] = useState(0);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [pixelSize, setPixelSize] = useState(12);
   const [logoPoints, setLogoPoints] = useState(100);
@@ -82,13 +82,15 @@ export default function PlayPage() {
       if (logos.length > 0 && currentIndex === 0) {
         setLogoPoints(logos[0].points || 100);
       }
-    }, [logos]);
+    }, [logos, currentIndex]);
   const [totalScore, setTotalScore] = useState(0);
   const [timeLeft, setTimeLeft] = useState(TIMER_SECONDS);
   const [guess, setGuess] = useState('');
   const [gameStatus, setGameStatus] = useState<'playing' | 'correct' | 'wrong' | 'gameover'>('playing');
   const [nextTimer, setNextTimer] = useState<number | null>(null);
   const [jokeContent, setJokeContent] = useState<{text: string, emoji: string} | null>(null);
+  
+  // Game Over States
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [finalRank, setFinalRank] = useState<number | null>(null);
   const [finalPercentile, setFinalPercentile] = useState<number | null>(null);
@@ -102,9 +104,36 @@ export default function PlayPage() {
   const mascotRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const shuffled = [...LOGOS].sort(() => Math.random() - 0.5).slice(0, 10);
-    setLogos(shuffled);
-  }, []);
+    fetch('/api/questions')
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && data.questions) {
+          const allQuestions = data.questions.map((q: any) => ({
+             id: q.id,
+             url: q.image_url,
+             name: q.answer,
+             points: 100
+          }));
+          
+          const seenStr = localStorage.getItem('mtcSeenLogos') || '[]';
+          let seen = JSON.parse(seenStr);
+          
+          let unseen = allQuestions.filter((q: any) => !seen.includes(q.id));
+          if (unseen.length < 10) {
+             seen = [];
+             unseen = allQuestions;
+          }
+          
+          const shuffled = unseen.sort(() => Math.random() - 0.5).slice(0, 10);
+          
+          const newSeen = [...seen, ...shuffled.map((q: any) => q.id)];
+          localStorage.setItem('mtcSeenLogos', JSON.stringify(newSeen));
+          
+          setLogos(shuffled);
+        }
+      })
+      .catch(console.error);
+  }, [playCount]);
 
   // Helper for Skribbl-style "Close" guessing
   const levenshtein = (a: string, b: string) => {
@@ -624,6 +653,19 @@ export default function PlayPage() {
                       </div>
   
                       <div className="flex flex-col gap-2 sm:gap-4 w-full">
+                        <button 
+                          onClick={() => {
+                            setStep('popup');
+                            setGameStatus('playing');
+                            setTotalScore(0);
+                            setCurrentIndex(0);
+                            setPlayCount(c => c + 1);
+                          }}
+                          className="w-full bg-red-600 hover:bg-red-500 hover:translate-y-1 hover:shadow-[0px_0px_0px_0px_rgba(0,0,0,1)] text-white font-black uppercase text-sm sm:text-base py-3 sm:py-4 px-4 sm:px-6 rounded-none border-4 border-black transition-all flex items-center justify-center gap-2 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
+                        >
+                          Play Again
+                        </button>
+                        
                         <button 
                           onClick={() => router.push('/leaderboard')}
                           className="w-full bg-black hover:translate-y-1 hover:shadow-[0px_0px_0px_0px_rgba(0,0,0,1)] text-white font-black uppercase text-sm sm:text-base py-3 sm:py-4 px-4 sm:px-6 rounded-none border-4 border-black transition-all flex items-center justify-center gap-2 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
