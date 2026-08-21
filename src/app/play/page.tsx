@@ -38,21 +38,21 @@ const JOKES_MID = [
   { text: "Not bad, but don't get cocky", emoji: `${NOTO_BASE}/1f921/512.webp` },
   { text: "Acceptable... barely.", emoji: `${NOTO_BASE}/1f644/512.webp` },
   { text: "Average behavior.", emoji: `${NOTO_BASE}/1f610/512.webp` },
-  { text: "You're doing okay sweetie", emoji: `${NOTO_BASE}/1f485_1f3fc/512.webp` },
-  { text: "Nothing to brag about", emoji: `${NOTO_BASE}/1f937_1f3fd_200d_2642_fe0f/512.webp` },
+  { text: "You're doing okay sweetie", emoji: `${NOTO_BASE}/1f485/512.webp` },
+  { text: "Nothing to brag about", emoji: `${NOTO_BASE}/1f937/512.webp` },
 ];
 const JOKES_SLOW = [
   { text: "Fighting for your life out here", emoji: `${NOTO_BASE}/1f975/512.webp` },
   { text: "Bro was sweating bullets", emoji: `${NOTO_BASE}/1f630/512.webp` },
-  { text: "My grandma types faster...", emoji: `${NOTO_BASE}/1f475_1f3fc/512.webp` },
+  { text: "My grandma types faster...", emoji: `${NOTO_BASE}/1f475/512.webp` },
   { text: "Did you fall asleep?", emoji: `${NOTO_BASE}/1f634/512.webp` },
   { text: "Barely made it out alive", emoji: `${NOTO_BASE}/1f915/512.webp` },
   { text: "Bro is playing in slow motion", emoji: `${NOTO_BASE}/1f40c/512.webp` },
 ];
 const JOKES_FAIL = [
   { text: "Bro was literally sleeping", emoji: `${NOTO_BASE}/1f634/512.webp` },
-  { text: "Is your keyboard even plugged in?", emoji: `${NOTO_BASE}/2328_fe0f/512.webp` },
-  { text: "Embarrassing tbh", emoji: `${NOTO_BASE}/1f926_1f3fc_200d_2642_fe0f/512.webp` },
+  { text: "Is your keyboard even plugged in?", emoji: `${NOTO_BASE}/2328/512.webp` },
+  { text: "Embarrassing tbh", emoji: `${NOTO_BASE}/1f926/512.webp` },
   { text: "You're getting cooked out here", emoji: `${NOTO_BASE}/1f373/512.webp` },
   { text: "0 points. 0 aura.", emoji: `${NOTO_BASE}/1f480/512.webp` },
   { text: "My screen froze... yeah right.", emoji: `${NOTO_BASE}/1f976/512.webp` },
@@ -588,60 +588,61 @@ export default function PlayPage() {
               </div>
           </header>
 
-          <main className="flex-1 flex flex-col items-center justify-center p-4 sm:p-6 w-full max-w-5xl mx-auto">
-            {gameStatus === 'gameover' ? (
-              <div className="w-full max-w-md bg-white p-10 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-zinc-100 flex flex-col items-center text-center animate-in zoom-in-95 duration-500 relative overflow-hidden">
-                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-indigo-500"></div>
-                
-                {isSubmitting ? (
-                  <div className="py-12 flex flex-col items-center space-y-6">
-                    <MessageLoading />
-                    <div className="space-y-2">
-                      <h2 className="text-xl font-bold text-zinc-900 tracking-tight">Saving Score...</h2>
-                      <p className="text-zinc-500 text-sm font-medium">Adding your score to the leaderboard.</p>
-                    </div>
-                  </div>
-                ) : (
-                  <>
-                    <div className="bg-[#f4f0e6] border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] p-4 rounded-none mb-6">
-                      <CheckCircle2 className="w-10 h-10 text-black" />
-                    </div>
-                    <h2 className="text-4xl font-black uppercase tracking-tight mb-2 text-black">Game Over!</h2>
-                    <p className="text-black font-bold uppercase tracking-widest mb-8">Run sequence terminated.</p>
-                    
-                    <div className="w-full mb-8 p-6 bg-white rounded-none border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-                      <div className="text-xs text-zinc-400 font-bold uppercase tracking-widest mb-1">Final Score</div>
-                      <div className="text-6xl font-black text-red-600 tracking-tighter">{totalScore}</div>
-                    </div>
-                    
-                    <div className="w-full bg-yellow-300 border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] p-4 mb-6 text-center transform -rotate-1">
-                      <div className="font-black text-black uppercase text-sm tracking-widest">Global Ranking</div>
-{fetchError && finalRank === null && <div className="text-red-500 text-xs font-mono">{fetchError}</div>}
-                      <div className="font-bold text-black mt-2 text-lg">You're better than <span className="font-black text-red-600 text-xl">{finalPercentile !== null ? finalPercentile : Math.min(99, Math.max(1, Math.floor(totalScore / 15) + 12))}%</span> of the participants today!</div>
-                      <div className="font-black text-black text-2xl mt-2 bg-white inline-block px-4 py-1 border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
-                        Rank: #{finalRank !== null ? finalRank : Math.max(1, 300 - Math.floor(totalScore / 5))}
+            <main className="flex-1 flex flex-col items-center justify-center p-2 sm:p-6 w-full max-w-5xl mx-auto">
+              {gameStatus === 'gameover' ? (
+                <div className="w-full max-w-md bg-white p-6 sm:p-10 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-zinc-100 flex flex-col items-center text-center animate-in zoom-in-95 duration-500 relative overflow-hidden">
+                  <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-indigo-500"></div>
+                  
+                  {isSubmitting ? (
+                    <div className="py-12 flex flex-col items-center space-y-6">
+                      <MessageLoading />
+                      <div className="space-y-2">
+                        <h2 className="text-xl font-bold text-zinc-900 tracking-tight">Saving Score...</h2>
+                        <p className="text-zinc-500 text-sm font-medium">Adding your score to the leaderboard.</p>
                       </div>
                     </div>
-
-                    <div className="flex flex-col gap-4 w-full">
-                      <button 
-                        onClick={() => router.push('/leaderboard')}
-                        className="w-full bg-black hover:translate-y-1 hover:shadow-[0px_0px_0px_0px_rgba(0,0,0,1)] text-white font-black uppercase text-base py-4 px-6 rounded-none border-4 border-black transition-all flex items-center justify-center gap-2 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
-                      >
-                        View Leaderboard
-                        <ArrowRight className="w-4 h-4" />
-                      </button>
-                      <button 
-                        onClick={() => router.push('/')}
-                        className="w-full bg-white hover:bg-zinc-100 hover:translate-y-1 hover:shadow-[0px_0px_0px_0px_rgba(0,0,0,1)] text-black font-black uppercase text-base py-4 px-6 rounded-none border-4 border-black transition-all flex items-center justify-center gap-2 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
-                      >
-                        Return to Base
-                      </button>
-                    </div>
-                  </>
-                )}
-              </div>
-            ) : (
+                  ) : (
+                    <>
+                      <div className="bg-[#f4f0e6] border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] p-3 sm:p-4 rounded-none mb-4">
+                        <CheckCircle2 className="w-8 h-8 sm:w-10 sm:h-10 text-black" />
+                      </div>
+                      <h2 className="text-3xl sm:text-4xl font-black uppercase tracking-tight mb-1 text-black">Game Over!</h2>
+                      <p className="text-sm sm:text-base text-black font-bold uppercase tracking-widest mb-4 sm:mb-6">Run sequence terminated.</p>
+                      
+                      <div className="w-full mb-4 sm:mb-6 p-4 sm:p-6 bg-white rounded-none border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                        <div className="text-[10px] sm:text-xs text-zinc-400 font-bold uppercase tracking-widest mb-1">Final Score</div>
+                        <div className="text-5xl sm:text-6xl font-black text-red-600 tracking-tighter">{totalScore}</div>
+                      </div>
+                      
+                      <div className="w-full bg-yellow-300 border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] p-3 sm:p-4 mb-4 sm:mb-6 text-center transform -rotate-1">
+                        <div className="font-black text-black uppercase text-xs sm:text-sm tracking-widest">Global Ranking</div>
+  {fetchError && finalRank === null && <div className="text-red-500 text-xs font-mono">{fetchError}</div>}
+                        <div className="font-bold text-black mt-2 text-base sm:text-lg">You're better than <span className="font-black text-red-600 text-lg sm:text-xl">{finalPercentile !== null ? finalPercentile : Math.min(99, Math.max(1, Math.floor(totalScore / 15) + 12))}%</span> of participants!</div>
+                        <div className="font-black text-black text-xl sm:text-2xl mt-2 bg-white inline-block px-4 py-1 border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+                          Rank: #{finalRank !== null ? finalRank : Math.max(1, 300 - Math.floor(totalScore / 5))}
+                        </div>
+                      </div>
+  
+                      <div className="flex flex-col gap-2 sm:gap-4 w-full">
+                        <button 
+                          onClick={() => router.push('/leaderboard')}
+                          className="w-full bg-black hover:translate-y-1 hover:shadow-[0px_0px_0px_0px_rgba(0,0,0,1)] text-white font-black uppercase text-sm sm:text-base py-3 sm:py-4 px-4 sm:px-6 rounded-none border-4 border-black transition-all flex items-center justify-center gap-2 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
+                        >
+                          View Leaderboard
+                          <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
+                        </button>
+                        
+                        <button 
+                          onClick={() => router.push('/')}
+                          className="w-full bg-white hover:bg-zinc-100 hover:translate-y-1 hover:shadow-[0px_0px_0px_0px_rgba(0,0,0,1)] text-black font-black uppercase text-sm sm:text-base py-3 sm:py-4 px-4 sm:px-6 rounded-none border-4 border-black transition-all flex items-center justify-center gap-2 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
+                        >
+                          Return to Base
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </div>
+              ) : (
               <div className="game-content w-full flex flex-col items-center">
                 <div className="w-full flex justify-between items-center mb-3 text-sm font-bold text-zinc-400 uppercase tracking-widest">
                   <span className="bg-black text-white px-3 py-1 font-black uppercase">Target {currentIndex + 1} of {logos.length}</span>
