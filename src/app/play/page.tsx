@@ -400,8 +400,10 @@ export default function PlayPage() {
   }, [gameStatus, playerName, playerEmail, totalScore]);
 
   const currentLogo = logos[currentIndex];
-
-  if (!currentLogo) return <div className="flex h-screen items-center justify-center bg-[#fafafa]">Loading...</div>;
+  
+  if (!currentLogo && (step === 'game' || step === 'countdown')) {
+    return <div className="flex h-screen items-center justify-center bg-[#111111] text-white font-bold tracking-widest uppercase">Loading Secure Data...</div>;
+  }
 
   return (
     <div className="min-h-screen bg-[#111111] text-white flex flex-col font-sans relative selection:bg-red-500 overflow-hidden">
