@@ -50,8 +50,8 @@ const JOKES_SLOW = [
 ];
 const JOKES_FAIL = [
   { text: "Bro was literally sleeping", emoji: `${NOTO_BASE}/1f634/512.webp` },
-  { text: "Is your keyboard even plugged in?", emoji: `${NOTO_BASE}/2328/512.webp` },
-  { text: "Embarrassing tbh", emoji: `${NOTO_BASE}/1f926/512.webp` },
+  { text: "Is your keyboard even plugged in?", emoji: `${NOTO_BASE}/1f928/512.webp` },
+  { text: "Embarrassing tbh", emoji: `${NOTO_BASE}/1f921/512.webp` },
   { text: "You're getting cooked out here", emoji: `${NOTO_BASE}/1f373/512.webp` },
   { text: "0 points. 0 aura.", emoji: `${NOTO_BASE}/1f480/512.webp` },
   { text: "My screen froze... yeah right.", emoji: `${NOTO_BASE}/1f976/512.webp` },
