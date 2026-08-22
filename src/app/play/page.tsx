@@ -55,7 +55,10 @@ const JOKES_FAIL = [
   { text: "You're getting cooked out here", emoji: `${NOTO_BASE}/1f373/512.webp` },
   { text: "0 points. 0 aura.", emoji: `${NOTO_BASE}/1f480/512.webp` },
   { text: "My screen froze... yeah right.", emoji: `${NOTO_BASE}/1f976/512.webp` },
-  { text: "HURRY UP TWIN! TIME IS TICKING...", emoji: `${NOTO_BASE}/1f47d/512.webp` }
+  { text: "Wake up! We believe in you (kinda)", emoji: `${NOTO_BASE}/1f4aa/512.webp` },
+  { text: "It's just a warmup, right?", emoji: `${NOTO_BASE}/1f975/512.webp` },
+  { text: "Comeback season starts NOW!", emoji: `${NOTO_BASE}/1f525/512.webp` },
+  { text: "Don't let the timer bully you", emoji: `${NOTO_BASE}/1f624/512.webp` }
 ];
 
 export default function PlayPage() {
