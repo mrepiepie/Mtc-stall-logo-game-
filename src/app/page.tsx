@@ -29,11 +29,12 @@ export default function Home() {
 
   return (
     <div className="h-screen bg-[#111111] flex flex-col xl:flex-row relative overflow-hidden">
+      <button onClick={() => window.open("/admin", "_blank")} className="fixed top-4 right-4 md:top-8 md:right-8 z-[100] group bg-[#111] text-zinc-400 hover:text-white font-bold text-xs px-4 py-2 border-2 border-zinc-800 hover:border-zinc-500 transition-all flex items-center gap-2 uppercase tracking-widest cursor-pointer">Admin <MoveRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" /></button>
       {/* Dot Pattern Background matching Rooftop Run */}
       <div className="absolute inset-0 bg-[radial-gradient(#333_2px,transparent_2px)] bg-[size:24px_24px] pointer-events-none z-0"></div>
       
       {/* LEFT: Hero Content */}
-      <div className="w-full xl:w-[55%] h-full relative z-10 flex items-center">
+      <div className="w-full xl:w-[55%] h-full relative z-20 flex items-center">
         <AnimatedHero />
       </div>
 

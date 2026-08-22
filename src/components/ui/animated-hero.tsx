@@ -38,7 +38,6 @@ function AnimatedHero() {
 
   return (
     <div className="w-full relative h-full flex flex-col justify-center pl-8 lg:pl-16 xl:pl-24 py-6">
-      <button onClick={() => window.open("/admin", "_blank")} className="fixed top-4 right-4 md:top-8 md:right-8 z-50 group bg-[#111] text-zinc-400 hover:text-white font-bold text-xs px-4 py-2 border-2 border-zinc-800 hover:border-zinc-500 transition-all flex items-center gap-2 uppercase tracking-widest">Admin <MoveRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" /></button>
       <div className="relative z-10 flex flex-col items-start justify-center">
         {/* MTC Top Badge */}
         <div className="flex items-center gap-2 mb-4">
