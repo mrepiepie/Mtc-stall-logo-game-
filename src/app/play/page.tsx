@@ -340,6 +340,7 @@ export default function PlayPage() {
 
     if (isCorrect) {
       setGameStatus('correct');
+      window.dispatchEvent(new CustomEvent('play-sound-success'));
       const timeBonus = timeLeft * 10;
       setTotalScore(prev => prev + logoPoints + timeBonus);
       

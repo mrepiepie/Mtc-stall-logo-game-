@@ -278,13 +278,14 @@ export default function JoinPage() {
       })
     })
     .then(res => res.json())
-    .then(data => {
-      setIsSubmitting(false);
-      setHasGuessed(true);
-      
-      let newJoke;
-      if (data.success && data.isCorrect) {
-        if (timeSubmitted >= 7) newJoke = JOKES_FAST[Math.floor(Math.random() * JOKES_FAST.length)];
+      .then(data => {
+        setIsSubmitting(false);
+        setHasGuessed(true);
+        
+        let newJoke;
+        if (data.success && data.isCorrect) {
+          window.dispatchEvent(new CustomEvent('play-sound-success'));
+          if (timeSubmitted >= 7) newJoke = JOKES_FAST[Math.floor(Math.random() * JOKES_FAST.length)];
         else if (timeSubmitted >= 4) newJoke = JOKES_MID[Math.floor(Math.random() * JOKES_MID.length)];
         else newJoke = JOKES_SLOW[Math.floor(Math.random() * JOKES_SLOW.length)];
       } else {

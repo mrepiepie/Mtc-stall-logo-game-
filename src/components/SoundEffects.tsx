@@ -76,6 +76,17 @@ export function SoundEffects() {
       playTone(audioContext, note * 1.5, 0.09, 0.18, "triangle", audioContext.destination, now + 0.035);
     };
 
+    const playSuccess = async () => {
+      const audioContext = await getOrCreateAudioContext();
+      if (!audioContext) return;
+
+      const now = audioContext.currentTime;
+      playTone(audioContext, 523.25, 0.1, 0.3, "square", audioContext.destination, now);
+      playTone(audioContext, 659.25, 0.1, 0.3, "square", audioContext.destination, now + 0.1);
+      playTone(audioContext, 783.99, 0.2, 0.3, "square", audioContext.destination, now + 0.2);
+      playTone(audioContext, 1046.50, 0.4, 0.3, "sine", audioContext.destination, now + 0.3);
+    };
+
     const startMusic = async () => {
       if (musicBeatRef.current) return;
 
@@ -130,14 +141,22 @@ export function SoundEffects() {
       }
     };
 
+    const handleCustomSound = (event: Event) => {
+      if (event.type === 'play-sound-success') {
+        void playSuccess();
+      }
+    };
+
     document.addEventListener("click", handleInteraction, true);
     document.addEventListener("keydown", handleInteraction, true);
     document.addEventListener("pointerdown", handleInteraction, true);
+    window.addEventListener("play-sound-success", handleCustomSound);
 
     return () => {
       document.removeEventListener("click", handleInteraction, true);
       document.removeEventListener("keydown", handleInteraction, true);
       document.removeEventListener("pointerdown", handleInteraction, true);
+      window.removeEventListener("play-sound-success", handleCustomSound);
       if (musicBeatRef.current) {
         clearInterval(musicBeatRef.current);
         musicBeatRef.current = null;
