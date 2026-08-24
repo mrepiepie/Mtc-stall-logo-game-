@@ -109,13 +109,25 @@ export function SoundEffects() {
 
     const handleInteraction = (event: Event) => {
       void startMusic();
-      if (event.type !== "click") return;
+      
+      let shouldPlaySound = false;
 
-      const target = event.target as Element | null;
-      const control = target?.closest('button, a, [role="button"]');
-      if (!control || (control instanceof HTMLButtonElement && control.disabled)) return;
+      if (event.type === "click") {
+        const target = event.target as Element | null;
+        const control = target?.closest('button, a, [role="button"]');
+        if (control && !(control instanceof HTMLButtonElement && control.disabled)) {
+          shouldPlaySound = true;
+        }
+      } else if (event.type === "keydown") {
+        const keyboardEvent = event as KeyboardEvent;
+        if (keyboardEvent.key === "Enter") {
+          shouldPlaySound = true;
+        }
+      }
 
-      void playClick();
+      if (shouldPlaySound) {
+        void playClick();
+      }
     };
 
     document.addEventListener("click", handleInteraction, true);
