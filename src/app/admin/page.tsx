@@ -1,5 +1,6 @@
 "use client";
 import { ProjectorView } from '@/components/ProjectorView';
+import { supabase } from '@/lib/supabaseClient';
 
 import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
