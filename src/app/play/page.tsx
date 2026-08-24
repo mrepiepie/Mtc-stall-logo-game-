@@ -412,7 +412,6 @@ export default function PlayPage() {
 
   return (
     <div className="min-h-screen bg-[#111111] text-white flex flex-col font-sans relative selection:bg-red-500 overflow-hidden">
-      <SoundEffects />
       
       <div className="absolute inset-0 bg-[radial-gradient(#333_2px,transparent_2px)] bg-[size:24px_24px] pointer-events-none z-0"></div>
 

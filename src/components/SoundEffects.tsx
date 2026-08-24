@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { usePathname } from "next/navigation";
 
 type AudioContextConstructor = typeof AudioContext;
 
@@ -48,6 +49,7 @@ function playTone(
 }
 
 export function SoundEffects() {
+  const pathname = usePathname();
   const audioContextRef = useRef<AudioContext | null>(null);
   const musicBeatRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const musicStepRef = useRef(0);
@@ -87,7 +89,18 @@ export function SoundEffects() {
       playTone(audioContext, 1046.50, 0.4, 0.3, "sine", audioContext.destination, now + 0.3);
     };
 
+    const stopMusic = () => {
+      if (musicBeatRef.current) {
+        clearInterval(musicBeatRef.current);
+        musicBeatRef.current = null;
+      }
+    };
+
     const startMusic = async () => {
+      if (pathname !== '/play' && pathname !== '/join') {
+        stopMusic();
+        return;
+      }
       if (musicBeatRef.current) return;
 
       const audioContext = await getOrCreateAudioContext();
@@ -118,8 +131,16 @@ export function SoundEffects() {
       musicBeatRef.current = setInterval(playNextBeat, 320);
     };
 
-    const handleInteraction = (event: Event) => {
+    if (pathname === '/play' || pathname === '/join') {
       void startMusic();
+    } else {
+      stopMusic();
+    }
+
+    const handleInteraction = (event: Event) => {
+      if (pathname === '/play' || pathname === '/join') {
+        void startMusic();
+      }
       
       let shouldPlaySound = false;
 
@@ -157,14 +178,11 @@ export function SoundEffects() {
       document.removeEventListener("keydown", handleInteraction, true);
       document.removeEventListener("pointerdown", handleInteraction, true);
       window.removeEventListener("play-sound-success", handleCustomSound);
-      if (musicBeatRef.current) {
-        clearInterval(musicBeatRef.current);
-        musicBeatRef.current = null;
-      }
+      stopMusic();
       audioContextRef.current?.close();
       audioContextRef.current = null;
     };
-  }, []);
+  }, [pathname]);
 
   return null;
 }

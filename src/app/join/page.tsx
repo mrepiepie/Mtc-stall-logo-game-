@@ -306,7 +306,6 @@ export default function JoinPage() {
 
   return (
     <div className="min-h-screen bg-[#111111] text-white flex flex-col items-center justify-center font-sans relative selection:bg-red-500 overflow-hidden p-4 md:p-8">
-      <SoundEffects />
       
       {/* Background Dots */}
       <div className="absolute inset-0 bg-[radial-gradient(#333_2px,transparent_2px)] bg-[size:24px_24px] pointer-events-none z-0"></div>
