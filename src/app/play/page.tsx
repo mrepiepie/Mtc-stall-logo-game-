@@ -39,12 +39,12 @@ const JOKES_MID = [
   { text: "Acceptable... barely.", emoji: `${NOTO_BASE}/1f644/512.webp` },
   { text: "Average behavior.", emoji: `${NOTO_BASE}/1f610/512.webp` },
   { text: "You're doing okay sweetie", emoji: `${NOTO_BASE}/1f485/512.webp` },
-  { text: "Nothing to brag about", emoji: `${NOTO_BASE}/1f937/512.webp` },
+  { text: "Nothing to brag about", emoji: `${NOTO_BASE}/1f612/512.webp` },
 ];
 const JOKES_SLOW = [
   { text: "Fighting for your life out here", emoji: `${NOTO_BASE}/1f975/512.webp` },
   { text: "Bro was sweating bullets", emoji: `${NOTO_BASE}/1f630/512.webp` },
-  { text: "My grandma types faster...", emoji: `${NOTO_BASE}/1f475/512.webp` },
+  { text: "My grandma types faster...", emoji: `${NOTO_BASE}/1f422/512.webp` },
   { text: "Did you fall asleep?", emoji: `${NOTO_BASE}/1f634/512.webp` },
   { text: "Barely made it out alive", emoji: `${NOTO_BASE}/1f915/512.webp` },
   { text: "Bro is playing in slow motion", emoji: `${NOTO_BASE}/1f40c/512.webp` },

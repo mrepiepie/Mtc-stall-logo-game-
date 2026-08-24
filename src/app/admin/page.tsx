@@ -266,22 +266,12 @@ function AdminDashboard() {
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [createdGame?.gamePin, createdGame?.status]);
 
-  // Poll for players (with 10-minute auto-timeout to save limits)
+  // Realtime updates for the game lobby and active game
   useEffect(() => {
     if (!createdGame || createdGame.status === 'timed_out' || createdGame.status === 'gameover') return;
     
-    let pollCount = 0;
-    const MAX_POLLS = 1800; // 1 hour // 300 * 2s = 10 minutes
-
-    const interval = setInterval(() => {
-      pollCount++;
-      if (pollCount >= MAX_POLLS) {
-        clearInterval(interval);
-        setCreatedGame(prev => prev ? { ...prev, status: 'timed_out' } : null);
-        alert("Waiting room timed out after 10 minutes to save database requests. Please create a new game.");
-        return;
-      }
-
+    // Initial fetch to ensure we're up to date
+    const fetchLatest = () => {
       fetch(`/api/games/${createdGame.gamePin}?t=${Date.now()}`, { cache: 'no-store' })
         .then(res => res.json())
         .then(data => {
@@ -290,8 +280,29 @@ function AdminDashboard() {
           }
         })
         .catch(console.error);
-    }, 2000);
-    return () => clearInterval(interval);
+    };
+    
+    fetchLatest();
+
+    const channel = supabase
+      .channel(`admin-game-${createdGame.gamePin}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'active_game',
+          filter: `id=eq.${createdGame.gamePin}`
+        },
+        () => {
+          fetchLatest();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [createdGame?.gamePin, createdGame?.status]);
 
 

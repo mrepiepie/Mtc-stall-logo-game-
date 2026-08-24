@@ -9,8 +9,8 @@ import { DeBugger } from '@/components/ui/de-bugger';
 import { SoundEffects } from '@/components/SoundEffects';
 
 const JOKES_FAST = [
-  { text: "Woah that was quick.. calm down twin", emoji: "💀" },
-  { text: "Bro is literally a human scanner", emoji: "🤯" },
+  { text: "Woah that was quick.. calm down twin", emoji: "🔥" },
+  { text: "Bro is literally a human scanner", emoji: "👁️" },
   { text: "Are you cheating?!", emoji: "🤨" },
   { text: "Speedforce activated", emoji: "⚡" },
   { text: "Bro has 20/20 vision", emoji: "👀" },
@@ -22,7 +22,7 @@ const JOKES_MID = [
   { text: "Acceptable... barely.", emoji: "🙄" },
   { text: "Average behavior.", emoji: "😐" },
   { text: "You're doing okay sweetie", emoji: "💅" },
-  { text: "Nothing to brag about", emoji: "🤷‍♂️" },
+  { text: "Nothing to brag about", emoji: "🤷" },
 ];
 const JOKES_SLOW = [
   { text: "Fighting for your life out here", emoji: "🥵" },
@@ -35,7 +35,7 @@ const JOKES_SLOW = [
 const JOKES_FAIL = [
   { text: "Bro was literally sleeping", emoji: "😴" },
   { text: "Is your keyboard even plugged in?", emoji: "⌨️" },
-  { text: "Embarrassing tbh", emoji: "🤦‍♂️" },
+  { text: "Embarrassing tbh", emoji: "🤦" },
   { text: "You're getting cooked out here", emoji: "🍳" },
   { text: "0 points. 0 aura.", emoji: "💀" },
   { text: "My screen froze... yeah right.", emoji: "🥶" },
@@ -61,6 +61,7 @@ export default function JoinPage() {
   const [guessResult, setGuessResult] = useState<{isCorrect?: boolean; points?: number} | null>(null);
   const [joke, setJoke] = useState<{text: string, emoji: string} | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const isSubmittingRef = useRef(false);
 
   const handleJoin = (e: React.FormEvent) => {
     if (e && e.preventDefault) e.preventDefault();
@@ -118,16 +119,7 @@ export default function JoinPage() {
     }
   }, [guess, formats, round, hasGuessed, isSubmitting, step]);
 
-  // Auto-submit when typing correct answer
-  useEffect(() => {
-    if (step === 'playing' && guess && formats[round - 1] && !hasGuessed && !isSubmitting) {
-      const target = formats[round - 1].replace(/ /g, '').toLowerCase();
-      const current = guess.replace(/ /g, '').toLowerCase();
-      if (target === current) {
-        submitGuess();
-      }
-    }
-  }, [guess, formats, round, hasGuessed, isSubmitting, step]);
+
 
   // Fallback to fetch formats if they are missing
   useEffect(() => {
@@ -227,6 +219,8 @@ export default function JoinPage() {
             setJoke(null);
             setGuess('');
             setTimeLeft(10); // reset local timer
+            isSubmittingRef.current = false;
+            setIsSubmitting(false);
           }
 
           if (newStatus === 'countdown' && step !== 'countdown') {
@@ -261,8 +255,9 @@ export default function JoinPage() {
 
   const submitGuess = (e?: React.FormEvent) => {
     if (e && e.preventDefault) e.preventDefault();
-    if (!guess.trim() || isSubmitting || hasGuessed) return;
+    if (!guess.trim() || isSubmittingRef.current || hasGuessed) return;
     
+    isSubmittingRef.current = true;
     setIsSubmitting(true);
     const timeSubmitted = timeLeft;
     
@@ -279,7 +274,11 @@ export default function JoinPage() {
     })
     .then(res => res.json())
       .then(data => {
-        setIsSubmitting(false);
+        if (!data.success && data.error !== "Already guessed") {
+          isSubmittingRef.current = false;
+          setIsSubmitting(false);
+        }
+        
         setHasGuessed(true);
         
         let newJoke;
@@ -295,11 +294,12 @@ export default function JoinPage() {
 
       if (data.success) {
         setGuessResult({ isCorrect: data.isCorrect, points: data.pointsAwarded });
-      } else {
+      } else if (data.error !== "Already guessed") {
         setGuessResult({ isCorrect: false, points: 0 });
       }
     })
     .catch(() => {
+      isSubmittingRef.current = false;
       setIsSubmitting(false);
     });
   };

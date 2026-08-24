@@ -4,18 +4,34 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Trophy, MoveRight } from "lucide-react";
 import gsap from "gsap";
+import { supabase } from "@/lib/supabaseClient";
 
 export default function Home() {
   const [scores, setScores] = useState<{id: string, name: string, score: number, date: string}[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('/api/scores')
-      .then(res => res.json())
-      .then(data => {
-        setScores(data.slice(0, 7)); // Top 7 to ensure it fits 100vh
-        setLoading(false);
-      });
+    const fetchScores = () => {
+      fetch('/api/scores')
+        .then(res => res.json())
+        .then(data => {
+          setScores(data.slice(0, 7)); // Top 7 to ensure it fits 100vh
+          setLoading(false);
+        });
+    };
+
+    fetchScores();
+
+    const channel = supabase
+      .channel('public:scores')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'scores' }, () => {
+        fetchScores();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   useEffect(() => {

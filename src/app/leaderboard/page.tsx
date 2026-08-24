@@ -3,18 +3,34 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Trophy, ArrowLeft, Gamepad2, MoveRight } from 'lucide-react';
 import gsap from 'gsap';
+import { supabase } from "@/lib/supabaseClient";
 
 export default function LeaderboardPage() {
   const [scores, setScores] = useState<{id: string, name: string, score: number, date: string}[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('/api/scores')
-      .then(res => res.json())
-      .then(data => {
-        setScores(data);
-        setLoading(false);
-      });
+    const fetchScores = () => {
+      fetch('/api/scores')
+        .then(res => res.json())
+        .then(data => {
+          setScores(data);
+          setLoading(false);
+        });
+    };
+
+    fetchScores();
+
+    const channel = supabase
+      .channel('public:scores')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'scores' }, () => {
+        fetchScores();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   useEffect(() => {
