@@ -15,10 +15,8 @@ export function PixelatedImage({ src, pixelSize, className, onLoad }: PixelatedI
   useEffect(() => {
     setImgElement(null);
     const img = new Image();
-    
-    // Use direct src since we now encode logos as base64 data URIs
+    // ALWAYS attach handlers before setting src to prevent cache race conditions!
     img.crossOrigin = "anonymous";
-    img.src = src;
     img.onload = () => {
       setImgElement(img);
       if (onLoad) onLoad();
@@ -26,6 +24,7 @@ export function PixelatedImage({ src, pixelSize, className, onLoad }: PixelatedI
     img.onerror = () => {
       console.error('Failed to load image', src.substring(0, 50));
     }
+    img.src = src;
   }, [src]);
 
   useEffect(() => {
