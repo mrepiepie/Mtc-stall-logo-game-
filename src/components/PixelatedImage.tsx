@@ -17,6 +17,7 @@ export function PixelatedImage({ src, pixelSize, className, onLoad }: PixelatedI
     const img = new Image();
     
     // Use direct src since we now encode logos as base64 data URIs
+    img.crossOrigin = "anonymous";
     img.src = src;
     img.onload = () => {
       setImgElement(img);
@@ -48,23 +49,21 @@ export function PixelatedImage({ src, pixelSize, className, onLoad }: PixelatedI
     if (pixelSize <= 1) {
       // Draw normal
       ctx.imageSmoothingEnabled = true;
+      ctx.filter = 'none';
       ctx.drawImage(imgElement, 0, 0, width, height);
       return;
     }
 
-    // Map pixelSize (1-12) to a guaranteed grid resolution.
-    // If pixelSize=12, we want a very blurry 10x10 grid.
-    // If pixelSize=2, we want a clear 75x75 grid.
-    const blocksTarget = Math.max(8, Math.floor(150 / pixelSize));
+    const blocksTarget = Math.max(4, Math.floor(150 / pixelSize));
     
     const ratio = width / height;
     let scaledWidth = blocksTarget;
     let scaledHeight = blocksTarget;
     
     if (ratio > 1) {
-      scaledHeight = Math.max(4, Math.floor(blocksTarget / ratio));
+      scaledHeight = Math.max(1, Math.round(blocksTarget / ratio));
     } else {
-      scaledWidth = Math.max(4, Math.floor(blocksTarget * ratio));
+      scaledWidth = Math.max(1, Math.round(blocksTarget * ratio));
     }
 
     // Create an offscreen canvas to scale down
@@ -74,11 +73,17 @@ export function PixelatedImage({ src, pixelSize, className, onLoad }: PixelatedI
     const offscreenCtx = offscreen.getContext('2d');
     if (!offscreenCtx) return;
 
+    // Add a blur filter BEFORE drawing to the offscreen canvas to obscure solid blocks (like Microsoft logo)
+    if (pixelSize > 2) {
+      offscreenCtx.filter = `blur(${Math.min(pixelSize, 8)}px)`;
+    }
+    
     // Draw the image scaled down
     offscreenCtx.drawImage(imgElement, 0, 0, scaledWidth, scaledHeight);
 
     // Turn off smoothing to keep the sharp pixel edges
     ctx.imageSmoothingEnabled = false;
+    ctx.filter = 'none';
 
     // Draw the scaled-down image back to the main canvas, scaling it up
     ctx.drawImage(offscreen, 0, 0, scaledWidth, scaledHeight, 0, 0, width, height);
