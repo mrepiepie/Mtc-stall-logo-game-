@@ -81,11 +81,6 @@ export function PixelatedImage({ src, pixelSize, className, onLoad }: PixelatedI
     offscreenCtx.fillStyle = '#FFFFFF';
     offscreenCtx.fillRect(0, 0, scaledWidth, scaledHeight);
 
-    // Add a blur filter BEFORE drawing to the offscreen canvas to obscure solid blocks (like Microsoft logo)
-    if (pixelSize > 2) {
-      offscreenCtx.filter = `blur(${Math.min(pixelSize, 8)}px)`;
-    }
-    
     // Draw the image scaled down
     offscreenCtx.drawImage(imgElement, 0, 0, scaledWidth, scaledHeight);
 
@@ -95,6 +90,20 @@ export function PixelatedImage({ src, pixelSize, className, onLoad }: PixelatedI
 
     // Draw the scaled-down image back to the main canvas, scaling it up
     ctx.drawImage(offscreen, 0, 0, scaledWidth, scaledHeight, 0, 0, width, height);
+
+    // Draw grid overlay to enforce the "pixelated" look even on solid square logos
+    if (pixelSize > 1) {
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.05)'; // Very light grid
+      const blockWidth = width / scaledWidth;
+      const blockHeight = height / scaledHeight;
+      
+      for (let x = 0; x < width; x += blockWidth) {
+        ctx.fillRect(x, 0, 1, height);
+      }
+      for (let y = 0; y < height; y += blockHeight) {
+        ctx.fillRect(0, y, width, 1);
+      }
+    }
 
   }, [imgElement, pixelSize]);
 
