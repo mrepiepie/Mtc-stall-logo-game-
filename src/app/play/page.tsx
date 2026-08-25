@@ -88,6 +88,7 @@ export default function PlayPage() {
       }
     }, [logos, currentIndex]);
   const [totalScore, setTotalScore] = useState(0);
+  const [lastPointsEarned, setLastPointsEarned] = useState(0);
   const [timeLeft, setTimeLeft] = useState(TIMER_SECONDS);
   const [guess, setGuess] = useState('');
   const [gameStatus, setGameStatus] = useState<'playing' | 'correct' | 'wrong' | 'gameover'>('playing');
@@ -342,7 +343,9 @@ export default function PlayPage() {
       setGameStatus('correct');
       window.dispatchEvent(new CustomEvent('play-sound-success'));
       const timeBonus = timeLeft * 10;
-      setTotalScore(prev => prev + logoPoints + timeBonus);
+      const points = logoPoints + timeBonus;
+      setTotalScore(prev => prev + points);
+      setLastPointsEarned(points);
       
       let pool = JOKES_SLOW;
       if (timeLeft >= 7) pool = JOKES_FAST;
@@ -709,7 +712,8 @@ export default function PlayPage() {
                   {gameStatus === 'correct' && (
                     <div className="absolute inset-0 bg-[#f4f0e6]/90 backdrop-blur-sm flex flex-col items-center justify-center z-20 animate-in fade-in duration-200">
                       <CheckCircle2 className="w-16 h-16 sm:w-20 sm:h-20 text-green-600 mb-4" />
-                      <div className="text-3xl sm:text-4xl font-black text-black uppercase tracking-tighter mb-4">Correct</div>
+                      <div className="text-3xl sm:text-4xl font-black text-black uppercase tracking-tighter mb-2">Correct</div>
+                      <div className="text-xl sm:text-2xl font-black text-green-600 uppercase mb-4">+{lastPointsEarned} POINTS</div>
                       {jokeContent && (
                         <div className="flex items-center gap-3 bg-white px-6 py-4 border-4 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] rounded-none text-center mx-4">
                           <span className="text-lg sm:text-xl font-black uppercase text-black">{jokeContent.text}</span>
