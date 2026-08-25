@@ -16,7 +16,6 @@ export function PixelatedImage({ src, pixelSize, className, onLoad }: PixelatedI
     setImgElement(null);
     const img = new Image();
     // ALWAYS attach handlers before setting src to prevent cache race conditions!
-    img.crossOrigin = "anonymous";
     img.onload = () => {
       setImgElement(img);
       if (onLoad) onLoad();
