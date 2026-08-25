@@ -45,6 +45,10 @@ export function PixelatedImage({ src, pixelSize, className, onLoad }: PixelatedI
     const height = imgElement.height || 300;
     canvas.width = width;
     canvas.height = height;
+    
+    // Fill main canvas with white to prevent transparent pixels blending into black
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(0, 0, width, height);
 
     if (pixelSize <= 1) {
       // Draw normal
@@ -72,6 +76,10 @@ export function PixelatedImage({ src, pixelSize, className, onLoad }: PixelatedI
     offscreen.height = scaledHeight;
     const offscreenCtx = offscreen.getContext('2d');
     if (!offscreenCtx) return;
+
+    // Fill offscreen canvas with white for the same reason
+    offscreenCtx.fillStyle = '#FFFFFF';
+    offscreenCtx.fillRect(0, 0, scaledWidth, scaledHeight);
 
     // Add a blur filter BEFORE drawing to the offscreen canvas to obscure solid blocks (like Microsoft logo)
     if (pixelSize > 2) {
