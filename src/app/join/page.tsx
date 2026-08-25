@@ -542,6 +542,21 @@ export default function JoinPage() {
             <h2 className="text-4xl font-black text-black uppercase tracking-tighter mb-4">
               Round Over!
             </h2>
+
+            {guessResult && guessResult.isCorrect ? (
+               <div className="mb-6 bg-green-100 text-green-700 px-6 py-3 border-4 border-green-700 font-black text-2xl uppercase shadow-[6px_6px_0px_0px_rgba(21,128,61,1)]">
+                 +{guessResult.points} POINTS!
+               </div>
+            ) : guessResult && !guessResult.isCorrect ? (
+               <div className="mb-6 bg-red-100 text-red-700 px-6 py-3 border-4 border-red-700 font-black text-2xl uppercase shadow-[6px_6px_0px_0px_rgba(185,28,28,1)]">
+                 INCORRECT (0 PTS)
+               </div>
+            ) : (
+               <div className="mb-6 bg-zinc-200 text-zinc-700 px-6 py-3 border-4 border-zinc-700 font-black text-2xl uppercase shadow-[6px_6px_0px_0px_rgba(63,63,70,1)]">
+                 TIME UP (0 PTS)
+               </div>
+            )}
+
             <div className="bg-black text-white px-6 py-3 border-4 border-black font-black uppercase tracking-widest text-xl shadow-[6px_6px_0px_0px_rgba(255,0,0,1)] mb-8">
               Check the projector!
             </div>
