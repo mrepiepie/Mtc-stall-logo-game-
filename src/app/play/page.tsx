@@ -219,7 +219,7 @@ export default function PlayPage() {
 
   const handleRegSubmit = (e: FormEvent) => {
     e.preventDefault();
-    if (!playerName.trim() || !playerEmail.trim()) return;
+    if (!playerName.trim()) return;
     
     gsap.to('.intro-container', { 
       opacity: 0, y: -30, duration: 0.5, ease: 'power3.in',
@@ -506,21 +506,9 @@ export default function PlayPage() {
                         maxLength={30}
                       />
                     </div>
-                    <div className="flex flex-col gap-2 w-full">
-                      <label htmlFor="playerEmail" className="font-bold text-black uppercase tracking-wider text-sm">Email</label>
-                      <input
-                        id="playerEmail"
-                        type="email"
-                        value={playerEmail}
-                        onChange={(e) => setPlayerEmail(e.target.value)}
-                        placeholder="student@university.edu"
-                        className="w-full bg-white border-4 border-black px-5 py-4 font-black text-black focus:outline-none focus:bg-yellow-50 placeholder:text-zinc-400 placeholder:font-bold shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] rounded-none"
-                        required
-                      />
-                    </div>
                     <button 
                       type="submit" 
-                      disabled={!playerName.trim() || !playerEmail.trim()}
+                      disabled={!playerName.trim()}
                       className="w-full bg-red-600 text-white font-black text-xl py-5 border-4 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:translate-y-1 hover:translate-x-1 hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-all uppercase tracking-wider mt-4"
                     >
                       Initialize Run
