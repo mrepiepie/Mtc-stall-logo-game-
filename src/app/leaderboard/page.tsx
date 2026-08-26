@@ -113,14 +113,14 @@ export default function LeaderboardPage() {
                   Wanna learn how to build all these things? Join MTC and level up.
                 </p>
               </div>
-              <details className="group/details">
-                <summary className="inline-flex items-center justify-center gap-2 bg-white text-black px-6 py-4 text-sm font-black hover:bg-zinc-200 transition-colors uppercase tracking-widest border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-[4px] hover:translate-y-[4px] whitespace-nowrap cursor-pointer list-none">
-                  Join MTC Today <MoveRight className="w-5 h-5 group-open/details:hidden" />
-                </summary>
-                <div className="absolute md:static right-0 top-full mt-4 bg-white p-4 border-4 border-black inline-block animate-in fade-in zoom-in duration-300 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] z-50">
-                  <img src="/mtc-qr.png" alt="MTC QR Code" className="w-48 h-48 object-contain" />
-                </div>
-              </details>
+              <a 
+                href="/mtc-qr.png" 
+                target="_blank" 
+                rel="noreferrer"
+                className="inline-flex items-center justify-center gap-2 bg-white text-black px-6 py-4 text-sm font-black hover:bg-zinc-200 transition-colors uppercase tracking-widest border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-[4px] hover:translate-y-[4px] whitespace-nowrap"
+              >
+                Join MTC Today <MoveRight className="w-5 h-5" />
+              </a>
           </div>
         </div>
 

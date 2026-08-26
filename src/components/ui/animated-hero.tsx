@@ -107,15 +107,14 @@ function AnimatedHero() {
               Inspired by the tech?
             </h3>
             <p className="text-sm text-zinc-400 font-medium mb-4">Wanna learn how to build all these things? Join MTC and level up.</p>
-            
-            <details className="group/details">
-              <summary className="inline-flex items-center gap-2 bg-white text-black px-5 py-2.5 text-sm font-bold hover:bg-zinc-200 transition-colors uppercase tracking-wider border-2 border-transparent hover:border-black cursor-pointer list-none">
-                Join MTC Today <MoveRight className="w-4 h-4 group-open/details:hidden" />
-              </summary>
-              <div className="mt-4 bg-white p-4 border-4 border-black inline-block animate-in fade-in zoom-in duration-300 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
-                <img src="/mtc-qr.png" alt="MTC QR Code" className="w-48 h-48 object-contain" />
-              </div>
-            </details>
+            <a 
+              href="/mtc-qr.png" 
+              target="_blank" 
+              rel="noreferrer"
+              className="inline-flex items-center gap-2 bg-white text-black px-5 py-2.5 text-sm font-bold hover:bg-zinc-200 transition-colors uppercase tracking-wider border-2 border-transparent hover:border-black"
+            >
+              Join MTC Today <MoveRight className="w-4 h-4" />
+            </a>
           </div>
         </div>
 
