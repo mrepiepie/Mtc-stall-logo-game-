@@ -113,12 +113,17 @@ export default function PlayPage() {
       .then(res => res.json())
       .then(data => {
         if (data.success && data.questions) {
-          const allQuestions = data.questions.map((q: any) => ({
-             id: q.id,
-             url: q.image_url,
-             name: q.answer,
-             points: 100
-          }));
+          const allQuestions = data.questions.map((q: any) => {
+            let basePts = 100;
+            if (q.difficulty === 'EASY') basePts = 50;
+            if (q.difficulty === 'HARD') basePts = 150;
+            return {
+              id: q.id,
+              url: q.image_url,
+              name: q.answer,
+              points: basePts
+            };
+          });
           
           const seenStr = localStorage.getItem('mtcSeenLogos') || '[]';
           let seen = JSON.parse(seenStr);
@@ -342,8 +347,7 @@ export default function PlayPage() {
     if (isCorrect) {
       setGameStatus('correct');
       window.dispatchEvent(new CustomEvent('play-sound-success'));
-      const timeBonus = timeLeft * 10;
-      const points = logoPoints + timeBonus;
+      const points = Math.max(10, Math.floor(logoPoints * (timeLeft / TIMER_SECONDS)));
       setTotalScore(prev => prev + points);
       setLastPointsEarned(points);
       
@@ -443,44 +447,34 @@ export default function PlayPage() {
                   Identify highly pixelated logos. Precision and speed yield the highest scores.
                 </p>
                 
-                <div className="bg-[#f4f0e6] border-4 border-black shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] rounded-none w-full flex flex-col relative overflow-hidden">
-                  <div className="bg-black text-white p-4 border-b-4 border-black font-black uppercase tracking-widest text-center">
-                    Rules of Engagement
-                  </div>
-
-                  <div className="flex flex-col p-4 sm:p-5 gap-4 text-left">
-                    <div className="flex items-start gap-4">
-                      <div className="bg-black text-[#f4f0e6] p-3 border-2 border-black">
-                        <CheckCircle2 className="w-6 h-6" />
-                      </div>
-                      <div>
-                        <h3 className="font-black text-black text-lg uppercase tracking-wider">+100 Base Points</h3>
-                        <p className="text-black/70 font-bold">Awarded for correctly identifying a logo.</p>
-                      </div>
+                  <div className="bg-[#f4f0e6] border-4 border-black shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] rounded-none w-full flex flex-col relative overflow-hidden">
+                    <div className="bg-black text-white p-4 border-b-4 border-black font-black uppercase tracking-widest text-center">
+                      Rules of Engagement
                     </div>
+                    
+                    <div className="p-6 sm:p-8 flex flex-col gap-6 bg-white">
+                      <div className="flex items-start gap-4">
+                        <div className="bg-black text-white p-3 border-2 border-black mt-1">
+                          <CheckCircle2 className="w-6 h-6" />
+                        </div>
+                        <div>
+                          <h3 className="font-black text-black text-lg uppercase tracking-wider">Dynamic Base Points</h3>
+                          <p className="text-black/70 font-bold">Earn 50 to 150 base points depending on logo difficulty.</p>
+                        </div>
+                      </div>
 
-                    <div className="flex items-start gap-4">
-                      <div className="bg-red-600 text-white p-3 border-2 border-black">
-                        <Timer className="w-6 h-6" />
-                      </div>
-                      <div>
-                        <h3 className="font-black text-black text-lg uppercase tracking-wider">10s Speed Bonus</h3>
-                        <p className="text-black/70 font-bold">Earn +10 points for every second left on the clock.</p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-start gap-4">
-                      <div className="bg-black text-[#f4f0e6] p-3 border-2 border-black">
-                        <Eye className="w-6 h-6" />
-                      </div>
-                      <div>
-                        <h3 className="font-black text-black text-lg uppercase tracking-wider">-20 Pts to Clarify</h3>
-                        <p className="text-black/70 font-bold">Reduce pixelation if stuck, but it costs base points.</p>
+                      <div className="flex items-start gap-4">
+                        <div className="bg-red-600 text-white p-3 border-2 border-black mt-1">
+                          <Timer className="w-6 h-6" />
+                        </div>
+                        <div>
+                          <h3 className="font-black text-black text-lg uppercase tracking-wider">Speed Multiplier</h3>
+                          <p className="text-black/70 font-bold">Your base points are multiplied by how fast you answer.</p>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-
+                
                 <div className="rules-panel-item mt-6 text-zinc-400 font-bold uppercase tracking-widest text-sm sm:text-base flex items-center gap-4 bg-black px-6 py-3 border-4 border-[#333]">
                   Press 
                   <span className="bg-white text-black px-4 py-1.5 font-black border-4 border-black shadow-[4px_4px_0px_0px_rgba(255,255,255,1)] hover:translate-y-0.5 hover:shadow-[2px_2px_0px_0px_rgba(255,255,255,1)] transition-all cursor-pointer" onClick={handleRulesNext}>
