@@ -139,6 +139,12 @@ export default function PlayPage() {
           const newSeen = [...seen, ...shuffled.map((q: any) => q.id)];
           localStorage.setItem('mtcSeenLogos', JSON.stringify(newSeen));
           
+          // Preload images so they render instantly
+          shuffled.forEach((q: any) => {
+            const img = new Image();
+            img.src = q.url;
+          });
+          
           setLogos(shuffled);
         }
       })
@@ -653,6 +659,7 @@ export default function PlayPage() {
                             setCurrentIndex(0);
                             setGuess('');
                             setCloseGuessWarning(false);
+                            setTimeLeft(TIMER_SECONDS);
                             setPlayCount(c => c + 1);
                           }}
                           className="w-full bg-red-600 hover:bg-red-500 hover:translate-y-1 hover:shadow-[0px_0px_0px_0px_rgba(0,0,0,1)] text-white font-black uppercase text-sm sm:text-base py-3 sm:py-4 px-4 sm:px-6 rounded-none border-4 border-black transition-all flex items-center justify-center gap-2 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"

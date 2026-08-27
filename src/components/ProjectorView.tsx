@@ -35,6 +35,18 @@ export function ProjectorView({
     callbacksRef.current = { onNextRound, onShowLeaderboard, onEndGame, onCountdownComplete }; 
   }, [onNextRound, onShowLeaderboard, onEndGame, onCountdownComplete]);
 
+  // Preload images
+  useEffect(() => {
+    if (game?.questions && Array.isArray(game.questions)) {
+      game.questions.forEach((q: any) => {
+        if (q.image_url) {
+          const img = new Image();
+          img.src = q.image_url;
+        }
+      });
+    }
+  }, [game?.questions]);
+
   // Robust timer machine
   useEffect(() => {
     let timerId: NodeJS.Timeout;
